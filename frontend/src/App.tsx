@@ -44,6 +44,9 @@ import {
   urlToBlob,
 } from './utils';
 
+type ControlSectionId = 'source' | 'mode' | 'settings' | 'run';
+type ContextTabId = 'info' | 'history';
+
 function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -74,6 +77,9 @@ function App() {
   const [compareView, setCompareView] = useState<CompareView>('slider');
   const [activeSection, setActiveSection] = useState<AppSection>('home');
   const [dragActive, setDragActive] = useState(false);
+  const [openControlSection, setOpenControlSection] =
+    useState<ControlSectionId>('source');
+  const [contextTab, setContextTab] = useState<ContextTabId>('info');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
@@ -173,6 +179,8 @@ function App() {
       setResult(null);
       setStage('file-selected');
       setActiveSection('processing');
+      setOpenControlSection('mode');
+      setContextTab('info');
       setMessage('Файл выбран. Настройте параметры и нажмите «Обработать».');
       setCompareValue(50);
     } catch {
@@ -240,6 +248,7 @@ function App() {
       setResult(processed);
       setStage(processed.isDemo ? 'fallback' : 'done');
       setActiveSection('processing');
+      setContextTab('info');
       setMessage(processed.statusText);
 
       const sourcePreview = await fileToDataUrl(file);
@@ -321,6 +330,7 @@ function App() {
     });
     setMode(item.mode);
     setActiveSection('processing');
+    setContextTab('info');
     setStage('done');
     setMessage('Запись из истории открыта.');
   };
@@ -357,6 +367,13 @@ function App() {
     ],
     [],
   );
+
+  const hasSource = Boolean(sourceMeta);
+  const processingWorkspaceState = hasSource
+    ? result
+      ? 'Результат готов к просмотру'
+      : 'Файл загружен, настройте обработку'
+    : 'Ожидание загрузки изображения';
 
   const renderSection = () => {
     switch (activeSection) {
@@ -463,118 +480,245 @@ function App() {
                 </p>
               </div>
             </section>
-            <section className='studioLayout'>
-              <div className='studioSidebar'>
-                <UploadPanel
-                  inputRef={inputRef}
-                  fileMeta={sourceMeta}
-                  previewUrl={sourceUrl}
-                  isDragActive={dragActive}
-                  onInputChange={onInputChange}
-                  onDrop={onDrop}
-                  onDragOver={onDragOver}
-                  onDragLeave={onDragLeave}
-                  onPickClick={handlePick}
-                  onClear={clearAll}
-                />
-                <ModeSelector mode={mode} onChange={setMode} />
-                <ParametersPanel
-                  mode={mode}
-                  params={params}
-                  onChange={updateParam}
-                />
-
-                <section className='surfaceCard stackGap actionCard'>
+            <section className='workspaceStudio'>
+              <aside className='workspacePanel controlPanel'>
+                <div className='workspacePanelHeader'>
                   <div>
-                    <div className='sectionLabel'>Run</div>
-                    <h2 className='sectionTitle'>Запуск обработки</h2>
+                    <div className='sectionLabel'>Tools</div>
+                    <h2 className='sectionTitle'>Панель управления</h2>
                   </div>
-                  <div className='buttonGrid'>
+                  <span className='panelStateChip'>
+                    {processingWorkspaceState}
+                  </span>
+                </div>
+                <div className='workspacePanelBody'>
+                  <section className='controlSection'>
                     <button
                       type='button'
-                      className='primaryButton'
-                      disabled={!canProcess}
-                      onClick={handleProcess}
+                      className='controlSectionToggle isOpen'
+                      onClick={() => setOpenControlSection('source')}
                     >
-                      Запустить обработку
+                      <span>Источник</span>
+                      <span className='controlSectionMeta'>
+                        {sourceMeta ? 'файл загружен' : 'ожидает файл'}
+                      </span>
                     </button>
-                    <button
-                      type='button'
-                      className='ghostButton'
-                      disabled={!processing}
-                      onClick={handleCancel}
+                    <div
+                      className={`controlSectionBody ${openControlSection === 'source' ? 'isOpen' : ''}`}
                     >
-                      Отменить
-                    </button>
-                    <button
-                      type='button'
-                      className='ghostButton'
-                      onClick={handleResetSettings}
-                    >
-                      Сбросить
-                    </button>
-                    <button
-                      type='button'
-                      className='dangerButton'
-                      disabled={!file && !result}
-                      onClick={clearAll}
-                    >
-                      Очистить
-                    </button>
-                    <button
-                      type='button'
-                      className='successButton'
-                      disabled={!result}
-                      onClick={() => handleDownload(params.resultFormat)}
-                    >
-                      Скачать результат
-                    </button>
-                  </div>
-
-                  <div className='statusPanel'>
-                    <div className='statusHeader'>
-                      <strong>Состояние обработки</strong>
-                      <span>{progress.label}</span>
-                    </div>
-                    <div className='progressBar'>
-                      <div
-                        className='progressValue'
-                        style={{ width: `${progress.value}%` }}
+                      <UploadPanel
+                        inputRef={inputRef}
+                        fileMeta={sourceMeta}
+                        previewUrl={sourceUrl}
+                        isDragActive={dragActive}
+                        onInputChange={onInputChange}
+                        onDrop={onDrop}
+                        onDragOver={onDragOver}
+                        onDragLeave={onDragLeave}
+                        onPickClick={handlePick}
+                        onClear={clearAll}
                       />
                     </div>
-                    <p
-                      className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}
+                  </section>
+
+                  <section className='controlSection'>
+                    <button
+                      type='button'
+                      className={`controlSectionToggle ${openControlSection === 'mode' ? 'isOpen' : ''}`}
+                      disabled={!hasSource}
+                      onClick={() => setOpenControlSection('mode')}
                     >
-                      {currentInfoMessage}
-                    </p>
+                      <span>Режим</span>
+                      <span className='controlSectionMeta'>
+                        {hasSource
+                          ? 'выберите сценарий'
+                          : 'недоступно до загрузки'}
+                      </span>
+                    </button>
+                    <div
+                      className={`controlSectionBody ${openControlSection === 'mode' ? 'isOpen' : ''}`}
+                    >
+                      <ModeSelector mode={mode} onChange={setMode} />
+                    </div>
+                  </section>
+
+                  <section className='controlSection'>
+                    <button
+                      type='button'
+                      className={`controlSectionToggle ${openControlSection === 'settings' ? 'isOpen' : ''}`}
+                      disabled={!hasSource}
+                      onClick={() => setOpenControlSection('settings')}
+                    >
+                      <span>Настройки</span>
+                      <span className='controlSectionMeta'>
+                        {hasSource
+                          ? 'интенсивность, формат, AI'
+                          : 'станут доступны позже'}
+                      </span>
+                    </button>
+                    <div
+                      className={`controlSectionBody ${openControlSection === 'settings' ? 'isOpen' : ''}`}
+                    >
+                      <ParametersPanel
+                        mode={mode}
+                        params={params}
+                        onChange={updateParam}
+                      />
+                    </div>
+                  </section>
+
+                  <section className='controlSection'>
+                    <button
+                      type='button'
+                      className={`controlSectionToggle ${openControlSection === 'run' ? 'isOpen' : ''}`}
+                      disabled={!hasSource}
+                      onClick={() => setOpenControlSection('run')}
+                    >
+                      <span>Запуск</span>
+                      <span className='controlSectionMeta'>
+                        {processing
+                          ? 'обработка выполняется'
+                          : 'запустите pipeline'}
+                      </span>
+                    </button>
+                    <div
+                      className={`controlSectionBody ${openControlSection === 'run' ? 'isOpen' : ''}`}
+                    >
+                      <section className='surfaceCard stackGap actionCard'>
+                        <div className='buttonGrid'>
+                          <button
+                            type='button'
+                            className='primaryButton'
+                            disabled={!canProcess}
+                            onClick={handleProcess}
+                          >
+                            Запустить обработку
+                          </button>
+                          <button
+                            type='button'
+                            className='ghostButton'
+                            disabled={!processing}
+                            onClick={handleCancel}
+                          >
+                            Отменить
+                          </button>
+                          <button
+                            type='button'
+                            className='ghostButton'
+                            onClick={handleResetSettings}
+                          >
+                            Сбросить
+                          </button>
+                          <button
+                            type='button'
+                            className='dangerButton'
+                            disabled={!file && !result}
+                            onClick={clearAll}
+                          >
+                            Очистить
+                          </button>
+                          <button
+                            type='button'
+                            className='successButton'
+                            disabled={!result}
+                            onClick={() => handleDownload(params.resultFormat)}
+                          >
+                            Скачать результат
+                          </button>
+                        </div>
+
+                        <div className='statusPanel'>
+                          <div className='statusHeader'>
+                            <strong>Состояние обработки</strong>
+                            <span>{progress.label}</span>
+                          </div>
+                          <div className='progressBar'>
+                            <div
+                              className='progressValue'
+                              style={{ width: `${progress.value}%` }}
+                            />
+                          </div>
+                          <p
+                            className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}
+                          >
+                            {currentInfoMessage}
+                          </p>
+                        </div>
+                      </section>
+                    </div>
+                  </section>
+                </div>
+              </aside>
+
+              <section className='workspacePanel canvasPanel'>
+                <div className='workspacePanelHeader'>
+                  <div>
+                    <div className='sectionLabel'>Canvas</div>
+                    <h2 className='sectionTitle'>Сравнение до/после</h2>
                   </div>
-                </section>
-              </div>
+                  <span className='panelStateChip panelStateChipAccent'>
+                    {compareView === 'slider' ? 'Слайдер' : 'Рядом'}
+                  </span>
+                </div>
+                <div className='canvasPanelBody'>
+                  <PreviewPanel
+                    sourceUrl={sourceUrl}
+                    result={result}
+                    compareValue={compareValue}
+                    compareView={compareView}
+                    isProcessing={processing}
+                    onCompareValueChange={setCompareValue}
+                    onCompareViewChange={setCompareView}
+                    onReprocess={handleProcess}
+                    onReset={setWorkflowToIdle}
+                    onDownload={handleDownload}
+                  />
+                </div>
+              </section>
 
-              <div className='studioMain'>
-                <PreviewPanel
-                  sourceUrl={sourceUrl}
-                  result={result}
-                  compareValue={compareValue}
-                  compareView={compareView}
-                  isProcessing={processing}
-                  onCompareValueChange={setCompareValue}
-                  onCompareViewChange={setCompareView}
-                  onReprocess={handleProcess}
-                  onReset={setWorkflowToIdle}
-                  onDownload={handleDownload}
-                />
-              </div>
-
-              <div className='studioInfo'>
-                <InfoPanel
-                  sourceMeta={sourceMeta}
-                  result={result}
-                  mode={mode}
-                  params={params}
-                  stage={stage}
-                />
-              </div>
+              <aside className='workspacePanel contextPanel'>
+                <div className='workspacePanelHeader'>
+                  <div>
+                    <div className='sectionLabel'>Context</div>
+                    <h2 className='sectionTitle'>Контекст</h2>
+                  </div>
+                  <div className='segmentedControl compactSegmented'>
+                    <button
+                      type='button'
+                      className={contextTab === 'info' ? 'active' : ''}
+                      onClick={() => setContextTab('info')}
+                    >
+                      Инфо
+                    </button>
+                    <button
+                      type='button'
+                      className={contextTab === 'history' ? 'active' : ''}
+                      onClick={() => setContextTab('history')}
+                    >
+                      История
+                    </button>
+                  </div>
+                </div>
+                <div className='workspacePanelBody'>
+                  {contextTab === 'info' ? (
+                    <InfoPanel
+                      sourceMeta={sourceMeta}
+                      result={result}
+                      mode={mode}
+                      params={params}
+                      stage={stage}
+                    />
+                  ) : (
+                    <HistorySection
+                      items={history}
+                      onOpen={handleHistoryOpen}
+                      onDownload={handleHistoryDownload}
+                      onDelete={handleHistoryDelete}
+                      onClear={handleClearHistory}
+                    />
+                  )}
+                </div>
+              </aside>
             </section>
           </section>
         );
