@@ -12,6 +12,16 @@
   box-sizing: border-box;
 }
 
+.appContent,
+.contentStack {
+  display: grid;
+  gap: 18px;
+}
+
+.appContent {
+  margin-top: 18px;
+}
+
 .appHeader,
 .surfaceCard,
 .appFooter,
@@ -40,8 +50,12 @@
   width: 46px;
   height: 46px;
   border-radius: 16px;
-  background:
-    radial-gradient(circle at 30% 30%, #8b5cf6 0%, #22d3ee 52%, #0f172a 110%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    #8b5cf6 0%,
+    #22d3ee 52%,
+    #0f172a 110%
+  );
   box-shadow: 0 10px 28px rgba(34, 211, 238, 0.3);
 }
 
@@ -65,13 +79,25 @@
   justify-content: center;
 }
 
-.mainNav a {
+.navButton {
   color: var(--text-h);
-  text-decoration: none;
   padding: 10px 12px;
   border-radius: 999px;
   background: var(--chip);
   font-size: 13px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.navButton.isActive {
+  background: linear-gradient(
+    135deg,
+    rgba(29, 78, 216, 0.16),
+    rgba(6, 182, 212, 0.18)
+  );
+  border-color: rgba(59, 130, 246, 0.18);
+  box-shadow: 0 10px 24px rgba(29, 78, 216, 0.12);
 }
 
 .statusGroup {
@@ -118,12 +144,27 @@
 }
 
 .heroSection {
-  margin-top: 18px;
   padding: 26px 28px;
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 18px;
   align-items: center;
+}
+
+.pageIntroCard {
+  padding: 24px 28px;
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.appNavCard {
+  display: grid;
+  gap: 14px;
+  align-content: start;
 }
 
 .heroEyebrow,
@@ -722,6 +763,7 @@ button:disabled {
 @media (max-width: 1160px) {
   .appHeader,
   .heroSection,
+  .sectionGrid,
   .splitPreview,
   .twoCols {
     grid-template-columns: 1fr;

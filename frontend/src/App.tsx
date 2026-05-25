@@ -1,11 +1,21 @@
 import type { ChangeEvent, DragEventHandler } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { deleteRemoteResult, getServiceStatus, processImageRequest, validateFile } from './apiClient';
+import {
+  deleteRemoteResult,
+  getServiceStatus,
+  processImageRequest,
+  validateFile,
+} from './apiClient';
 import './App.css';
-import { DEFAULT_PARAMETERS, MAX_FILE_SIZE, STORAGE_HISTORY_KEY } from './constants';
+import {
+  DEFAULT_PARAMETERS,
+  MAX_FILE_SIZE,
+  STORAGE_HISTORY_KEY,
+} from './constants';
 import { AboutSection } from './components/AboutSection';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import type { AppSection } from './components/Header';
 import { HelpSection } from './components/HelpSection';
 import { Hero } from './components/Hero';
 import { HistorySection } from './components/HistorySection';
@@ -49,13 +59,20 @@ function App() {
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [mode, setMode] = useState<ProcessingMode>('auto-enhance');
-  const [params, setParams] = useState<ProcessingParameters>(DEFAULT_PARAMETERS);
+  const [params, setParams] =
+    useState<ProcessingParameters>(DEFAULT_PARAMETERS);
   const [stage, setStage] = useState<ProcessStage>('idle');
-  const [progress, setProgress] = useState<ProgressState>({ value: 0, label: '0% · загрузка' });
-  const [message, setMessage] = useState<string>('Выберите изображение для начала работы.');
+  const [progress, setProgress] = useState<ProgressState>({
+    value: 0,
+    label: '0% · загрузка',
+  });
+  const [message, setMessage] = useState<string>(
+    'Выберите изображение для начала работы.',
+  );
   const [processing, setProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState(50);
   const [compareView, setCompareView] = useState<CompareView>('slider');
+  const [activeSection, setActiveSection] = useState<AppSection>('home');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
@@ -97,7 +114,10 @@ function App() {
     return message;
   }, [message, result]);
 
-  const updateParam = <K extends keyof ProcessingParameters>(key: K, value: ProcessingParameters[K]) => {
+  const updateParam = <K extends keyof ProcessingParameters>(
+    key: K,
+    value: ProcessingParameters[K],
+  ) => {
     setParams((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -151,6 +171,7 @@ function App() {
       setSourceUrl(URL.createObjectURL(selected));
       setResult(null);
       setStage('file-selected');
+      setActiveSection('processing');
       setMessage('Файл выбран. Настройте параметры и нажмите «Обработать».');
       setCompareValue(50);
     } catch {
@@ -210,6 +231,7 @@ function App() {
 
       setResult(processed);
       setStage(processed.isDemo ? 'fallback' : 'done');
+      setActiveSection('processing');
       setMessage(processed.statusText);
 
       const sourcePreview = await fileToDataUrl(file);
@@ -235,7 +257,9 @@ function App() {
         setMessage('Обработка отменена пользователем.');
       } else {
         setStage('api-error');
-        setMessage('Ошибка API. Используйте demo mode или повторите попытку позже.');
+        setMessage(
+          'Ошибка API. Используйте demo mode или повторите попытку позже.',
+        );
       }
     } finally {
       setProcessing(false);
@@ -256,8 +280,12 @@ function App() {
     try {
       const blob = await urlToBlob(result.downloadUrl || result.resultUrl);
       const converted = await convertImageBlob(blob, format, params.quality);
-      const baseName = sourceMeta?.name.replace(/\.[^.]+$/, '') || 'processed-image';
-      downloadBlob(converted, `${baseName}.${format === 'jpeg' ? 'jpg' : format}`);
+      const baseName =
+        sourceMeta?.name.replace(/\.[^.]+$/, '') || 'processed-image';
+      downloadBlob(
+        converted,
+        `${baseName}.${format === 'jpeg' ? 'jpg' : format}`,
+      );
       setStage('saved');
       setMessage('Результат успешно сохранен.');
     } catch {
@@ -279,9 +307,12 @@ function App() {
       resultMeta: item.resultMeta,
       sourceMeta: item.sourceMeta,
       isDemo: item.isDemo,
-      statusText: item.isDemo ? 'Открыт результат из demo-истории.' : 'Открыт результат из истории.',
+      statusText: item.isDemo
+        ? 'Открыт результат из demo-истории.'
+        : 'Открыт результат из истории.',
     });
     setMode(item.mode);
+    setActiveSection('processing');
     setStage('done');
     setMessage('Запись из истории открыта.');
   };
@@ -301,6 +332,303 @@ function App() {
     localStorage.removeItem(STORAGE_HISTORY_KEY);
   };
 
+  const processingSummary = useMemo(
+    () => [
+      {
+        title: 'Загрузка и проверка',
+        text: 'Поддерживаются JPG, PNG и WebP до 10 МБ с автоматическим чтением размера, формата и разрешения.',
+      },
+      {
+        title: 'AI-режимы',
+        text: 'Доступны сценарии улучшения, увеличения, шумоподавления, повышения резкости и подготовки для веба.',
+      },
+      {
+        title: 'Контроль результата',
+        text: 'Сравнение до/после, информация о параметрах обработки и сохранение последних операций в истории.',
+      },
+    ],
+    [],
+  );
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'home':
+        return (
+          <div className='contentStack'>
+            <Hero />
+            <section className='surfaceCard stackGap'>
+              <div className='sectionHeading'>
+                <div>
+                  <div className='sectionLabel'>Структура сервиса</div>
+                  <h2 className='sectionTitle'>Рабочие разделы интерфейса</h2>
+                </div>
+                <p className='sectionMuted'>
+                  Разделы открываются отдельно, поэтому интерфейс не перегружен.
+                </p>
+              </div>
+              <div className='sectionGrid'>
+                <article className='miniCard appNavCard'>
+                  <h3>Обработка</h3>
+                  <p className='sectionText'>
+                    Загрузка изображения, выбор режима, параметры, запуск и
+                    сравнение результата.
+                  </p>
+                  <button
+                    type='button'
+                    className='primaryButton'
+                    onClick={() => setActiveSection('processing')}
+                  >
+                    Перейти к обработке
+                  </button>
+                </article>
+                <article className='miniCard appNavCard'>
+                  <h3>История</h3>
+                  <p className='sectionText'>
+                    Просмотр последних операций, повторное открытие результата и
+                    локальное хранение.
+                  </p>
+                  <button
+                    type='button'
+                    className='ghostButton'
+                    onClick={() => setActiveSection('history')}
+                  >
+                    Открыть историю
+                  </button>
+                </article>
+                <article className='miniCard appNavCard'>
+                  <h3>Справка</h3>
+                  <p className='sectionText'>
+                    Описание системы, стек технологий, инструкция по
+                    использованию и ограничения.
+                  </p>
+                  <div className='buttonRow'>
+                    <button
+                      type='button'
+                      className='ghostButton'
+                      onClick={() => setActiveSection('about')}
+                    >
+                      О системе
+                    </button>
+                    <button
+                      type='button'
+                      className='ghostButton'
+                      onClick={() => setActiveSection('help')}
+                    >
+                      Помощь
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section className='surfaceCard stackGap'>
+              <div>
+                <div className='sectionLabel'>Ключевые возможности</div>
+                <h2 className='sectionTitle'>
+                  Что уже есть в клиентской части
+                </h2>
+              </div>
+              <div className='sectionGrid'>
+                {processingSummary.map((item) => (
+                  <article key={item.title} className='miniCard'>
+                    <h3>{item.title}</h3>
+                    <p className='sectionText'>{item.text}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </div>
+        );
+      case 'processing':
+        return (
+          <section className='contentStack'>
+            <section className='surfaceCard pageIntroCard'>
+              <div className='sectionHeading'>
+                <div>
+                  <div className='sectionLabel'>Рабочая область</div>
+                  <h1 className='sectionTitle'>Обработка изображений</h1>
+                </div>
+                <p className='sectionMuted'>
+                  Загрузите изображение, настройте параметры и получите
+                  результат в сравнении «до/после».
+                </p>
+              </div>
+            </section>
+            <section className='workspace'>
+              <div className='leftColumn'>
+                <UploadPanel
+                  inputRef={inputRef}
+                  fileMeta={sourceMeta}
+                  previewUrl={sourceUrl}
+                  onInputChange={onInputChange}
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  onPickClick={handlePick}
+                  onClear={clearAll}
+                />
+                <ModeSelector mode={mode} onChange={setMode} />
+                <ParametersPanel
+                  mode={mode}
+                  params={params}
+                  onChange={updateParam}
+                />
+
+                <section className='surfaceCard stackGap'>
+                  <div>
+                    <div className='sectionLabel'>Управление</div>
+                    <h2 className='sectionTitle'>Действия</h2>
+                  </div>
+                  <div className='buttonGrid'>
+                    <button
+                      type='button'
+                      className='primaryButton'
+                      disabled={!canProcess}
+                      onClick={handleProcess}
+                    >
+                      Обработать
+                    </button>
+                    <button
+                      type='button'
+                      className='ghostButton'
+                      disabled={!processing}
+                      onClick={handleCancel}
+                    >
+                      Отменить обработку
+                    </button>
+                    <button
+                      type='button'
+                      className='ghostButton'
+                      onClick={handleResetSettings}
+                    >
+                      Сбросить настройки
+                    </button>
+                    <button
+                      type='button'
+                      className='dangerButton'
+                      disabled={!file && !result}
+                      onClick={clearAll}
+                    >
+                      Очистить изображение
+                    </button>
+                    <button
+                      type='button'
+                      className='secondaryButton'
+                      disabled={!result}
+                      onClick={() => handleDownload(params.resultFormat)}
+                    >
+                      Скачать результат
+                    </button>
+                  </div>
+
+                  <div className='statusPanel'>
+                    <div className='statusHeader'>
+                      <strong>Состояние обработки</strong>
+                      <span>{progress.label}</span>
+                    </div>
+                    <div className='progressBar'>
+                      <div
+                        className='progressValue'
+                        style={{ width: `${progress.value}%` }}
+                      />
+                    </div>
+                    <p
+                      className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}
+                    >
+                      {currentInfoMessage}
+                    </p>
+                  </div>
+                </section>
+
+                <InfoPanel
+                  sourceMeta={sourceMeta}
+                  result={result}
+                  mode={mode}
+                  params={params}
+                  stage={stage}
+                />
+              </div>
+
+              <div className='rightColumn'>
+                <PreviewPanel
+                  sourceUrl={sourceUrl}
+                  result={result}
+                  compareValue={compareValue}
+                  compareView={compareView}
+                  isProcessing={processing}
+                  onCompareValueChange={setCompareValue}
+                  onCompareViewChange={setCompareView}
+                  onReprocess={handleProcess}
+                  onReset={setWorkflowToIdle}
+                  onDownload={handleDownload}
+                />
+              </div>
+            </section>
+          </section>
+        );
+      case 'history':
+        return (
+          <div className='contentStack'>
+            <section className='surfaceCard pageIntroCard'>
+              <div className='sectionHeading'>
+                <div>
+                  <div className='sectionLabel'>Журнал операций</div>
+                  <h1 className='sectionTitle'>История обработок</h1>
+                </div>
+                <p className='sectionMuted'>
+                  Последние результаты сохраняются локально и доступны для
+                  повторного открытия или скачивания.
+                </p>
+              </div>
+            </section>
+            <HistorySection
+              items={history}
+              onOpen={handleHistoryOpen}
+              onDownload={handleHistoryDownload}
+              onDelete={handleHistoryDelete}
+              onClear={handleClearHistory}
+            />
+          </div>
+        );
+      case 'about':
+        return (
+          <div className='contentStack'>
+            <section className='surfaceCard pageIntroCard'>
+              <div className='sectionHeading'>
+                <div>
+                  <div className='sectionLabel'>Описание проекта</div>
+                  <h1 className='sectionTitle'>О системе</h1>
+                </div>
+                <p className='sectionMuted'>
+                  Архитектура, назначение системы, технологический стек и
+                  основные возможности дипломного веб-сервиса.
+                </p>
+              </div>
+            </section>
+            <AboutSection />
+          </div>
+        );
+      case 'help':
+        return (
+          <div className='contentStack'>
+            <section className='surfaceCard pageIntroCard'>
+              <div className='sectionHeading'>
+                <div>
+                  <div className='sectionLabel'>Инструкция</div>
+                  <h1 className='sectionTitle'>Помощь и ограничения</h1>
+                </div>
+                <p className='sectionMuted'>
+                  Краткая инструкция по работе с сервисом и список ограничений
+                  для демонстрации результата.
+                </p>
+              </div>
+            </section>
+            <HelpSection />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className='pageShell'>
       <div className='page'>
@@ -308,92 +636,10 @@ function App() {
           apiOk={serviceStatus.apiOk}
           aiAvailable={serviceStatus.aiAvailable}
           runtimeMode={serviceStatus.runtimeMode}
+          activeSection={activeSection}
+          onNavigate={setActiveSection}
         />
-        <Hero />
-
-        <section id='processing' className='workspace'>
-          <div className='leftColumn'>
-            <UploadPanel
-              inputRef={inputRef}
-              fileMeta={sourceMeta}
-              previewUrl={sourceUrl}
-              onInputChange={onInputChange}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              onPickClick={handlePick}
-              onClear={clearAll}
-            />
-            <ModeSelector mode={mode} onChange={setMode} />
-            <ParametersPanel mode={mode} params={params} onChange={updateParam} />
-
-            <section className='surfaceCard stackGap'>
-              <div>
-                <div className='sectionLabel'>Управление</div>
-                <h2 className='sectionTitle'>Действия</h2>
-              </div>
-              <div className='buttonGrid'>
-                <button type='button' className='primaryButton' disabled={!canProcess} onClick={handleProcess}>
-                  Обработать
-                </button>
-                <button type='button' className='ghostButton' disabled={!processing} onClick={handleCancel}>
-                  Отменить обработку
-                </button>
-                <button type='button' className='ghostButton' onClick={handleResetSettings}>
-                  Сбросить настройки
-                </button>
-                <button type='button' className='dangerButton' disabled={!file && !result} onClick={clearAll}>
-                  Очистить изображение
-                </button>
-                <button
-                  type='button'
-                  className='secondaryButton'
-                  disabled={!result}
-                  onClick={() => handleDownload(params.resultFormat)}
-                >
-                  Скачать результат
-                </button>
-              </div>
-
-              <div className='statusPanel'>
-                <div className='statusHeader'>
-                  <strong>Состояние обработки</strong>
-                  <span>{progress.label}</span>
-                </div>
-                <div className='progressBar'>
-                  <div className='progressValue' style={{ width: `${progress.value}%` }} />
-                </div>
-                <p className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}>{currentInfoMessage}</p>
-              </div>
-            </section>
-
-            <InfoPanel sourceMeta={sourceMeta} result={result} mode={mode} params={params} stage={stage} />
-          </div>
-
-          <div className='rightColumn'>
-            <PreviewPanel
-              sourceUrl={sourceUrl}
-              result={result}
-              compareValue={compareValue}
-              compareView={compareView}
-              isProcessing={processing}
-              onCompareValueChange={setCompareValue}
-              onCompareViewChange={setCompareView}
-              onReprocess={handleProcess}
-              onReset={setWorkflowToIdle}
-              onDownload={handleDownload}
-            />
-          </div>
-        </section>
-
-        <HistorySection
-          items={history}
-          onOpen={handleHistoryOpen}
-          onDownload={handleHistoryDownload}
-          onDelete={handleHistoryDelete}
-          onClear={handleClearHistory}
-        />
-        <AboutSection />
-        <HelpSection />
+        <main className='appContent'>{renderSection()}</main>
         <Footer />
       </div>
     </div>

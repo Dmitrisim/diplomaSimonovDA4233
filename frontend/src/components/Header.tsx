@@ -1,12 +1,30 @@
 import type { RuntimeMode } from '../types';
 
+type AppSection = 'home' | 'processing' | 'history' | 'about' | 'help';
+
 type HeaderProps = {
   apiOk: boolean;
   aiAvailable: boolean;
   runtimeMode: RuntimeMode;
+  activeSection: AppSection;
+  onNavigate: (section: AppSection) => void;
 };
 
-export function Header({ apiOk, aiAvailable, runtimeMode }: HeaderProps) {
+const NAV_ITEMS: Array<{ id: AppSection; label: string }> = [
+  { id: 'home', label: 'Главная' },
+  { id: 'processing', label: 'Обработка' },
+  { id: 'history', label: 'История' },
+  { id: 'about', label: 'О системе' },
+  { id: 'help', label: 'Помощь' },
+];
+
+export function Header({
+  apiOk,
+  aiAvailable,
+  runtimeMode,
+  activeSection,
+  onNavigate,
+}: HeaderProps) {
   return (
     <header className='appHeader'>
       <div className='brandBlock'>
@@ -20,25 +38,40 @@ export function Header({ apiOk, aiAvailable, runtimeMode }: HeaderProps) {
       </div>
 
       <nav className='mainNav' aria-label='Навигация'>
-        <a href='#home'>Главная</a>
-        <a href='#processing'>Обработка</a>
-        <a href='#history'>История</a>
-        <a href='#about'>О системе</a>
-        <a href='#help'>Помощь</a>
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            type='button'
+            className={`navButton ${activeSection === item.id ? 'isActive' : ''}`}
+            onClick={() => onNavigate(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
       </nav>
 
       <div className='statusGroup'>
-        <StatusBadge label='API' value={apiOk ? 'ok' : 'error'} tone={apiOk ? 'success' : 'danger'} />
+        <StatusBadge
+          label='API'
+          value={apiOk ? 'ok' : 'error'}
+          tone={apiOk ? 'success' : 'danger'}
+        />
         <StatusBadge
           label='AI-модель'
           value={aiAvailable ? 'доступна' : 'недоступна'}
           tone={aiAvailable ? 'info' : 'muted'}
         />
-        <StatusBadge label='режим' value={runtimeMode} tone={runtimeMode === 'production' ? 'success' : 'warning'} />
+        <StatusBadge
+          label='режим'
+          value={runtimeMode}
+          tone={runtimeMode === 'production' ? 'success' : 'warning'}
+        />
       </div>
     </header>
   );
 }
+
+export type { AppSection };
 
 function StatusBadge({
   label,
