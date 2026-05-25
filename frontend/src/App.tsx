@@ -405,6 +405,65 @@ function App() {
       ? 'Результат готов к просмотру'
       : 'Файл загружен, настройте обработку'
     : 'Ожидание загрузки изображения';
+  const controlPipeline = useMemo(
+    () => [
+      {
+        id: 'source',
+        step: '01',
+        title: 'Источник',
+        text: sourceMeta ? sourceMeta.name : 'Загрузите JPG, PNG или WebP',
+        state: !hasSource
+          ? 'current'
+          : openControlSection === 'source'
+            ? 'current'
+            : 'done',
+      },
+      {
+        id: 'mode',
+        step: '02',
+        title: 'Режим',
+        text: hasSource
+          ? 'Выберите подходящий сценарий'
+          : 'Станет доступно после загрузки',
+        state: !hasSource
+          ? 'locked'
+          : openControlSection === 'mode'
+            ? 'current'
+            : 'ready',
+      },
+      {
+        id: 'settings',
+        step: '03',
+        title: 'Параметры',
+        text: hasSource
+          ? 'Интенсивность, формат и AI-параметры'
+          : 'Ожидает предыдущий шаг',
+        state: !hasSource
+          ? 'locked'
+          : openControlSection === 'settings'
+            ? 'current'
+            : 'ready',
+      },
+      {
+        id: 'run',
+        step: '04',
+        title: 'Запуск',
+        text: processing
+          ? 'Обработка выполняется'
+          : hasSource
+            ? 'Запустите обработку и сохраните результат'
+            : 'Будет доступно после настройки',
+        state: !hasSource
+          ? 'locked'
+          : openControlSection === 'run'
+            ? 'current'
+            : result
+              ? 'done'
+              : 'ready',
+      },
+    ],
+    [hasSource, openControlSection, processing, result, sourceMeta],
+  );
 
   const renderSection = () => {
     switch (activeSection) {
@@ -470,6 +529,22 @@ function App() {
                     <p className='sectionMuted'>
                       Загрузите файл, выберите режим и настройте параметры.
                     </p>
+                    <div className='pipelineOverview'>
+                      {controlPipeline.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`pipelineOverviewItem is-${item.state}`}
+                        >
+                          <span className='pipelineOverviewStep'>
+                            {item.step}
+                          </span>
+                          <div className='pipelineOverviewBody'>
+                            <strong>{item.title}</strong>
+                            <span>{item.text}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <span className='panelStateChip'>
                     {processingWorkspaceState}

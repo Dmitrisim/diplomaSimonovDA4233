@@ -37,6 +37,14 @@ export function Hero({ onStart, onExplore }: HeroProps) {
       </div>
 
       <div className='heroMockup productMockup'>
+        <div className='mockupWindowBar'>
+          <div className='mockupWindowDots' aria-hidden='true'>
+            <span />
+            <span />
+            <span />
+          </div>
+          <span className='mockupWindowTitle'>AI Image Processing</span>
+        </div>
         <div className='mockupTop'>
           <strong>Пример сценария обработки</strong>
           <span className='mockupMetaText'>Light Image Studio</span>
