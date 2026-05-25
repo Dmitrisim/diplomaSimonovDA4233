@@ -836,3 +836,858 @@ button:disabled {
     flex-direction: column;
   }
 }
+
+/* Dark SaaS redesign overrides */
+
+.pageShell {
+  padding: 18px 18px 28px;
+}
+
+.page {
+  max-width: 1480px;
+}
+
+.appContent {
+  animation: fadeUp 0.28s ease;
+}
+
+.appHeader,
+.surfaceCard,
+.heroSection {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(8, 13, 27, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+}
+
+.surfaceCard,
+.heroSection {
+  border-radius: 28px;
+  padding: 22px;
+}
+
+.appHeader {
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  grid-template-columns: auto 1fr auto;
+  padding: 12px 16px;
+  border-radius: 22px;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 25% 25%, #22d3ee, #8b5cf6 55%, #0f172a 100%);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.24);
+}
+
+.brandTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brandSubtitle {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.mainNav {
+  justify-content: center;
+}
+
+.navButton {
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  transition: 0.2s ease;
+}
+
+.navButton:hover,
+.navButton.isActive {
+  color: var(--text-h);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(59, 130, 246, 0.22);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.06) inset;
+}
+
+.statusBadge {
+  padding: 7px 10px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.statusLabel {
+  color: var(--muted);
+}
+
+.tone-success {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.tone-danger {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.tone-warning {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.tone-info {
+  background: rgba(34, 211, 238, 0.08);
+}
+
+.tone-muted {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.heroSection {
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 22px;
+  overflow: hidden;
+}
+
+.heroText {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.heroEyebrow,
+.sectionLabel {
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.18), rgba(34, 211, 238, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c4b5fd;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.heroText h1 {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1.08;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.08;
+}
+
+.sectionMuted,
+.sectionText,
+.heroText p,
+.modeInfo p,
+.featureList,
+.historyBody p,
+.historyMeta,
+.stepCard p {
+  color: var(--text);
+}
+
+.heroActions,
+.heroMetrics,
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.heroPrimary,
+.heroSecondary {
+  min-width: 170px;
+}
+
+.metricChip,
+.mockupBadge,
+.mockupChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-h);
+  font-size: 12px;
+}
+
+.heroMockup {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at 65% 30%, rgba(34, 211, 238, 0.18), transparent 35%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.88));
+}
+
+.mockupTop,
+.mockupMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mockupDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.75);
+}
+
+.mockupStage {
+  position: relative;
+  min-height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(30, 41, 59, 0.74));
+}
+
+.mockupBefore,
+.mockupAfter {
+  position: absolute;
+  inset: 0;
+}
+
+.mockupBefore {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(148, 163, 184, 0.25), transparent 32%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.82), rgba(15, 23, 42, 0.92));
+}
+
+.mockupAfter {
+  clip-path: inset(0 0 0 48%);
+  background:
+    radial-gradient(circle at 65% 38%, rgba(34, 211, 238, 0.4), transparent 26%),
+    radial-gradient(circle at 80% 62%, rgba(139, 92, 246, 0.34), transparent 28%),
+    linear-gradient(180deg, rgba(29, 78, 216, 0.32), rgba(15, 23, 42, 0.88));
+}
+
+.mockupBefore span,
+.mockupAfter span {
+  position: absolute;
+  top: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.64);
+  color: var(--text-h);
+  font-size: 12px;
+}
+
+.mockupBefore span {
+  left: 14px;
+}
+
+.mockupAfter span {
+  right: 14px;
+}
+
+.mockupDivider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 52%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.32);
+}
+
+.sectionGrid {
+  gap: 14px;
+}
+
+.miniCard,
+.imageCard,
+.metaTile,
+.modeInfo,
+.statusPanel,
+.warningCard,
+.stepCard {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.appNavCard {
+  gap: 12px;
+}
+
+.studioLayout {
+  display: grid;
+  grid-template-columns: minmax(360px, 410px) minmax(0, 1fr) minmax(250px, 290px);
+  gap: 18px;
+  align-items: start;
+}
+
+.studioSidebar,
+.studioMain,
+.studioInfo {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.studioInfo {
+  position: sticky;
+  top: 92px;
+}
+
+.dropzone {
+  position: relative;
+  border-radius: 24px;
+  border: 1px dashed rgba(148, 163, 184, 0.34);
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.08), transparent 35%),
+    rgba(2, 6, 23, 0.48);
+  transition: 0.22s ease;
+}
+
+.dropzone:hover,
+.dropzone.isActive {
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow:
+    inset 0 0 0 1px rgba(34, 211, 238, 0.12),
+    0 0 24px rgba(34, 211, 238, 0.08);
+}
+
+.dropzoneInner {
+  min-height: 210px;
+  padding: 20px;
+}
+
+.dropIcon,
+.emptyPreviewIcon,
+.modeIcon {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-h);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(34, 211, 238, 0.22));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dropIcon,
+.emptyPreviewIcon {
+  width: 52px;
+  height: 52px;
+}
+
+.dropSubtitle {
+  color: var(--muted);
+}
+
+.uploadAssetRow {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.filePreviewBox {
+  min-height: 140px;
+  background: rgba(2, 6, 23, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filePreviewBox img,
+.imageCardBody img,
+.historyImage {
+  object-fit: cover;
+}
+
+.fileMetaGrid {
+  gap: 10px;
+}
+
+.metaTile span,
+.fieldLabel,
+.infoLabel,
+.infoRow span {
+  color: var(--muted);
+}
+
+.modeGrid {
+  gap: 10px;
+}
+
+.modeCard {
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.modeCard:hover,
+.miniCard:hover,
+.historyCard:hover,
+.stepCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 211, 238, 0.22);
+}
+
+.modeCardTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modeIcon {
+  width: 38px;
+  height: 38px;
+  color: #dbeafe;
+}
+
+.modeCard span {
+  font-size: 12px;
+}
+
+.modeCard.isActive {
+  background:
+    linear-gradient(180deg, rgba(34, 211, 238, 0.08), rgba(139, 92, 246, 0.08)),
+    rgba(255, 255, 255, 0.04);
+  border-color: rgba(34, 211, 238, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.12),
+    0 10px 28px rgba(34, 211, 238, 0.08);
+}
+
+.modeInfo {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.formGrid {
+  grid-template-columns: 1fr;
+}
+
+.fieldValue {
+  color: var(--text-h);
+  font-size: 13px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.62);
+}
+
+.toggleRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.toggleRow input {
+  appearance: none;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.toggleRow input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f8fafc;
+  transition: 0.18s ease;
+}
+
+.toggleRow input:checked {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.88), rgba(59, 130, 246, 0.9));
+}
+
+.toggleRow input:checked::after {
+  transform: translateX(18px);
+}
+
+.toggleRow.isDisabled,
+.field.isDisabled {
+  opacity: 0.45;
+}
+
+.segmentedControl {
+  border-radius: 14px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.segmentedControl.fullWidth {
+  width: 100%;
+}
+
+.segmentedControl button {
+  flex: 1;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.segmentedControl button.active,
+.segmentedControl button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-h);
+}
+
+.primaryButton,
+.secondaryButton,
+.ghostButton,
+.dangerButton,
+.successButton {
+  border-radius: 14px;
+  color: var(--text-h);
+  transition: transform 0.18s ease, filter 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.primaryButton {
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6 0%, #2563eb 55%, #22d3ee 100%);
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.24);
+}
+
+.successButton {
+  border-radius: 14px;
+  padding: 11px 14px;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.22);
+}
+
+.secondaryButton {
+  background: rgba(34, 211, 238, 0.08);
+  color: var(--text-h);
+  border-color: rgba(34, 211, 238, 0.18);
+}
+
+.ghostButton {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dangerButton {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.ghostButton:hover:not(:disabled),
+.dangerButton:hover:not(:disabled),
+.successButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.actionCard .buttonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statusPanel {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.progressBar {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.progressValue {
+  transition: width 0.28s ease;
+}
+
+.statusMessage.isError {
+  color: #fca5a5;
+}
+
+.previewPanel {
+  position: static;
+}
+
+.compareStage {
+  min-height: 600px;
+  border-radius: 24px;
+  border-color: rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.88)),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.05), rgba(139, 92, 246, 0.05));
+}
+
+.compareHandle {
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.28);
+}
+
+.compareFooter {
+  gap: 10px;
+}
+
+.compareLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.range {
+  accent-color: #22d3ee;
+}
+
+.loadingOverlay {
+  background: rgba(2, 6, 23, 0.44);
+}
+
+.loadingCard {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-h);
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border-color: rgba(255, 255, 255, 0.14);
+  border-top-color: #22d3ee;
+}
+
+.imageCardBody {
+  min-height: 360px;
+  background: rgba(2, 6, 23, 0.44);
+}
+
+.emptyPreviewState,
+.emptyResult {
+  min-height: 280px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.24);
+  background: radial-gradient(circle at top, rgba(34, 211, 238, 0.06), rgba(2, 6, 23, 0.46));
+}
+
+.emptyPreviewState strong {
+  color: var(--text-h);
+  max-width: 420px;
+}
+
+.emptyPreviewState span {
+  color: var(--muted);
+  max-width: 420px;
+  font-size: 14px;
+}
+
+.infoGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.infoRow {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.infoRow strong {
+  text-align: right;
+  font-size: 13px;
+}
+
+.historyCard {
+  grid-template-columns: 120px 1fr auto;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+}
+
+.historyImage {
+  width: 120px;
+  height: 88px;
+  border-radius: 16px;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.historyMeta {
+  gap: 10px;
+  font-size: 12px;
+}
+
+.tinyBadge {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.14);
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stepCard {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.stepNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.24), rgba(34, 211, 238, 0.18));
+  color: var(--text-h);
+  font-weight: 800;
+}
+
+.warningCard {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(15, 23, 42, 0.46));
+}
+
+.appFooter {
+  margin-top: 18px;
+  padding: 10px 4px 2px;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1320px) {
+  .studioLayout {
+    grid-template-columns: minmax(340px, 390px) minmax(0, 1fr);
+  }
+
+  .studioInfo {
+    grid-column: 1 / -1;
+    position: static;
+  }
+}
+
+@media (max-width: 1120px) {
+  .heroSection,
+  .sectionGrid,
+  .twoCols,
+  .stepsGrid,
+  .splitPreview,
+  .appHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .mainNav,
+  .statusGroup {
+    justify-content: flex-start;
+  }
+
+  .uploadAssetRow,
+  .fileMetaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .compareStage {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 900px) {
+  .studioLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .studioInfo {
+    position: static;
+  }
+
+  .actionCard .buttonGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .pageShell {
+    padding-inline: 12px;
+    padding-top: 12px;
+  }
+
+  .surfaceCard,
+  .heroSection {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .appHeader {
+    position: static;
+    padding: 14px;
+  }
+
+  .heroText h1 {
+    font-size: 30px;
+  }
+
+  .sectionTitle {
+    font-size: 21px;
+  }
+
+  .compareStage {
+    min-height: 320px;
+  }
+
+  .historyCard {
+    grid-template-columns: 1fr;
+  }
+
+  .historyImage {
+    width: 100%;
+    height: 180px;
+  }
+
+  .appFooter {
+    flex-wrap: wrap;
+  }
+}

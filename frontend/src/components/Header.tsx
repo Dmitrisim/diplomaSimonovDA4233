@@ -31,9 +31,7 @@ export function Header({
         <div className='brandMark' aria-hidden='true' />
         <div>
           <div className='brandTitle'>AI Image Processing</div>
-          <div className='brandSubtitle'>
-            Система обработки цифровых изображений на основе AI-алгоритмов
-          </div>
+          <div className='brandSubtitle'>AI-powered image enhancement</div>
         </div>
       </div>
 
@@ -53,16 +51,16 @@ export function Header({
       <div className='statusGroup'>
         <StatusBadge
           label='API'
-          value={apiOk ? 'ok' : 'error'}
+          value={apiOk ? 'online' : 'offline'}
           tone={apiOk ? 'success' : 'danger'}
         />
         <StatusBadge
-          label='AI-модель'
-          value={aiAvailable ? 'доступна' : 'недоступна'}
+          label='Model'
+          value={aiAvailable ? 'online' : 'demo'}
           tone={aiAvailable ? 'info' : 'muted'}
         />
         <StatusBadge
-          label='режим'
+          label='Mode'
           value={runtimeMode}
           tone={runtimeMode === 'production' ? 'success' : 'warning'}
         />

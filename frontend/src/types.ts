@@ -96,6 +96,7 @@ export type ModeDefinition = {
   id: ProcessingMode;
   title: string;
   shortTitle: string;
+  iconLabel: string;
   description: string;
   bestFor: string;
   limitations: string;

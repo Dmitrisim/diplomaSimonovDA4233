@@ -22,6 +22,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'auto-enhance',
     title: 'Автоматическое улучшение',
     shortTitle: 'Улучшение',
+    iconLabel: 'AE',
     description:
       'Автоматическая коррекция яркости, контрастности, резкости и общего визуального качества.',
     bestFor: 'Подходит для большинства пользовательских фотографий и сканов.',
@@ -32,6 +33,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'super-resolution',
     title: 'Повышение разрешения',
     shortTitle: 'Super-resolution',
+    iconLabel: 'SR',
     description:
       'Увеличение разрешения изображения с использованием AI-подхода и super-resolution.',
     bestFor: 'Подходит для маленьких изображений и кадров, требующих увеличения.',
@@ -42,6 +44,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'denoise',
     title: 'Удаление шума',
     shortTitle: 'Шумоподавление',
+    iconLabel: 'DN',
     description: 'Подавление цифрового шума, зернистости и мелких артефактов.',
     bestFor: 'Подходит для снимков при слабом освещении и старых цифровых фото.',
     limitations: 'Сильное шумоподавление может сгладить мелкие детали.',
@@ -50,6 +53,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'sharpen',
     title: 'Повышение резкости',
     shortTitle: 'Резкость',
+    iconLabel: 'SH',
     description: 'Усиление деталей, контуров и визуальной четкости изображения.',
     bestFor: 'Подходит для слегка размытых снимков и web-изображений.',
     limitations: 'Не исправляет серьезный дефокус и может усилить шум.',
@@ -58,6 +62,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'restore-photo',
     title: 'Восстановление старого фото',
     shortTitle: 'Реставрация',
+    iconLabel: 'RF',
     description:
       'Предварительное улучшение старых, размытых или частично поврежденных фотографий.',
     bestFor: 'Подходит для архивных снимков, семейных фото и сканов.',
@@ -67,6 +72,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     id: 'web-export',
     title: 'Подготовка для веб-публикации',
     shortTitle: 'Web',
+    iconLabel: 'WB',
     description:
       'Оптимизация изображения для размещения на сайте: формат, размер и итоговое качество.',
     bestFor: 'Подходит для изображений, которые планируется публиковать в интернете.',

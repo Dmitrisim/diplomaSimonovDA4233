@@ -31,7 +31,7 @@ export function PreviewPanel(props: PreviewPanelProps) {
     <section className='surfaceCard stackGap previewPanel'>
       <div className='sectionHeading'>
         <div>
-          <div className='sectionLabel'>Предпросмотр и результат</div>
+          <div className='sectionLabel'>Preview</div>
           <h2 className='sectionTitle'>Сравнение «до/после»</h2>
         </div>
         <div className='segmentedControl'>
@@ -53,26 +53,56 @@ export function PreviewPanel(props: PreviewPanelProps) {
       </div>
 
       {!sourceUrl && !result ? (
-        <div className='emptyResult'>
-          Загрузите изображение и запустите обработку. Здесь появится сравнение исходного и обработанного варианта.
+        <div className='emptyPreviewState'>
+          <div className='emptyPreviewIcon'>IMG</div>
+          <strong>
+            Здесь появится сравнение исходного и обработанного изображения
+          </strong>
+          <span>
+            Загрузите файл, выберите режим обработки и запустите процесс.
+          </span>
         </div>
       ) : compareView === 'slider' ? (
         <div className='compareCard'>
           <div className='compareStage'>
-            {sourceUrl ? <img className='compareImg' src={sourceUrl} alt='Исходное изображение' /> : null}
+            {sourceUrl ? (
+              <img
+                className='compareImg'
+                src={sourceUrl}
+                alt='Исходное изображение'
+              />
+            ) : null}
             {result ? (
               <div className='compareTop' style={{ width: `${compareValue}%` }}>
-                <img className='compareImg' src={result.resultUrl} alt='Результат обработки' />
+                <img
+                  className='compareImg'
+                  src={result.resultUrl}
+                  alt='Результат обработки'
+                />
               </div>
             ) : null}
-            {result ? <div className='compareHandle' style={{ left: `${compareValue}%` }} /> : null}
+            {result ? (
+              <div
+                className='compareHandle'
+                style={{ left: `${compareValue}%` }}
+              />
+            ) : null}
             {isProcessing ? (
               <div className='loadingOverlay'>
-                <div className='spinner' />
+                <div className='loadingCard'>
+                  <div className='spinner' />
+                  <span>Идет обработка изображения...</span>
+                </div>
               </div>
             ) : null}
           </div>
           <div className='compareFooter'>
+            <div className='compareLabels'>
+              <span>Исходное изображение</span>
+              <span>
+                {result?.isDemo ? 'Демо-результат' : 'Результат обработки'}
+              </span>
+            </div>
             <input
               className='range'
               type='range'
@@ -95,19 +125,44 @@ export function PreviewPanel(props: PreviewPanelProps) {
       )}
 
       <div className='buttonRow'>
-        <button type='button' className='ghostButton' onClick={onReprocess} disabled={!sourceUrl}>
+        <button
+          type='button'
+          className='ghostButton'
+          onClick={onReprocess}
+          disabled={!sourceUrl}
+        >
           Обработать заново
         </button>
-        <button type='button' className='ghostButton' onClick={onReset} disabled={!sourceUrl && !result}>
+        <button
+          type='button'
+          className='ghostButton'
+          onClick={onReset}
+          disabled={!sourceUrl && !result}
+        >
           Сбросить
         </button>
-        <button type='button' className='primaryButton' onClick={() => onDownload('png')} disabled={!result}>
+        <button
+          type='button'
+          className='successButton'
+          onClick={() => onDownload('png')}
+          disabled={!result}
+        >
           Скачать результат
         </button>
-        <button type='button' className='secondaryButton' onClick={() => onDownload('png')} disabled={!result}>
+        <button
+          type='button'
+          className='secondaryButton'
+          onClick={() => onDownload('png')}
+          disabled={!result}
+        >
           Скачать в PNG
         </button>
-        <button type='button' className='secondaryButton' onClick={() => onDownload('jpeg')} disabled={!result}>
+        <button
+          type='button'
+          className='secondaryButton'
+          onClick={() => onDownload('jpeg')}
+          disabled={!result}
+        >
           Скачать в JPEG
         </button>
       </div>
@@ -120,7 +175,11 @@ function ImageCard({ title, url }: { title: string; url: string | null }) {
     <div className='imageCard'>
       <div className='cardTitle'>{title}</div>
       <div className='imageCardBody'>
-        {url ? <img src={url} alt={title} /> : <div className='emptyResult'>Пока нет данных</div>}
+        {url ? (
+          <img src={url} alt={title} />
+        ) : (
+          <div className='emptyResult'>Пока нет данных</div>
+        )}
       </div>
     </div>
   );

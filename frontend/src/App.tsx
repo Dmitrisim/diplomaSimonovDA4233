@@ -73,6 +73,7 @@ function App() {
   const [compareValue, setCompareValue] = useState(50);
   const [compareView, setCompareView] = useState<CompareView>('slider');
   const [activeSection, setActiveSection] = useState<AppSection>('home');
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
@@ -186,11 +187,18 @@ function App() {
 
   const onDrop: DragEventHandler<HTMLDivElement> = async (e) => {
     e.preventDefault();
+    setDragActive(false);
     await selectFile(e.dataTransfer.files?.[0] ?? null);
   };
 
   const onDragOver: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
+    if (!dragActive) setDragActive(true);
+  };
+
+  const onDragLeave: DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    setDragActive(false);
   };
 
   const handlePick = () => {
@@ -355,22 +363,26 @@ function App() {
       case 'home':
         return (
           <div className='contentStack'>
-            <Hero />
+            <Hero
+              onStart={() => setActiveSection('processing')}
+              onExplore={() => setActiveSection('about')}
+            />
             <section className='surfaceCard stackGap'>
               <div className='sectionHeading'>
                 <div>
-                  <div className='sectionLabel'>Структура сервиса</div>
-                  <h2 className='sectionTitle'>Рабочие разделы интерфейса</h2>
+                  <div className='sectionLabel'>Workspace</div>
+                  <h2 className='sectionTitle'>Быстрый старт</h2>
                 </div>
                 <p className='sectionMuted'>
-                  Разделы открываются отдельно, поэтому интерфейс не перегружен.
+                  Навигация устроена как у полноценного SaaS-сервиса: каждый
+                  раздел открывается отдельно.
                 </p>
               </div>
               <div className='sectionGrid'>
                 <article className='miniCard appNavCard'>
-                  <h3>Обработка</h3>
+                  <h3>Начните обработку</h3>
                   <p className='sectionText'>
-                    Загрузка изображения, выбор режима, параметры, запуск и
+                    Откройте студию обработки, загрузите изображение и получите
                     сравнение результата.
                   </p>
                   <button
@@ -384,8 +396,8 @@ function App() {
                 <article className='miniCard appNavCard'>
                   <h3>История</h3>
                   <p className='sectionText'>
-                    Просмотр последних операций, повторное открытие результата и
-                    локальное хранение.
+                    Последние операции, быстрые действия и повторное открытие
+                    результатов.
                   </p>
                   <button
                     type='button'
@@ -396,10 +408,10 @@ function App() {
                   </button>
                 </article>
                 <article className='miniCard appNavCard'>
-                  <h3>Справка</h3>
+                  <h3>О сервисе</h3>
                   <p className='sectionText'>
-                    Описание системы, стек технологий, инструкция по
-                    использованию и ограничения.
+                    Технологии, возможности, инструкция и ограничения для
+                    демонстрации.
                   </p>
                   <div className='buttonRow'>
                     <button
@@ -422,10 +434,8 @@ function App() {
             </section>
             <section className='surfaceCard stackGap'>
               <div>
-                <div className='sectionLabel'>Ключевые возможности</div>
-                <h2 className='sectionTitle'>
-                  Что уже есть в клиентской части
-                </h2>
+                <div className='sectionLabel'>Highlights</div>
+                <h2 className='sectionTitle'>Что уже готово</h2>
               </div>
               <div className='sectionGrid'>
                 {processingSummary.map((item) => (
@@ -444,24 +454,26 @@ function App() {
             <section className='surfaceCard pageIntroCard'>
               <div className='sectionHeading'>
                 <div>
-                  <div className='sectionLabel'>Рабочая область</div>
+                  <div className='sectionLabel'>Studio</div>
                   <h1 className='sectionTitle'>Обработка изображений</h1>
                 </div>
                 <p className='sectionMuted'>
-                  Загрузите изображение, настройте параметры и получите
-                  результат в сравнении «до/после».
+                  Рабочая студия для загрузки файла, выбора режима и сравнения
+                  результата в одном экране.
                 </p>
               </div>
             </section>
-            <section className='workspace'>
-              <div className='leftColumn'>
+            <section className='studioLayout'>
+              <div className='studioSidebar'>
                 <UploadPanel
                   inputRef={inputRef}
                   fileMeta={sourceMeta}
                   previewUrl={sourceUrl}
+                  isDragActive={dragActive}
                   onInputChange={onInputChange}
                   onDrop={onDrop}
                   onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
                   onPickClick={handlePick}
                   onClear={clearAll}
                 />
@@ -472,10 +484,10 @@ function App() {
                   onChange={updateParam}
                 />
 
-                <section className='surfaceCard stackGap'>
+                <section className='surfaceCard stackGap actionCard'>
                   <div>
-                    <div className='sectionLabel'>Управление</div>
-                    <h2 className='sectionTitle'>Действия</h2>
+                    <div className='sectionLabel'>Run</div>
+                    <h2 className='sectionTitle'>Запуск обработки</h2>
                   </div>
                   <div className='buttonGrid'>
                     <button
@@ -484,7 +496,7 @@ function App() {
                       disabled={!canProcess}
                       onClick={handleProcess}
                     >
-                      Обработать
+                      Запустить обработку
                     </button>
                     <button
                       type='button'
@@ -492,14 +504,14 @@ function App() {
                       disabled={!processing}
                       onClick={handleCancel}
                     >
-                      Отменить обработку
+                      Отменить
                     </button>
                     <button
                       type='button'
                       className='ghostButton'
                       onClick={handleResetSettings}
                     >
-                      Сбросить настройки
+                      Сбросить
                     </button>
                     <button
                       type='button'
@@ -507,11 +519,11 @@ function App() {
                       disabled={!file && !result}
                       onClick={clearAll}
                     >
-                      Очистить изображение
+                      Очистить
                     </button>
                     <button
                       type='button'
-                      className='secondaryButton'
+                      className='successButton'
                       disabled={!result}
                       onClick={() => handleDownload(params.resultFormat)}
                     >
@@ -537,17 +549,9 @@ function App() {
                     </p>
                   </div>
                 </section>
-
-                <InfoPanel
-                  sourceMeta={sourceMeta}
-                  result={result}
-                  mode={mode}
-                  params={params}
-                  stage={stage}
-                />
               </div>
 
-              <div className='rightColumn'>
+              <div className='studioMain'>
                 <PreviewPanel
                   sourceUrl={sourceUrl}
                   result={result}
@@ -559,6 +563,16 @@ function App() {
                   onReprocess={handleProcess}
                   onReset={setWorkflowToIdle}
                   onDownload={handleDownload}
+                />
+              </div>
+
+              <div className='studioInfo'>
+                <InfoPanel
+                  sourceMeta={sourceMeta}
+                  result={result}
+                  mode={mode}
+                  params={params}
+                  stage={stage}
                 />
               </div>
             </section>
@@ -575,7 +589,7 @@ function App() {
                 </div>
                 <p className='sectionMuted'>
                   Последние результаты сохраняются локально и доступны для
-                  повторного открытия или скачивания.
+                  быстрого открытия и скачивания.
                 </p>
               </div>
             </section>
@@ -598,8 +612,8 @@ function App() {
                   <h1 className='sectionTitle'>О системе</h1>
                 </div>
                 <p className='sectionMuted'>
-                  Архитектура, назначение системы, технологический стек и
-                  основные возможности дипломного веб-сервиса.
+                  Назначение сервиса, технологии, архитектура и возможности
+                  клиентской части.
                 </p>
               </div>
             </section>
@@ -616,8 +630,8 @@ function App() {
                   <h1 className='sectionTitle'>Помощь и ограничения</h1>
                 </div>
                 <p className='sectionMuted'>
-                  Краткая инструкция по работе с сервисом и список ограничений
-                  для демонстрации результата.
+                  Пошаговая инструкция по работе с сервисом и ограничения для
+                  демонстрации результата.
                 </p>
               </div>
             </section>

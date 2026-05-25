@@ -12,7 +12,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
   return (
     <section className='surfaceCard stackGap'>
       <div>
-        <div className='sectionLabel'>Режимы обработки</div>
+        <div className='sectionLabel'>Modes</div>
         <h2 className='sectionTitle'>Выбор режима</h2>
       </div>
 
@@ -24,7 +24,10 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
             className={`modeCard ${item.id === mode ? 'isActive' : ''}`}
             onClick={() => onChange(item.id)}
           >
-            <strong>{item.title}</strong>
+            <div className='modeCardTop'>
+              <span className='modeIcon'>{item.iconLabel}</span>
+              <strong>{item.shortTitle}</strong>
+            </div>
             <span>{item.description}</span>
           </button>
         ))}
