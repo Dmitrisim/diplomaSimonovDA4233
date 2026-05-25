@@ -1,0 +1,165 @@
+import { MODE_BY_ID } from './constants';
+import type {
+  FileMeta,
+  HistoryItem,
+  ProcessingMode,
+  ProgressState,
+  ResultFormat,
+  ResultMeta,
+} from './types';
+
+export function formatBytes(value: number | null): string {
+  if (value === null) return '—';
+  if (value < 1024) return `${value} Б`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} КБ`;
+  return `${(value / (1024 * 1024)).toFixed(2)} МБ`;
+}
+
+export function formatDate(value: string): string {
+  return new Date(value).toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function modeLabel(mode: ProcessingMode): string {
+  return MODE_BY_ID[mode].title;
+}
+
+export async function getImageMeta(file: File): Promise<FileMeta> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const dimensions = await getImageDimensions(objectUrl);
+    return {
+      name: file.name,
+      type: file.type || 'unknown',
+      size: file.size,
+      width: dimensions.width,
+      height: dimensions.height,
+    };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+export function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => reject(new Error('Не удалось получить размеры изображения'));
+    img.src = src;
+  });
+}
+
+export function fileTypeLabel(type: string): string {
+  if (type === 'image/jpeg') return 'JPG';
+  if (type === 'image/png') return 'PNG';
+  if (type === 'image/webp') return 'WebP';
+  return type || 'unknown';
+}
+
+export function progressStages(): ProgressState[] {
+  return [
+    { value: 0, label: '0% · загрузка' },
+    { value: 25, label: '25% · проверка файла' },
+    { value: 50, label: '50% · предобработка' },
+    { value: 75, label: '75% · AI-обработка' },
+    { value: 100, label: '100% · результат готов' },
+  ];
+}
+
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Не удалось преобразовать файл'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function fileToDataUrl(file: File): Promise<string> {
+  return blobToDataUrl(file);
+}
+
+export async function urlToBlob(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Не удалось получить файл результата');
+  }
+  return response.blob();
+}
+
+export async function convertImageBlob(blob: Blob, format: ResultFormat, quality: number): Promise<Blob> {
+  if (format === 'png' && blob.type === 'image/png') {
+    return blob;
+  }
+
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await loadImage(url);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas недоступен');
+    ctx.drawImage(img, 0, 0);
+    const mime = format === 'jpeg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png';
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (result) resolve(result);
+          else reject(new Error('Не удалось сконвертировать изображение'));
+        },
+        mime,
+        quality / 100,
+      );
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function createHistoryItem(input: {
+  id: string;
+  fileName: string;
+  mode: ProcessingMode;
+  status: string;
+  timingMs: number;
+  usedAi: boolean;
+  modelName: string | null;
+  sourcePreview: string;
+  resultPreview: string;
+  sourceMeta: FileMeta;
+  resultMeta: ResultMeta;
+  isDemo: boolean;
+}): HistoryItem {
+  return {
+    ...input,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Не удалось загрузить изображение'));
+    image.src = src;
+  });
+}

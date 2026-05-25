@@ -1,399 +1,401 @@
 import type { ChangeEvent, DragEventHandler } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { deleteRemoteResult, getServiceStatus, processImageRequest, validateFile } from './apiClient';
 import './App.css';
-
-type Mode = 'enhance' | 'upscale';
-
-type HistoryItem = {
-  jobId: string;
-  createdAt: number;
-  fileName: string;
-  mode: Mode;
-  preferAi: boolean;
-  usedAi: boolean;
-  modelName: string | null;
-  timingMs: number | null;
-  input: { width: number; height: number; bytes: number } | null;
-  output: { width: number; height: number; bytes: number } | null;
-  resultUrl: string;
-  srcUrl: string;
-};
+import { DEFAULT_PARAMETERS, MAX_FILE_SIZE, STORAGE_HISTORY_KEY } from './constants';
+import { AboutSection } from './components/AboutSection';
+import { Footer } from './components/Footer';
+import { Header } from './components/Header';
+import { HelpSection } from './components/HelpSection';
+import { Hero } from './components/Hero';
+import { HistorySection } from './components/HistorySection';
+import { InfoPanel } from './components/InfoPanel';
+import { ModeSelector } from './components/ModeSelector';
+import { ParametersPanel } from './components/ParametersPanel';
+import { PreviewPanel } from './components/PreviewPanel';
+import { UploadPanel } from './components/UploadPanel';
+import type {
+  CompareView,
+  FileMeta,
+  HistoryItem,
+  ProcessResult,
+  ProcessStage,
+  ProcessingMode,
+  ProcessingParameters,
+  ProgressState,
+  ServiceStatus,
+} from './types';
+import {
+  convertImageBlob,
+  createHistoryItem,
+  downloadBlob,
+  fileToDataUrl,
+  getImageMeta,
+  urlToBlob,
+} from './utils';
 
 function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const currentSrcUrlRef = useRef<string | null>(null);
-  const historyRef = useRef<HistoryItem[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus>({
+    apiOk: false,
+    aiAvailable: false,
+    runtimeMode: 'demo',
+  });
   const [file, setFile] = useState<File | null>(null);
-  const [preferAi, setPreferAi] = useState(true);
-  const [mode, setMode] = useState<Mode>('enhance');
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
-  const [compare, setCompare] = useState(55);
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [usedAi, setUsedAi] = useState<boolean | null>(null);
-  const [modelName, setModelName] = useState<string | null>(null);
-  const [aiModelPresent, setAiModelPresent] = useState<boolean | null>(null);
-  const [timingMs, setTimingMs] = useState<number | null>(null);
-  const [inputMeta, setInputMeta] = useState<HistoryItem['input']>(null);
-  const [outputMeta, setOutputMeta] = useState<HistoryItem['output']>(null);
-  const [currentSrcUrl, setCurrentSrcUrl] = useState<string | null>(null);
+  const [sourceMeta, setSourceMeta] = useState<FileMeta | null>(null);
+  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<ProcessResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [mode, setMode] = useState<ProcessingMode>('auto-enhance');
+  const [params, setParams] = useState<ProcessingParameters>(DEFAULT_PARAMETERS);
+  const [stage, setStage] = useState<ProcessStage>('idle');
+  const [progress, setProgress] = useState<ProgressState>({ value: 0, label: '0% · загрузка' });
+  const [message, setMessage] = useState<string>('Выберите изображение для начала работы.');
+  const [processing, setProcessing] = useState(false);
+  const [compareValue, setCompareValue] = useState(50);
+  const [compareView, setCompareView] = useState<CompareView>('slider');
 
   useEffect(() => {
-    return () => {
-      if (currentSrcUrlRef.current) URL.revokeObjectURL(currentSrcUrlRef.current);
-      for (const item of historyRef.current) {
-        URL.revokeObjectURL(item.srcUrl);
+    const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved) as HistoryItem[]);
+      } catch {
+        localStorage.removeItem(STORAGE_HISTORY_KEY);
       }
-    };
+    }
   }, []);
 
   useEffect(() => {
-    currentSrcUrlRef.current = currentSrcUrl;
-  }, [currentSrcUrl]);
-
-  useEffect(() => {
-    historyRef.current = history;
+    localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
   }, [history]);
 
   useEffect(() => {
     const run = async () => {
-      try {
-        const resp = await fetch('/api/health');
-        const data = await resp.json();
-        setAiModelPresent(Boolean(data?.ai_model_present));
-      } catch {
-        setAiModelPresent(null);
-      }
+      const status = await getServiceStatus();
+      setServiceStatus(status);
     };
     run();
   }, []);
 
-  const selectFile = (f: File | null) => {
-    if (currentSrcUrl) URL.revokeObjectURL(currentSrcUrl);
-    setFile(f);
-    setError(null);
-    setStatus(null);
-    setResultUrl(null);
-    setUsedAi(null);
-    setModelName(null);
-    setTimingMs(null);
-    setInputMeta(null);
-    setOutputMeta(null);
-    setCompare(55);
-    setCurrentSrcUrl(f ? URL.createObjectURL(f) : null);
+  useEffect(() => {
+    return () => {
+      if (sourceUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(sourceUrl);
+      }
+      abortControllerRef.current?.abort();
+    };
+  }, [sourceUrl]);
+
+  const canProcess = Boolean(file && sourceMeta && !processing);
+  const currentInfoMessage = useMemo(() => {
+    if (result?.isDemo) {
+      return 'Демо-режим: реальная AI-обработка не выполнялась.';
+    }
+    return message;
+  }, [message, result]);
+
+  const updateParam = <K extends keyof ProcessingParameters>(key: K, value: ProcessingParameters[K]) => {
+    setParams((prev) => ({ ...prev, [key]: value }));
   };
 
-  const onPickClick = () => {
-    inputRef.current?.click();
+  const setWorkflowToIdle = () => {
+    setResult(null);
+    setCompareValue(50);
+    setStage(file ? 'file-selected' : 'idle');
   };
 
-  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    selectFile(f);
+  const clearAll = () => {
+    abortControllerRef.current?.abort();
+    if (sourceUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(sourceUrl);
+    }
+    setFile(null);
+    setSourceMeta(null);
+    setSourceUrl(null);
+    setResult(null);
+    setStage('idle');
+    setMessage('Выберите изображение для начала работы.');
+    setProcessing(false);
+    setCompareValue(50);
   };
 
-  const onDrop: DragEventHandler<HTMLDivElement> = (e) => {
+  const selectFile = async (selected: File | null) => {
+    if (!selected) {
+      clearAll();
+      return;
+    }
+
+    const validationError = validateFile(selected);
+    if (validationError) {
+      setStage('format-error');
+      setMessage(validationError);
+      return;
+    }
+
+    if (selected.size > MAX_FILE_SIZE) {
+      setStage('size-error');
+      setMessage('Размер файла превышает 10 МБ.');
+      return;
+    }
+
+    try {
+      const meta = await getImageMeta(selected);
+      if (sourceUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(sourceUrl);
+      }
+      setFile(selected);
+      setSourceMeta(meta);
+      setSourceUrl(URL.createObjectURL(selected));
+      setResult(null);
+      setStage('file-selected');
+      setMessage('Файл выбран. Настройте параметры и нажмите «Обработать».');
+      setCompareValue(50);
+    } catch {
+      setStage('format-error');
+      setMessage('Не удалось прочитать изображение.');
+    }
+  };
+
+  const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    await selectFile(e.target.files?.[0] ?? null);
+  };
+
+  const onDrop: DragEventHandler<HTMLDivElement> = async (e) => {
     e.preventDefault();
-    const f = e.dataTransfer.files?.[0] ?? null;
-    if (f) selectFile(f);
+    await selectFile(e.dataTransfer.files?.[0] ?? null);
   };
 
   const onDragOver: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
   };
 
-  const process = async () => {
-    if (!file) {
-      setError('Выберите изображение (JPG/PNG/WebP).');
+  const handlePick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleProcess = async () => {
+    if (!file || !sourceMeta) {
+      setStage('idle');
+      setMessage('Нельзя запустить обработку без выбранного файла.');
       return;
     }
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setProcessing(true);
-    setError(null);
-    setStatus('Загрузка и обработка...');
+    setProgress({ value: 0, label: '0% · загрузка' });
+    setStage('uploading');
+    setMessage('Идет подготовка изображения и запуск обработки...');
 
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('prefer_ai', preferAi ? 'true' : 'false');
-      fd.append('mode', mode);
-
-      const resp = await fetch('/api/process', { method: 'POST', body: fd });
-      const data = await resp.json().catch(() => null);
-
-      if (!resp.ok) {
-        const msg = String(data?.detail ?? 'Ошибка обработки');
-        throw new Error(msg);
-      }
-
-      const jobId = String(data.job_id);
-      const usedAiValue = Boolean(data.used_ai);
-      const modelNameValue = data.model_name ? String(data.model_name) : null;
-      const resultUrlValue = String(data.result_url);
-      const timingMsValue =
-        typeof data.timing_ms === 'number' ? Number(data.timing_ms) : null;
-      const inputValue = data.input ?? null;
-      const outputValue = data.output ?? null;
-
-      setResultUrl(resultUrlValue);
-      setUsedAi(usedAiValue);
-      setModelName(modelNameValue);
-      setTimingMs(timingMsValue);
-      setInputMeta(inputValue);
-      setOutputMeta(outputValue);
-      setStatus('Готово');
-
-      const srcHistoryUrl = URL.createObjectURL(file);
-      setHistory((prev) => {
-        const next: HistoryItem[] = [
-          {
-            jobId,
-            createdAt: Date.now(),
-            fileName: file.name,
-            mode,
-            preferAi,
-            usedAi: usedAiValue,
-            modelName: modelNameValue,
-            timingMs: timingMsValue,
-            input: inputValue,
-            output: outputValue,
-            resultUrl: resultUrlValue,
-            srcUrl: srcHistoryUrl,
-          },
-          ...prev,
-        ];
-        const limit = 8;
-        if (next.length <= limit) return next;
-        for (const removed of next.slice(limit)) {
-          URL.revokeObjectURL(removed.srcUrl);
-        }
-        return next.slice(0, limit);
+      const processed = await processImageRequest({
+        file,
+        mode,
+        params,
+        sourceMeta,
+        signal: controller.signal,
+        onProgress: (nextProgress) => {
+          setProgress(nextProgress);
+          if (nextProgress.value === 25) setStage('validating');
+          else if (nextProgress.value === 50) setStage('preprocessing');
+          else if (nextProgress.value === 75) setStage('processing');
+          else if (nextProgress.value === 100) setStage('done');
+        },
       });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка обработки');
-      setStatus(null);
+
+      setResult(processed);
+      setStage(processed.isDemo ? 'fallback' : 'done');
+      setMessage(processed.statusText);
+
+      const sourcePreview = await fileToDataUrl(file);
+      const historyItem = createHistoryItem({
+        id: processed.id,
+        fileName: sourceMeta.name,
+        mode,
+        status: processed.isDemo ? 'demo' : 'готово',
+        timingMs: processed.timingMs,
+        usedAi: processed.usedAi,
+        modelName: processed.modelName,
+        sourcePreview,
+        resultPreview: processed.resultUrl,
+        sourceMeta,
+        resultMeta: processed.resultMeta,
+        isDemo: processed.isDemo,
+      });
+
+      setHistory((prev) => [historyItem, ...prev].slice(0, 12));
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setStage('cancelled');
+        setMessage('Обработка отменена пользователем.');
+      } else {
+        setStage('api-error');
+        setMessage('Ошибка API. Используйте demo mode или повторите попытку позже.');
+      }
     } finally {
       setProcessing(false);
     }
   };
 
+  const handleCancel = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  const handleResetSettings = () => {
+    setParams(DEFAULT_PARAMETERS);
+    setMessage('Параметры сброшены к значениям по умолчанию.');
+  };
+
+  const handleDownload = async (format: 'png' | 'jpeg' | 'webp') => {
+    if (!result) return;
+    try {
+      const blob = await urlToBlob(result.downloadUrl || result.resultUrl);
+      const converted = await convertImageBlob(blob, format, params.quality);
+      const baseName = sourceMeta?.name.replace(/\.[^.]+$/, '') || 'processed-image';
+      downloadBlob(converted, `${baseName}.${format === 'jpeg' ? 'jpg' : format}`);
+      setStage('saved');
+      setMessage('Результат успешно сохранен.');
+    } catch {
+      setMessage('Не удалось скачать результат.');
+    }
+  };
+
+  const handleHistoryOpen = (item: HistoryItem) => {
+    setSourceMeta(item.sourceMeta);
+    setSourceUrl(item.sourcePreview);
+    setResult({
+      id: item.id,
+      resultUrl: item.resultPreview,
+      downloadUrl: item.resultPreview,
+      mode: item.mode,
+      usedAi: item.usedAi,
+      modelName: item.modelName,
+      timingMs: item.timingMs,
+      resultMeta: item.resultMeta,
+      sourceMeta: item.sourceMeta,
+      isDemo: item.isDemo,
+      statusText: item.isDemo ? 'Открыт результат из demo-истории.' : 'Открыт результат из истории.',
+    });
+    setMode(item.mode);
+    setStage('done');
+    setMessage('Запись из истории открыта.');
+  };
+
+  const handleHistoryDownload = async (item: HistoryItem) => {
+    const blob = await urlToBlob(item.resultPreview);
+    downloadBlob(blob, item.fileName.replace(/\.[^.]+$/, '') + '.png');
+  };
+
+  const handleHistoryDelete = async (id: string) => {
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+    await deleteRemoteResult(id);
+  };
+
+  const handleClearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem(STORAGE_HISTORY_KEY);
+  };
+
   return (
-    <div className='page'>
-      <header className='topbar'>
-        <div className='brand'>
-          <div className='brandMark' aria-hidden='true' />
-          <div>
-            <div className='brandTitle'>AI Image Processing</div>
-            <div className='brandSubtitle'>
-              Загрузка → обработка → результат
-            </div>
-          </div>
-        </div>
-        <div className='badges'>
-          <span className='badge'>
-            API: {aiModelPresent === null ? 'нет связи' : 'ok'}
-          </span>
-          <span className='badge'>
-            AI-модель: {aiModelPresent ? 'есть' : 'нет'}
-          </span>
-        </div>
-      </header>
+    <div className='pageShell'>
+      <div className='page'>
+        <Header
+          apiOk={serviceStatus.apiOk}
+          aiAvailable={serviceStatus.aiAvailable}
+          runtimeMode={serviceStatus.runtimeMode}
+        />
+        <Hero />
 
-      <main className='grid'>
-        <section className='panel'>
-          <div className='panelHeader'>
-            <h1>Обработка изображений</h1>
-            <p className='muted'>
-              Поддержка: JPG, PNG, WebP. Результат сохраняется в PNG.
-            </p>
-          </div>
-
-          <div className='dropzone' onDrop={onDrop} onDragOver={onDragOver}>
-            <input
-              ref={inputRef}
-              type='file'
-              accept='image/png,image/jpeg,image/webp'
-              onChange={onInputChange}
-              className='fileInput'
+        <section id='processing' className='workspace'>
+          <div className='leftColumn'>
+            <UploadPanel
+              inputRef={inputRef}
+              fileMeta={sourceMeta}
+              previewUrl={sourceUrl}
+              onInputChange={onInputChange}
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+              onPickClick={handlePick}
+              onClear={clearAll}
             />
-            <div className='dropzoneInner'>
-              <div className='dropTitle'>
-                {file ? file.name : 'Перетащите изображение сюда'}
+            <ModeSelector mode={mode} onChange={setMode} />
+            <ParametersPanel mode={mode} params={params} onChange={updateParam} />
+
+            <section className='surfaceCard stackGap'>
+              <div>
+                <div className='sectionLabel'>Управление</div>
+                <h2 className='sectionTitle'>Действия</h2>
               </div>
-              <div className='muted'>
-                или{' '}
+              <div className='buttonGrid'>
+                <button type='button' className='primaryButton' disabled={!canProcess} onClick={handleProcess}>
+                  Обработать
+                </button>
+                <button type='button' className='ghostButton' disabled={!processing} onClick={handleCancel}>
+                  Отменить обработку
+                </button>
+                <button type='button' className='ghostButton' onClick={handleResetSettings}>
+                  Сбросить настройки
+                </button>
+                <button type='button' className='dangerButton' disabled={!file && !result} onClick={clearAll}>
+                  Очистить изображение
+                </button>
                 <button
                   type='button'
-                  className='linkButton'
-                  onClick={onPickClick}
+                  className='secondaryButton'
+                  disabled={!result}
+                  onClick={() => handleDownload(params.resultFormat)}
                 >
-                  выберите файл
+                  Скачать результат
                 </button>
               </div>
-            </div>
-          </div>
 
-          <div className='controls'>
-            <div className='row2'>
-              <label className='field'>
-                <span className='fieldLabel'>Режим</span>
-                <select
-                  className='select'
-                  value={mode}
-                  onChange={(e) => setMode(e.target.value as Mode)}
-                >
-                  <option value='enhance'>Улучшение</option>
-                  <option value='upscale'>Upscale ×2</option>
-                </select>
-              </label>
-              <label className='toggle'>
-                <input
-                  type='checkbox'
-                  checked={preferAi}
-                  onChange={(e) => setPreferAi(e.target.checked)}
-                />
-                <span>Предпочитать AI (если доступно)</span>
-              </label>
-            </div>
-            <button
-              type='button'
-              className='primary'
-              onClick={process}
-              disabled={processing}
-            >
-              {processing ? 'Обработка...' : 'Обработать'}
-            </button>
-          </div>
-
-          {(status || error) && (
-            <div className={error ? 'toast error' : 'toast'}>
-              <div className='toastTitle'>{error ? 'Ошибка' : 'Статус'}</div>
-              <div className='toastText'>{error ?? status}</div>
-            </div>
-          )}
-
-          <div className='meta'>
-            <div className='metaRow'>
-              <span className='metaKey'>used_ai</span>
-              <span className='metaVal'>
-                {usedAi === null ? '—' : usedAi ? 'true' : 'false'}
-              </span>
-            </div>
-            <div className='metaRow'>
-              <span className='metaKey'>model</span>
-              <span className='metaVal'>{modelName ?? '—'}</span>
-            </div>
-            <div className='metaRow'>
-              <span className='metaKey'>time</span>
-              <span className='metaVal'>{timingMs === null ? '—' : `${timingMs}ms`}</span>
-            </div>
-            <div className='metaRow'>
-              <span className='metaKey'>in</span>
-              <span className='metaVal'>
-                {inputMeta ? `${inputMeta.width}×${inputMeta.height}` : '—'}
-              </span>
-            </div>
-            <div className='metaRow'>
-              <span className='metaKey'>out</span>
-              <span className='metaVal'>
-                {outputMeta ? `${outputMeta.width}×${outputMeta.height}` : '—'}
-              </span>
-            </div>
-          </div>
-        </section>
-
-        <section className='preview'>
-          <div className='compareCard'>
-            <div className='cardHeader'>Сравнение</div>
-            <div className='compareBody'>
-              {currentSrcUrl && resultUrl ? (
-                <div className='compareStage'>
-                  <img className='compareImg' src={currentSrcUrl} alt='Исходное' />
-                  <div
-                    className='compareTop'
-                    style={{ width: `${compare}%` }}
-                  >
-                    <img className='compareImg' src={resultUrl} alt='Результат' />
-                  </div>
-                  <div className='compareHandle' style={{ left: `${compare}%` }} />
-                  {processing && (
-                    <div className='loadingOverlay'>
-                      <div className='spinner' />
-                    </div>
-                  )}
+              <div className='statusPanel'>
+                <div className='statusHeader'>
+                  <strong>Состояние обработки</strong>
+                  <span>{progress.label}</span>
                 </div>
-              ) : (
-                <div className='placeholder'>Загрузите файл и получите результат</div>
-              )}
-            </div>
-            <div className='compareFooter'>
-              <input
-                className='range'
-                type='range'
-                min={0}
-                max={100}
-                value={compare}
-                onChange={(e) => setCompare(Number(e.target.value))}
-                disabled={!currentSrcUrl || !resultUrl}
-              />
-              <div className='actions'>
-                {resultUrl ? (
-                  <a className='download' href={resultUrl} download>
-                    Скачать PNG
-                  </a>
-                ) : (
-                  <span className='muted'>—</span>
-                )}
+                <div className='progressBar'>
+                  <div className='progressValue' style={{ width: `${progress.value}%` }} />
+                </div>
+                <p className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}>{currentInfoMessage}</p>
               </div>
-            </div>
+            </section>
+
+            <InfoPanel sourceMeta={sourceMeta} result={result} mode={mode} params={params} stage={stage} />
           </div>
 
-          <div className='history'>
-            <div className='historyHeader'>
-              <div className='historyTitle'>История</div>
-              <button
-                type='button'
-                className='ghost'
-                onClick={() => {
-                  for (const item of history) URL.revokeObjectURL(item.srcUrl);
-                  setHistory([]);
-                }}
-                disabled={history.length === 0}
-              >
-                Очистить
-              </button>
-            </div>
-            {history.length === 0 ? (
-              <div className='historyEmpty'>Пока пусто</div>
-            ) : (
-              <div className='historyList'>
-                {history.map((h) => (
-                  <div key={h.jobId} className='historyItem'>
-                    <img className='thumb' src={h.srcUrl} alt='' />
-                    <div className='historyMeta'>
-                      <div className='historyName'>{h.fileName}</div>
-                      <div className='historyLine'>
-                        {h.mode} · used_ai={h.usedAi ? 'true' : 'false'}
-                        {h.timingMs !== null ? ` · ${h.timingMs}ms` : ''}
-                      </div>
-                      <div className='historyLinks'>
-                        <a className='smallLink' href={h.resultUrl} target='_blank' rel='noreferrer'>
-                          открыть
-                        </a>
-                        <a className='smallLink' href={h.resultUrl} download>
-                          скачать
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className='rightColumn'>
+            <PreviewPanel
+              sourceUrl={sourceUrl}
+              result={result}
+              compareValue={compareValue}
+              compareView={compareView}
+              isProcessing={processing}
+              onCompareValueChange={setCompareValue}
+              onCompareViewChange={setCompareView}
+              onReprocess={handleProcess}
+              onReset={setWorkflowToIdle}
+              onDownload={handleDownload}
+            />
           </div>
         </section>
-      </main>
+
+        <HistorySection
+          items={history}
+          onOpen={handleHistoryOpen}
+          onDownload={handleHistoryDownload}
+          onDelete={handleHistoryDelete}
+          onClear={handleClearHistory}
+        />
+        <AboutSection />
+        <HelpSection />
+        <Footer />
+      </div>
     </div>
   );
 }
