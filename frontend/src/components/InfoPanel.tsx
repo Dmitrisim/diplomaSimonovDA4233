@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { MODE_BY_ID } from '../constants';
 import type {
   FileMeta,
@@ -23,67 +24,101 @@ export function InfoPanel({
   params,
   stage,
 }: InfoPanelProps) {
+  if (!sourceMeta) {
+    return (
+      <section className='surfaceCard stackGap'>
+        <div>
+          <h2 className='sectionTitle'>Информация</h2>
+        </div>
+        <div className='infoEmptyState'>
+          <div className='emptyPreviewIcon'>INF</div>
+          <strong>Информация появится после загрузки изображения</strong>
+          <span>
+            После загрузки здесь появятся параметры файла и результат обработки.
+          </span>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className='surfaceCard stackGap'>
       <div>
-        <div className='sectionLabel'>Info</div>
         <h2 className='sectionTitle'>Информация</h2>
       </div>
 
-      <div className='infoGrid'>
-        <InfoRow label='Имя файла' value={sourceMeta?.name ?? '—'} />
-        <InfoRow
-          label='Формат файла'
-          value={sourceMeta ? fileTypeLabel(sourceMeta.type) : '—'}
-        />
-        <InfoRow
-          label='Размер файла'
-          value={sourceMeta ? formatBytes(sourceMeta.size) : '—'}
-        />
-        <InfoRow
-          label='Разрешение'
-          value={
-            sourceMeta ? `${sourceMeta.width} × ${sourceMeta.height}` : '—'
-          }
-        />
-        <InfoRow label='Выбранный режим' value={MODE_BY_ID[mode].title} />
-        <InfoRow
-          label='Параметры'
-          value={`интенсивность ${params.intensity}, формат ${params.resultFormat.toUpperCase()}, AI ${
-            params.preferAi ? 'вкл' : 'выкл'
-          }`}
-        />
+      <div className='infoSectionList'>
+        <InfoGroup title='Файл'>
+          <InfoRow label='Имя файла' value={sourceMeta.name} />
+          <InfoRow label='Формат' value={fileTypeLabel(sourceMeta.type)} />
+          <InfoRow label='Размер' value={formatBytes(sourceMeta.size)} />
+          <InfoRow
+            label='Разрешение'
+            value={`${sourceMeta.width} × ${sourceMeta.height}`}
+          />
+        </InfoGroup>
 
-        <InfoRow
-          label='Формат результата'
-          value={result ? result.resultMeta.format.toUpperCase() : '—'}
-        />
-        <InfoRow
-          label='Размер результата'
-          value={result ? formatBytes(result.resultMeta.size) : '—'}
-        />
-        <InfoRow
-          label='Разрешение результата'
-          value={
-            result
-              ? `${result.resultMeta.width} × ${result.resultMeta.height}`
-              : '—'
-          }
-        />
-        <InfoRow
-          label='Время обработки'
-          value={result ? `${result.timingMs} мс` : '—'}
-        />
-        <InfoRow
-          label='Использована AI-модель'
-          value={result ? (result.usedAi ? 'да' : 'нет') : '—'}
-        />
-        <InfoRow
-          label='Название модели'
-          value={result?.modelName ?? 'не подключена'}
-        />
-        <InfoRow label='Статус обработки' value={statusLabel(stage, result)} />
+        <InfoGroup title='Обработка'>
+          <InfoRow label='Режим' value={MODE_BY_ID[mode].title} />
+          <InfoRow label='Интенсивность' value={`${params.intensity}%`} />
+          <InfoRow
+            label='Формат результата'
+            value={params.resultFormat.toUpperCase()}
+          />
+          <InfoRow label='Статус' value={statusLabel(stage, result)} />
+        </InfoGroup>
+
+        {result ? (
+          <InfoGroup title='Результат'>
+            <InfoRow
+              label='Формат'
+              value={result.resultMeta.format.toUpperCase()}
+            />
+            <InfoRow
+              label='Размер'
+              value={formatBytes(result.resultMeta.size)}
+            />
+            <InfoRow
+              label='Разрешение'
+              value={`${result.resultMeta.width} × ${result.resultMeta.height}`}
+            />
+            <InfoRow label='Время обработки' value={`${result.timingMs} мс`} />
+          </InfoGroup>
+        ) : null}
+
+        <InfoGroup title='Модель'>
+          <InfoRow
+            label='AI-обработка'
+            value={result ? (result.usedAi ? 'Да' : 'Нет') : 'Ожидание запуска'}
+          />
+          <InfoRow
+            label='Модель'
+            value={
+              result?.modelName ??
+              (params.preferAi ? 'Будет выбрана автоматически' : 'AI отключена')
+            }
+          />
+          <InfoRow
+            label='Режим работы'
+            value={result?.isDemo ? 'Demo mode' : 'API / processing'}
+          />
+        </InfoGroup>
       </div>
+    </section>
+  );
+}
+
+function InfoGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className='infoGroup'>
+      <div className='infoGroupTitle'>{title}</div>
+      <div className='infoGrid'>{children}</div>
     </section>
   );
 }

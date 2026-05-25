@@ -36,24 +36,56 @@ export function Hero({ onStart, onExplore }: HeroProps) {
         </div>
       </div>
 
-      <div className='heroMockup'>
+      <div className='heroMockup productMockup'>
         <div className='mockupTop'>
-          <strong>Пример сравнения</strong>
-          <span className='mockupMetaText'>PNG · demo</span>
+          <strong>Пример сценария обработки</strong>
+          <span className='mockupMetaText'>Light Image Studio</span>
         </div>
-        <div className='mockupStage'>
-          <div className='mockupBefore'>
-            <span>До</span>
+
+        <div className='mockupWorkflow'>
+          <article className='mockupAssetCard'>
+            <div className='mockupAssetPreview mockupAssetPreviewSource' />
+            <div className='mockupAssetMeta'>
+              <strong>original.jpg</strong>
+              <span>Исходное изображение</span>
+            </div>
+          </article>
+
+          <div className='mockupProcessFlow'>
+            <span className='mockupProcessLabel'>processing</span>
+            <div className='mockupProcessArrow' aria-hidden='true' />
           </div>
-          <div className='mockupAfter'>
-            <span>После</span>
-          </div>
-          <div className='mockupDivider' />
+
+          <article className='mockupAssetCard'>
+            <div className='mockupAssetPreview mockupAssetPreviewResult' />
+            <div className='mockupAssetMeta'>
+              <strong>result.png</strong>
+              <span>Готовый результат</span>
+            </div>
+          </article>
         </div>
-        <div className='mockupMeta'>
-          <div className='mockupChip'>Автоулучшение</div>
-          <div className='mockupChip'>Сравнение до/после</div>
-          <div className='mockupChip'>Результат PNG</div>
+
+        <div className='mockupSettings'>
+          <div className='mockupSettingsGrid'>
+            <div className='mockupSetting'>
+              <span>Режим</span>
+              <strong>Автоулучшение</strong>
+            </div>
+            <div className='mockupSetting'>
+              <span>Интенсивность</span>
+              <strong>65%</strong>
+            </div>
+            <div className='mockupSetting'>
+              <span>Формат</span>
+              <strong>PNG</strong>
+            </div>
+          </div>
+          <button
+            type='button'
+            className='secondaryButton mockupDownloadButton'
+          >
+            Скачать результат
+          </button>
         </div>
       </div>
     </section>

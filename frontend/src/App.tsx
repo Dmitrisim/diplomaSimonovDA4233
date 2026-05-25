@@ -353,20 +353,47 @@ function App() {
   const processingSummary = useMemo(
     () => [
       {
-        title: 'Загрузка и проверка изображений',
-        text: 'Поддерживаются JPG, PNG и WebP до 10 МБ с автоматическим определением формата, размера и разрешения.',
+        title: 'Поддержка JPG, PNG, WebP',
+        text: 'Загружайте популярные форматы изображений и проверяйте их параметры перед обработкой.',
       },
       {
-        title: 'AI-режимы обработки',
-        text: 'Доступны сценарии улучшения, увеличения, шумоподавления, повышения резкости и подготовки для веба.',
+        title: 'Режимы обработки изображений',
+        text: 'Выбирайте подходящий сценарий: улучшение, увеличение, шумоподавление и другие режимы.',
       },
       {
-        title: 'Сравнение до/после',
-        text: 'Результат можно просматривать слайдером или рядом с исходным изображением.',
+        title: 'История последних результатов',
+        text: 'Открывайте, скачивайте и удаляйте последние результаты без повторной загрузки файла.',
+      },
+    ],
+    [],
+  );
+
+  const homeWorkflow = useMemo(
+    () => [
+      {
+        icon: 'UP',
+        title: 'Загрузите изображение',
+        text: 'Добавьте JPG, PNG или WebP размером до 10 МБ.',
       },
       {
-        title: 'История результатов',
-        text: 'Последние обработки сохраняются локально и доступны для повторного открытия и скачивания.',
+        icon: 'FX',
+        title: 'Выберите режим',
+        text: 'Подберите сценарий обработки под конкретную задачу.',
+      },
+      {
+        icon: 'ADJ',
+        title: 'Настройте параметры',
+        text: 'Укажите интенсивность, формат и дополнительные опции.',
+      },
+      {
+        icon: 'CMP',
+        title: 'Сравните результат',
+        text: 'Посмотрите исходник и готовое изображение в одном окне.',
+      },
+      {
+        icon: 'DL',
+        title: 'Скачайте файл',
+        text: 'Сохраните PNG или JPEG после завершения обработки.',
       },
     ],
     [],
@@ -388,15 +415,40 @@ function App() {
               onStart={() => setActiveSection('processing')}
               onExplore={() => setActiveSection('about')}
             />
-            <section className='surfaceCard stackGap homeFeaturesSection'>
+            <section className='surfaceCard stackGap homeWorkflowSection'>
               <div>
-                <h2 className='sectionTitle'>Возможности сервиса</h2>
+                <h2 className='sectionTitle'>Как это работает</h2>
                 <p className='sectionMuted'>
-                  Интерфейс построен как простой веб-сервис: загрузка файла,
-                  обработка, сравнение результата и скачивание.
+                  Загрузите изображение, выберите режим и скачайте готовый
+                  результат.
                 </p>
               </div>
-              <div className='sectionGrid'>
+              <div className='workflowRow'>
+                {homeWorkflow.map((item, index) => (
+                  <article key={item.title} className='workflowStepCard'>
+                    <div className='workflowStepIcon'>{item.icon}</div>
+                    <div className='workflowStepContent'>
+                      <h3>{item.title}</h3>
+                      <p className='sectionText'>{item.text}</p>
+                    </div>
+                    {index < homeWorkflow.length - 1 ? (
+                      <div className='workflowConnector' aria-hidden='true'>
+                        →
+                      </div>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </section>
+            <section className='surfaceCard stackGap homeFeaturesSection'>
+              <div>
+                <h2 className='sectionTitle'>Почему сервис удобен</h2>
+                <p className='sectionMuted'>
+                  Всё важное собрано в одном интерфейсе: загрузка, обработка,
+                  сравнение и история.
+                </p>
+              </div>
+              <div className='sectionGrid compactFeatureGrid'>
                 {processingSummary.map((item) => (
                   <article key={item.title} className='miniCard featureCard'>
                     <h3>{item.title}</h3>
@@ -430,7 +482,10 @@ function App() {
                       className='controlSectionToggle isOpen'
                       onClick={() => setOpenControlSection('source')}
                     >
-                      <span>Загрузка файла</span>
+                      <span className='pipelineStepTitle'>
+                        <span className='pipelineStepNumber'>1</span>
+                        <span>Источник</span>
+                      </span>
                       <span className='controlSectionMeta'>
                         {sourceMeta ? 'файл загружен' : 'ожидает файл'}
                       </span>
@@ -460,7 +515,10 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('mode')}
                     >
-                      <span>Режим обработки</span>
+                      <span className='pipelineStepTitle'>
+                        <span className='pipelineStepNumber'>2</span>
+                        <span>Режим</span>
+                      </span>
                       <span className='controlSectionMeta'>
                         {hasSource
                           ? 'выберите сценарий'
@@ -481,7 +539,10 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('settings')}
                     >
-                      <span>Параметры</span>
+                      <span className='pipelineStepTitle'>
+                        <span className='pipelineStepNumber'>3</span>
+                        <span>Параметры</span>
+                      </span>
                       <span className='controlSectionMeta'>
                         {hasSource
                           ? 'интенсивность, формат, AI'
@@ -506,7 +567,10 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('run')}
                     >
-                      <span>Запуск обработки</span>
+                      <span className='pipelineStepTitle'>
+                        <span className='pipelineStepNumber'>4</span>
+                        <span>Запуск</span>
+                      </span>
                       <span className='controlSectionMeta'>
                         {processing
                           ? 'обработка выполняется'
@@ -608,6 +672,7 @@ function App() {
                     onReprocess={handleProcess}
                     onReset={setWorkflowToIdle}
                     onDownload={handleDownload}
+                    onPickFile={handlePick}
                   />
                 </div>
               </div>
@@ -619,7 +684,8 @@ function App() {
                   <div>
                     <h2 className='sectionTitle'>Информация</h2>
                     <p className='sectionMuted'>
-                      Метаданные файла, результат и локальная история.
+                      После загрузки здесь появятся параметры файла и результат
+                      обработки.
                     </p>
                   </div>
                   <div className='segmentedControl compactSegmented'>
@@ -655,6 +721,7 @@ function App() {
                       onDownload={handleHistoryDownload}
                       onDelete={handleHistoryDelete}
                       onClear={handleClearHistory}
+                      onGoToProcessing={() => setActiveSection('processing')}
                     />
                   )}
                 </div>
@@ -683,6 +750,7 @@ function App() {
               onDownload={handleHistoryDownload}
               onDelete={handleHistoryDelete}
               onClear={handleClearHistory}
+              onGoToProcessing={() => setActiveSection('processing')}
             />
           </div>
         );

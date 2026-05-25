@@ -7,6 +7,7 @@ type HistorySectionProps = {
   onDownload: (item: HistoryItem) => void;
   onDelete: (id: string) => void;
   onClear: () => void;
+  onGoToProcessing?: () => void;
 };
 
 export function HistorySection({
@@ -15,6 +16,7 @@ export function HistorySection({
   onDownload,
   onDelete,
   onClear,
+  onGoToProcessing,
 }: HistorySectionProps) {
   return (
     <section id='history' className='surfaceCard stackGap'>
@@ -38,9 +40,18 @@ export function HistorySection({
           <div className='emptyPreviewIcon'>LOG</div>
           <strong>История пока пуста</strong>
           <span>
-            После первой обработки здесь появятся последние результаты и быстрые
-            действия.
+            История сохраняется локально в браузере и появится после первой
+            обработки изображения.
           </span>
+          {onGoToProcessing ? (
+            <button
+              type='button'
+              className='primaryButton emptyPreviewButton'
+              onClick={onGoToProcessing}
+            >
+              Перейти к обработке
+            </button>
+          ) : null}
         </div>
       ) : (
         <div className='historyList'>

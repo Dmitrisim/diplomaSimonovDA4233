@@ -11,6 +11,7 @@ type PreviewPanelProps = {
   onReprocess: () => void;
   onReset: () => void;
   onDownload: (format: 'png' | 'jpeg' | 'webp') => void;
+  onPickFile: () => void;
 };
 
 export function PreviewPanel(props: PreviewPanelProps) {
@@ -25,29 +26,48 @@ export function PreviewPanel(props: PreviewPanelProps) {
     onReprocess,
     onReset,
     onDownload,
+    onPickFile,
   } = props;
 
   return (
     <section className='surfaceCard stackGap previewPanel'>
-      <div className='sectionHeading'>
-        <div>
-          <div className='sectionLabel'>Preview</div>
-          <h2 className='sectionTitle'>Сравнение «до/после»</h2>
+      <div className='canvasToolbar'>
+        <div className='canvasToolbarGroup'>
+          <div className='segmentedControl'>
+            <button
+              type='button'
+              className={compareView === 'slider' ? 'active' : ''}
+              onClick={() => onCompareViewChange('slider')}
+            >
+              Слайдер
+            </button>
+            <button
+              type='button'
+              className={compareView === 'split' ? 'active' : ''}
+              onClick={() => onCompareViewChange('split')}
+            >
+              Рядом
+            </button>
+          </div>
+          <span className='canvasZoomBadge'>Масштаб 100%</span>
         </div>
-        <div className='segmentedControl'>
+
+        <div className='canvasToolbarGroup'>
           <button
             type='button'
-            className={compareView === 'slider' ? 'active' : ''}
-            onClick={() => onCompareViewChange('slider')}
+            className='secondaryButton toolbarButton'
+            onClick={() => onDownload('png')}
+            disabled={!result}
           >
-            Слайдер
+            Скачать PNG
           </button>
           <button
             type='button'
-            className={compareView === 'split' ? 'active' : ''}
-            onClick={() => onCompareViewChange('split')}
+            className='secondaryButton toolbarButton'
+            onClick={() => onDownload('jpeg')}
+            disabled={!result}
           >
-            Рядом
+            Скачать JPEG
           </button>
         </div>
       </div>
@@ -55,12 +75,18 @@ export function PreviewPanel(props: PreviewPanelProps) {
       {!sourceUrl && !result ? (
         <div className='emptyPreviewState'>
           <div className='emptyPreviewIcon'>IMG</div>
-          <strong>
-            Здесь появится сравнение исходного и обработанного изображения
-          </strong>
+          <strong>Загрузите изображение, чтобы начать обработку</strong>
           <span>
-            Загрузите файл, выберите режим обработки и запустите процесс.
+            После обработки здесь появится сравнение исходного и улучшенного
+            варианта.
           </span>
+          <button
+            type='button'
+            className='primaryButton emptyPreviewButton'
+            onClick={onPickFile}
+          >
+            Выбрать файл
+          </button>
         </div>
       ) : compareView === 'slider' ? (
         <div className='compareCard'>
@@ -112,6 +138,24 @@ export function PreviewPanel(props: PreviewPanelProps) {
               onChange={(e) => onCompareValueChange(Number(e.target.value))}
               disabled={!result}
             />
+            <div className='canvasActionRow'>
+              <button
+                type='button'
+                className='ghostButton toolbarButton'
+                onClick={onReprocess}
+                disabled={!sourceUrl}
+              >
+                Обработать заново
+              </button>
+              <button
+                type='button'
+                className='ghostButton toolbarButton'
+                onClick={onReset}
+                disabled={!sourceUrl && !result}
+              >
+                Сбросить
+              </button>
+            </div>
           </div>
         </div>
       ) : (
@@ -123,49 +167,6 @@ export function PreviewPanel(props: PreviewPanelProps) {
           />
         </div>
       )}
-
-      <div className='buttonRow'>
-        <button
-          type='button'
-          className='ghostButton'
-          onClick={onReprocess}
-          disabled={!sourceUrl}
-        >
-          Обработать заново
-        </button>
-        <button
-          type='button'
-          className='ghostButton'
-          onClick={onReset}
-          disabled={!sourceUrl && !result}
-        >
-          Сбросить
-        </button>
-        <button
-          type='button'
-          className='successButton'
-          onClick={() => onDownload('png')}
-          disabled={!result}
-        >
-          Скачать результат
-        </button>
-        <button
-          type='button'
-          className='secondaryButton'
-          onClick={() => onDownload('png')}
-          disabled={!result}
-        >
-          Скачать в PNG
-        </button>
-        <button
-          type='button'
-          className='secondaryButton'
-          onClick={() => onDownload('jpeg')}
-          disabled={!result}
-        >
-          Скачать в JPEG
-        </button>
-      </div>
     </section>
   );
 }
