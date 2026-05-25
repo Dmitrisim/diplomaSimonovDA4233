@@ -10,7 +10,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
         <h1>AI-обработка изображений в браузере</h1>
         <p>
           Загрузите изображение, выберите режим обработки, сравните результат и
-          скачайте готовый файл. Клиентская часть уже готова к подключению API.
+          скачайте готовый файл.
         </p>
         <div className='heroActions'>
           <button
@@ -18,7 +18,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             className='primaryButton heroPrimary'
             onClick={onStart}
           >
-            Открыть обработку
+            Начать обработку
           </button>
           <button
             type='button'
@@ -52,7 +52,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
         </div>
         <div className='mockupMeta'>
           <div className='mockupChip'>Автоулучшение</div>
-          <div className='mockupChip'>Интенсивность 65%</div>
+          <div className='mockupChip'>Сравнение до/после</div>
           <div className='mockupChip'>Результат PNG</div>
         </div>
       </div>

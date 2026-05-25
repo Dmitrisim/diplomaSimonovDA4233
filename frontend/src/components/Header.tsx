@@ -21,7 +21,6 @@ const NAV_ITEMS: Array<{ id: AppSection; label: string }> = [
 export function Header({
   apiOk,
   aiAvailable,
-  runtimeMode,
   activeSection,
   onNavigate,
 }: HeaderProps) {
@@ -57,12 +56,7 @@ export function Header({
         <StatusBadge
           label='Model'
           value={aiAvailable ? 'online' : 'demo'}
-          tone={aiAvailable ? 'info' : 'muted'}
-        />
-        <StatusBadge
-          label='Mode'
-          value={runtimeMode}
-          tone={runtimeMode === 'production' ? 'success' : 'warning'}
+          tone={aiAvailable ? 'info' : 'warning'}
         />
       </div>
     </header>

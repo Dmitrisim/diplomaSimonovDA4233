@@ -353,16 +353,20 @@ function App() {
   const processingSummary = useMemo(
     () => [
       {
-        title: 'Загрузка и проверка',
-        text: 'Поддерживаются JPG, PNG и WebP до 10 МБ с автоматическим чтением размера, формата и разрешения.',
+        title: 'Загрузка и проверка изображений',
+        text: 'Поддерживаются JPG, PNG и WebP до 10 МБ с автоматическим определением формата, размера и разрешения.',
       },
       {
-        title: 'AI-режимы',
+        title: 'AI-режимы обработки',
         text: 'Доступны сценарии улучшения, увеличения, шумоподавления, повышения резкости и подготовки для веба.',
       },
       {
-        title: 'Контроль результата',
-        text: 'Сравнение до/после, информация о параметрах обработки и сохранение последних операций в истории.',
+        title: 'Сравнение до/после',
+        text: 'Результат можно просматривать слайдером или рядом с исходным изображением.',
+      },
+      {
+        title: 'История результатов',
+        text: 'Последние обработки сохраняются локально и доступны для повторного открытия и скачивания.',
       },
     ],
     [],
@@ -384,79 +388,17 @@ function App() {
               onStart={() => setActiveSection('processing')}
               onExplore={() => setActiveSection('about')}
             />
-            <section className='surfaceCard stackGap'>
-              <div className='sectionHeading'>
-                <div>
-                  <div className='sectionLabel'>Workspace</div>
-                  <h2 className='sectionTitle'>Быстрый старт</h2>
-                </div>
+            <section className='surfaceCard stackGap homeFeaturesSection'>
+              <div>
+                <h2 className='sectionTitle'>Возможности сервиса</h2>
                 <p className='sectionMuted'>
-                  Навигация устроена как у полноценного SaaS-сервиса: каждый
-                  раздел открывается отдельно.
+                  Интерфейс построен как простой веб-сервис: загрузка файла,
+                  обработка, сравнение результата и скачивание.
                 </p>
               </div>
               <div className='sectionGrid'>
-                <article className='miniCard appNavCard'>
-                  <h3>Начните обработку</h3>
-                  <p className='sectionText'>
-                    Откройте студию обработки, загрузите изображение и получите
-                    сравнение результата.
-                  </p>
-                  <button
-                    type='button'
-                    className='primaryButton'
-                    onClick={() => setActiveSection('processing')}
-                  >
-                    Перейти к обработке
-                  </button>
-                </article>
-                <article className='miniCard appNavCard'>
-                  <h3>История</h3>
-                  <p className='sectionText'>
-                    Последние операции, быстрые действия и повторное открытие
-                    результатов.
-                  </p>
-                  <button
-                    type='button'
-                    className='ghostButton'
-                    onClick={() => setActiveSection('history')}
-                  >
-                    Открыть историю
-                  </button>
-                </article>
-                <article className='miniCard appNavCard'>
-                  <h3>О сервисе</h3>
-                  <p className='sectionText'>
-                    Технологии, возможности, инструкция и ограничения для
-                    демонстрации.
-                  </p>
-                  <div className='buttonRow'>
-                    <button
-                      type='button'
-                      className='ghostButton'
-                      onClick={() => setActiveSection('about')}
-                    >
-                      О системе
-                    </button>
-                    <button
-                      type='button'
-                      className='ghostButton'
-                      onClick={() => setActiveSection('help')}
-                    >
-                      Помощь
-                    </button>
-                  </div>
-                </article>
-              </div>
-            </section>
-            <section className='surfaceCard stackGap'>
-              <div>
-                <div className='sectionLabel'>Highlights</div>
-                <h2 className='sectionTitle'>Что уже готово</h2>
-              </div>
-              <div className='sectionGrid'>
                 {processingSummary.map((item) => (
-                  <article key={item.title} className='miniCard'>
+                  <article key={item.title} className='miniCard featureCard'>
                     <h3>{item.title}</h3>
                     <p className='sectionText'>{item.text}</p>
                   </article>
@@ -467,25 +409,15 @@ function App() {
         );
       case 'processing':
         return (
-          <section className='contentStack'>
-            <section className='surfaceCard pageIntroCard'>
-              <div className='sectionHeading'>
-                <div>
-                  <div className='sectionLabel'>Studio</div>
-                  <h1 className='sectionTitle'>Обработка изображений</h1>
-                </div>
-                <p className='sectionMuted'>
-                  Рабочая студия для загрузки файла, выбора режима и сравнения
-                  результата в одном экране.
-                </p>
-              </div>
-            </section>
-            <section className='workspaceStudio'>
-              <aside className='workspacePanel controlPanel'>
+          <section className='workspaceStudio'>
+            <aside className='workspacePanel controlPanel'>
+              <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
-                    <div className='sectionLabel'>Tools</div>
-                    <h2 className='sectionTitle'>Панель управления</h2>
+                    <h2 className='sectionTitle'>Настройки обработки</h2>
+                    <p className='sectionMuted'>
+                      Загрузите файл, выберите режим и настройте параметры.
+                    </p>
                   </div>
                   <span className='panelStateChip'>
                     {processingWorkspaceState}
@@ -498,7 +430,7 @@ function App() {
                       className='controlSectionToggle isOpen'
                       onClick={() => setOpenControlSection('source')}
                     >
-                      <span>Источник</span>
+                      <span>Загрузка файла</span>
                       <span className='controlSectionMeta'>
                         {sourceMeta ? 'файл загружен' : 'ожидает файл'}
                       </span>
@@ -528,7 +460,7 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('mode')}
                     >
-                      <span>Режим</span>
+                      <span>Режим обработки</span>
                       <span className='controlSectionMeta'>
                         {hasSource
                           ? 'выберите сценарий'
@@ -549,7 +481,7 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('settings')}
                     >
-                      <span>Настройки</span>
+                      <span>Параметры</span>
                       <span className='controlSectionMeta'>
                         {hasSource
                           ? 'интенсивность, формат, AI'
@@ -574,7 +506,7 @@ function App() {
                       disabled={!hasSource}
                       onClick={() => setOpenControlSection('run')}
                     >
-                      <span>Запуск</span>
+                      <span>Запуск обработки</span>
                       <span className='controlSectionMeta'>
                         {processing
                           ? 'обработка выполняется'
@@ -648,13 +580,17 @@ function App() {
                     </div>
                   </section>
                 </div>
-              </aside>
+              </div>
+            </aside>
 
-              <section className='workspacePanel canvasPanel'>
+            <section className='workspacePanel canvasPanel'>
+              <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
-                    <div className='sectionLabel'>Canvas</div>
-                    <h2 className='sectionTitle'>Сравнение до/после</h2>
+                    <h2 className='sectionTitle'>Рабочая область</h2>
+                    <p className='sectionMuted'>
+                      Просмотр исходного изображения и результата обработки.
+                    </p>
                   </div>
                   <span className='panelStateChip panelStateChipAccent'>
                     {compareView === 'slider' ? 'Слайдер' : 'Рядом'}
@@ -674,13 +610,17 @@ function App() {
                     onDownload={handleDownload}
                   />
                 </div>
-              </section>
+              </div>
+            </section>
 
-              <aside className='workspacePanel contextPanel'>
+            <aside className='workspacePanel contextPanel'>
+              <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
-                    <div className='sectionLabel'>Context</div>
-                    <h2 className='sectionTitle'>Контекст</h2>
+                    <h2 className='sectionTitle'>Информация</h2>
+                    <p className='sectionMuted'>
+                      Метаданные файла, результат и локальная история.
+                    </p>
                   </div>
                   <div className='segmentedControl compactSegmented'>
                     <button
@@ -718,8 +658,8 @@ function App() {
                     />
                   )}
                 </div>
-              </aside>
-            </section>
+              </div>
+            </aside>
           </section>
         );
       case 'history':
@@ -797,8 +737,12 @@ function App() {
           activeSection={activeSection}
           onNavigate={setActiveSection}
         />
-        <main className='appContent'>{renderSection()}</main>
-        <Footer />
+        <main
+          className={`appContent ${activeSection === 'processing' ? 'isProcessingSection' : ''}`}
+        >
+          {renderSection()}
+        </main>
+        {activeSection !== 'processing' ? <Footer /> : null}
       </div>
     </div>
   );

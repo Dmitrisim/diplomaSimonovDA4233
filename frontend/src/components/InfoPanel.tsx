@@ -26,8 +26,8 @@ export function InfoPanel({
   return (
     <section className='surfaceCard stackGap'>
       <div>
-        <div className='sectionLabel'>Session</div>
-        <h2 className='sectionTitle'>Инфо по обработке</h2>
+        <div className='sectionLabel'>Info</div>
+        <h2 className='sectionTitle'>Информация</h2>
       </div>
 
       <div className='infoGrid'>
