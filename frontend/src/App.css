@@ -1994,3 +1994,424 @@ button:disabled {
     padding-right: 0;
   }
 }
+
+/* Calm product UI overrides */
+
+.appHeader,
+.surfaceCard,
+.heroSection,
+.workspacePanel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.appHeader,
+.surfaceCard,
+.heroSection {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.22);
+}
+
+.surfaceCard,
+.heroSection {
+  border-radius: 20px;
+}
+
+.appHeader {
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.94);
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.18);
+}
+
+.brandMark {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1d4ed8, #0f172a);
+  box-shadow: none;
+}
+
+.brandTitle {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.brandSubtitle {
+  font-size: 11px;
+  color: #8fa0b8;
+}
+
+.navButton {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.navButton:hover,
+.navButton.isActive {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: none;
+}
+
+.statusBadge {
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.sectionLabel,
+.heroEyebrow {
+  display: none;
+}
+
+.heroSection {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 18px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 6px 0 10px;
+}
+
+.heroText {
+  gap: 12px;
+}
+
+.heroText h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.15;
+  max-width: 640px;
+}
+
+.heroText p {
+  max-width: 640px;
+  font-size: 15px;
+  color: #a5b4c8;
+}
+
+.heroMetrics {
+  gap: 8px;
+}
+
+.metricChip {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  padding: 6px 10px;
+}
+
+.heroMockup {
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border-color: rgba(148, 163, 184, 0.14);
+  background: #111827;
+}
+
+.mockupTop {
+  align-items: center;
+}
+
+.mockupTop strong {
+  color: var(--text-h);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mockupMetaText {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.mockupBadge,
+.mockupDot {
+  display: none;
+}
+
+.mockupChip {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  padding: 6px 8px;
+}
+
+.mockupStage {
+  min-height: 240px;
+  background: #0b1220;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.mockupBefore {
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(148, 163, 184, 0.12),
+      transparent 28%
+    ),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.88));
+}
+
+.mockupAfter {
+  background:
+    radial-gradient(
+      circle at 65% 40%,
+      rgba(59, 130, 246, 0.16),
+      transparent 24%
+    ),
+    linear-gradient(180deg, rgba(30, 64, 175, 0.14), rgba(15, 23, 42, 0.84));
+}
+
+.mockupDivider,
+.compareHandle {
+  box-shadow: none;
+}
+
+.pageIntroCard {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0 0 4px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.sectionMuted,
+.sectionText {
+  color: #98a8bd;
+}
+
+.miniCard,
+.metaTile,
+.imageCard,
+.modeInfo,
+.statusPanel,
+.warningCard,
+.stepCard,
+.historyCard {
+  background: #111827;
+  border-color: rgba(148, 163, 184, 0.14);
+  border-radius: 16px;
+}
+
+.miniCard:hover,
+.historyCard:hover,
+.stepCard:hover,
+.modeCard:hover {
+  transform: none;
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.workspacePanel {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.18);
+}
+
+.workspacePanelHeader {
+  padding-bottom: 12px;
+  border-bottom-color: rgba(148, 163, 184, 0.14);
+}
+
+.panelStateChip {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.panelStateChipAccent {
+  color: var(--text);
+  background: transparent;
+  border: 0;
+}
+
+.controlSection + .controlSection {
+  border-top-color: rgba(148, 163, 184, 0.12);
+}
+
+.controlSectionToggle {
+  padding: 12px 0;
+}
+
+.controlSectionToggle span:first-child {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.controlSectionMeta {
+  font-size: 11px;
+}
+
+.dropzone {
+  background: #0b1220;
+  border-color: rgba(148, 163, 184, 0.22);
+  box-shadow: none;
+}
+
+.dropzone:hover,
+.dropzone.isActive {
+  border-color: rgba(96, 165, 250, 0.38);
+  box-shadow: none;
+}
+
+.dropIcon,
+.emptyPreviewIcon,
+.modeIcon {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #cbd5e1;
+}
+
+.modeCard {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.14);
+  border-radius: 14px;
+}
+
+.modeCard.isActive {
+  background: #131c31;
+  border-color: rgba(96, 165, 250, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.08);
+}
+
+.modeInfo {
+  background: transparent;
+  border-style: dashed;
+}
+
+.field input,
+.field select,
+.field textarea,
+.filePreviewBox,
+.imageCardBody {
+  background: #0b1220;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: rgba(96, 165, 250, 0.28);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.08);
+}
+
+.toggleRow input {
+  background: rgba(100, 116, 139, 0.3);
+}
+
+.toggleRow input:checked {
+  background: #2563eb;
+}
+
+.segmentedControl {
+  background: #111827;
+  border-color: rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+}
+
+.segmentedControl button {
+  border-radius: 8px;
+}
+
+.segmentedControl button.active,
+.segmentedControl button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.primaryButton,
+.secondaryButton,
+.ghostButton,
+.dangerButton,
+.successButton {
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.primaryButton {
+  background: #2563eb;
+}
+
+.successButton {
+  background: #16a34a;
+}
+
+.secondaryButton {
+  background: #162033;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.ghostButton {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.dangerButton {
+  background: rgba(127, 29, 29, 0.18);
+  border-color: rgba(239, 68, 68, 0.16);
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.ghostButton:hover:not(:disabled),
+.dangerButton:hover:not(:disabled),
+.successButton:hover:not(:disabled) {
+  filter: none;
+}
+
+.compareStage {
+  border-radius: 18px;
+  border-color: rgba(148, 163, 184, 0.14);
+  background: #0b1220;
+}
+
+.compareFooter,
+.buttonRow,
+.buttonGrid {
+  gap: 8px;
+}
+
+.loadingOverlay {
+  background: rgba(11, 18, 32, 0.56);
+}
+
+.loadingCard {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.spinner {
+  border-top-color: #60a5fa;
+}
+
+.emptyPreviewState,
+.emptyResult {
+  border-radius: 18px;
+  background: #0b1220;
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+.tinyBadge {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.warningCard {
+  background: rgba(120, 53, 15, 0.16);
+}
+
+.appFooter {
+  color: #8291a7;
+}
+
+@media (max-width: 1120px) {
+  .heroSection {
+    grid-template-columns: 1fr;
+  }
+}

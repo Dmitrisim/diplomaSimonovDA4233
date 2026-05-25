@@ -31,7 +31,7 @@ export function Header({
         <div className='brandMark' aria-hidden='true' />
         <div>
           <div className='brandTitle'>AI Image Processing</div>
-          <div className='brandSubtitle'>AI-powered image enhancement</div>
+          <div className='brandSubtitle'>Сервис обработки изображений</div>
         </div>
       </div>
 
