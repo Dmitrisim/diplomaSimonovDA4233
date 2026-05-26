@@ -21,7 +21,7 @@
   --font-option-plex:
     'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial,
     sans-serif;
-  --font-ui: var(--font-option-onest);
+  --font-ui: var(--font-option-manrope);
   --text: #111827;
   --text-h: #111827;
   --muted: #6b7280;
