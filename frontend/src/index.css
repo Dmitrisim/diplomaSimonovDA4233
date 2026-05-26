@@ -1,16 +1,19 @@
 :root {
   --text: #111827;
   --text-h: #111827;
-  --muted: #64748b;
-  --bg: #f3f6fb;
+  --muted: #6b7280;
+  --bg: #f6f1ea;
   --panel: #ffffff;
-  --chip: #f8fafc;
-  --border: #e2e8f0;
-  --primary: #2563eb;
-  --primary-dark: #1e3a8a;
-  --accent-violet: #7c3aed;
-  --accent-cyan: #06b6d4;
-  --primary-hover: #1d4ed8;
+  --chip: #fff8ec;
+  --border: #e5ded3;
+  --primary: #1e40af;
+  --primary-dark: #172554;
+  --accent-violet: #5b4bc4;
+  --accent-cyan: #7ba6e8;
+  --accent-amber: #f59e0b;
+  --soft-blue: #eaf1ff;
+  --soft-amber: #fff4de;
+  --primary-hover: #172554;
   --success: #16a34a;
   --error: #dc2626;
   --warning: #f59e0b;
@@ -53,21 +56,21 @@ body {
   min-width: 320px;
   background:
     radial-gradient(
-      780px 460px at 82% 8%,
-      rgba(37, 99, 235, 0.09),
+      860px 480px at 82% 8%,
+      rgba(30, 64, 175, 0.08),
       transparent 58%
     ),
     radial-gradient(
-      680px 400px at 12% 12%,
-      rgba(124, 58, 237, 0.08),
+      720px 420px at 12% 12%,
+      rgba(245, 158, 11, 0.08),
       transparent 60%
     ),
     radial-gradient(
       560px 340px at 50% 100%,
-      rgba(6, 182, 212, 0.05),
+      rgba(30, 64, 175, 0.04),
       transparent 60%
     ),
-    linear-gradient(180deg, #f3f6fb 0%, #f6f8fc 100%);
+    linear-gradient(180deg, #f7f4ef 0%, #f6f1ea 100%);
 }
 
 h1 {

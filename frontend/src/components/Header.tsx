@@ -36,8 +36,10 @@ export function Header({
       <div className='brandBlock'>
         <div className='brandMark' aria-hidden='true' />
         <div>
-          <div className='brandTitle'>AI Image Processing</div>
-          <div className='brandSubtitle'>AI-сервис обработки изображений</div>
+          <div className='brandTitle'>PhotoRestore AI</div>
+          <div className='brandSubtitle'>
+            восстановление и улучшение изображений
+          </div>
         </div>
       </div>
 
@@ -70,7 +72,7 @@ export function Header({
           className='primaryButton headerCtaButton'
           onClick={() => onNavigate('processing')}
         >
-          Начать обработку
+          Загрузить фото
         </button>
       </div>
     </header>

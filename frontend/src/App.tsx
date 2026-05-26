@@ -72,7 +72,7 @@ function App() {
     label: '0% · загрузка',
   });
   const [message, setMessage] = useState<string>(
-    'Выберите изображение для начала работы.',
+    'Загрузите фото, чтобы начать восстановление и улучшение.',
   );
   const [processing, setProcessing] = useState(false);
   const [compareValue, setCompareValue] = useState(50);
@@ -146,7 +146,7 @@ function App() {
     setSourceUrl(null);
     setResult(null);
     setStage('idle');
-    setMessage('Выберите изображение для начала работы.');
+    setMessage('Загрузите фото, чтобы начать восстановление и улучшение.');
     setProcessing(false);
     setCompareValue(50);
   };
@@ -183,7 +183,7 @@ function App() {
       setActiveSection('processing');
       setOpenControlSection('mode');
       setContextTab('info');
-      setMessage('Файл выбран. Настройте параметры и нажмите «Обработать».');
+      setMessage('Фото загружено. Выберите сценарий и запустите обработку.');
       setCompareValue(50);
     } catch {
       setStage('format-error');
@@ -369,17 +369,17 @@ function App() {
       {
         icon: 'IMG',
         title: 'Поддержка JPG, PNG, WebP',
-        text: 'Загружайте популярные форматы изображений и проверяйте их параметры перед обработкой.',
+        text: 'Загрузите популярные форматы и сразу переходите к восстановлению или улучшению.',
       },
       {
         icon: 'AI',
-        title: 'Режимы обработки изображений',
-        text: 'Выбирайте подходящий сценарий: улучшение, увеличение, шумоподавление и другие режимы.',
+        title: 'Сценарии восстановления',
+        text: 'Подберите понятный сценарий: убрать шум, повысить четкость, восстановить старое фото.',
       },
       {
         icon: 'HIS',
         title: 'История последних результатов',
-        text: 'Открывайте, скачивайте и удаляйте последние результаты без повторной загрузки файла.',
+        text: 'Открывайте, скачивайте и возвращайтесь к недавним обработкам без повторной загрузки.',
       },
     ],
     [],
@@ -387,16 +387,34 @@ function App() {
 
   const featuredScenarios = useMemo(
     () =>
-      MODE_DEFINITIONS.map((item, index) => ({
+      MODE_DEFINITIONS.map((item) => ({
         id: item.id,
         icon: item.iconLabel,
         title: item.shortTitle,
-        text:
-          index % 2 === 0
-            ? item.bestFor
-            : item.description.length > 74
-              ? `${item.description.slice(0, 74)}...`
-              : item.description,
+        text: item.bestFor,
+      })),
+    [],
+  );
+
+  const restorationIssues = useMemo(
+    () => [
+      { icon: 'SP', title: 'Царапины и пятна', tone: 'amber' },
+      { icon: 'NZ', title: 'Шум и зернистость', tone: 'blue' },
+      { icon: 'BL', title: 'Размытие', tone: 'blue' },
+      { icon: 'HD', title: 'Низкое разрешение', tone: 'indigo' },
+      { icon: 'CL', title: 'Тусклые цвета', tone: 'amber' },
+      { icon: 'WB', title: 'Большой размер файла', tone: 'indigo' },
+    ],
+    [],
+  );
+
+  const processingStartScenarios = useMemo(
+    () =>
+      MODE_DEFINITIONS.slice(0, 4).map((item) => ({
+        id: item.id,
+        title: item.title,
+        icon: item.iconLabel,
+        text: item.bestFor,
       })),
     [],
   );
@@ -406,27 +424,27 @@ function App() {
       {
         icon: 'UP',
         title: 'Загрузите изображение',
-        text: 'Добавьте JPG, PNG или WebP размером до 10 МБ.',
+        text: 'Добавьте фото или скан в формате JPG, PNG или WebP.',
       },
       {
         icon: 'FX',
-        title: 'Выберите режим',
-        text: 'Подберите сценарий обработки под конкретную задачу.',
+        title: 'Выберите сценарий',
+        text: 'Укажите, что именно нужно исправить на изображении.',
       },
       {
         icon: 'ADJ',
         title: 'Настройте параметры',
-        text: 'Укажите интенсивность, формат и дополнительные опции.',
+        text: 'Настройте интенсивность, формат результата и дополнительные опции.',
       },
       {
         icon: 'CMP',
         title: 'Сравните результат',
-        text: 'Посмотрите исходник и готовое изображение в одном окне.',
+        text: 'Сравните исходник и улучшенную версию в одном окне.',
       },
       {
         icon: 'DL',
         title: 'Скачайте файл',
-        text: 'Сохраните PNG или JPEG после завершения обработки.',
+        text: 'Сохраните готовый результат в удобном формате.',
       },
     ],
     [],
@@ -507,19 +525,42 @@ function App() {
               onStart={() => setActiveSection('processing')}
               onExplore={() => setActiveSection('examples')}
             />
+            <section className='surfaceCard stackGap problemGridSection'>
+              <div>
+                <h2 className='sectionTitle'>Что можно исправить</h2>
+                <p className='sectionMuted'>
+                  Сервис помогает решать конкретные проблемы изображения, а не
+                  просто запускать абстрактную AI-обработку.
+                </p>
+              </div>
+              <div className='problemGrid'>
+                {restorationIssues.map((item) => (
+                  <article
+                    key={item.title}
+                    className={`problemCard tone-${item.tone}`}
+                  >
+                    <span className='problemIcon'>{item.icon}</span>
+                    <strong>{item.title}</strong>
+                  </article>
+                ))}
+              </div>
+            </section>
             <ExamplesSection
               compact
               title='Примеры обработки'
-              description='Демонстрационные before/after карточки показывают, как разные режимы меняют изображение.'
+              description='Смотрите, как меняется фото после удаления шума, реставрации, повышения четкости и подготовки для сайта.'
               onTryMode={openModeInWorkspace}
             />
             <section className='surfaceCard stackGap scenariosSection'>
               <div className='sectionHeading'>
                 <div>
-                  <h2 className='sectionTitle'>Выберите сценарий обработки</h2>
+                  <h2 className='sectionTitle'>
+                    Что нужно сделать с изображением?
+                  </h2>
                   <p className='sectionMuted'>
-                    Визуальная лента режимов помогает быстрее понять, для какой
-                    задачи подходит каждый инструмент.
+                    Выберите понятный сценарий: восстановить старое фото, убрать
+                    шум, повысить четкость или подготовить изображение для
+                    сайта.
                   </p>
                 </div>
               </div>
@@ -542,8 +583,8 @@ function App() {
               <div>
                 <h2 className='sectionTitle'>Как это работает</h2>
                 <p className='sectionMuted'>
-                  Загрузите изображение, выберите режим и скачайте готовый
-                  результат.
+                  Загрузите фото, выберите сценарий и скачайте готовый результат
+                  после сравнения до/после.
                 </p>
               </div>
               <div className='workflowRow'>
@@ -584,15 +625,104 @@ function App() {
           </div>
         );
       case 'processing':
+        if (!hasSource) {
+          return (
+            <section className='processingStartScreen'>
+              <aside className='surfaceCard processingStartRail'>
+                <div className='processingStartCopy'>
+                  <span className='processingStartEyebrow'>
+                    Photo Lab onboarding
+                  </span>
+                  <h1 className='sectionTitle'>
+                    Восстановите и улучшите изображение за минуту
+                  </h1>
+                  <p className='sectionMuted'>
+                    Загрузите фото, выберите сценарий обработки и сравните
+                    результат до/после прямо в браузере.
+                  </p>
+                </div>
+                <div className='processingStartSteps'>
+                  {homeWorkflow.slice(0, 3).map((item, index) => (
+                    <div key={item.title} className='processingStartStep'>
+                      <span className='processingStartStepIndex'>
+                        {index + 1}
+                      </span>
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span>{item.text}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+
+              <section className='surfaceCard processingStartMain'>
+                <div className='processingStartMainHeader'>
+                  <div>
+                    <h2 className='sectionTitle'>Загрузить фото</h2>
+                    <p className='sectionMuted'>
+                      После загрузки откроется рабочая студия с настройками,
+                      сравнением результата и кнопками сохранения.
+                    </p>
+                  </div>
+                  <span className='panelStateChip panelStateChipAccent'>
+                    JPG / PNG / WebP
+                  </span>
+                </div>
+                <UploadPanel
+                  inputRef={inputRef}
+                  fileMeta={sourceMeta}
+                  previewUrl={sourceUrl}
+                  isDragActive={dragActive}
+                  onInputChange={onInputChange}
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onPickClick={handlePick}
+                  onClear={clearAll}
+                />
+              </section>
+
+              <aside className='surfaceCard processingStartScenarios'>
+                <div>
+                  <h2 className='sectionTitle'>Популярные сценарии</h2>
+                  <p className='sectionMuted'>
+                    Выберите подходящий вариант сразу после загрузки фото.
+                  </p>
+                </div>
+                <div className='processingStartScenarioList'>
+                  {processingStartScenarios.map((item) => (
+                    <button
+                      key={item.id}
+                      type='button'
+                      className='processingStartScenarioCard'
+                      onClick={() => openModeInWorkspace(item.id)}
+                    >
+                      <span className='processingStartScenarioIcon'>
+                        {item.icon}
+                      </span>
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span>{item.text}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+            </section>
+          );
+        }
+
         return (
           <section className='workspaceStudio'>
             <aside className='workspacePanel controlPanel'>
               <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
-                    <h2 className='sectionTitle'>Настройки обработки</h2>
+                    <h2 className='sectionTitle'>Панель обработки</h2>
                     <p className='sectionMuted'>
-                      Загрузите файл, выберите режим и настройте параметры.
+                      Выберите сценарий, настройте параметры и запустите
+                      обработку изображения.
                     </p>
                     <div className='pipelineOverview'>
                       {controlPipeline.map((item) => (
@@ -791,9 +921,9 @@ function App() {
               <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
-                    <h2 className='sectionTitle'>Рабочая область</h2>
+                    <h2 className='sectionTitle'>Сравнение результата</h2>
                     <p className='sectionMuted'>
-                      Просмотр исходного изображения и результата обработки.
+                      Сравните исходное фото и улучшенную версию в одном окне.
                     </p>
                   </div>
                   <span className='panelStateChip panelStateChipAccent'>
@@ -824,7 +954,7 @@ function App() {
                   <div>
                     <h2 className='sectionTitle'>Информация</h2>
                     <p className='sectionMuted'>
-                      После загрузки здесь появятся параметры файла и результат
+                      Загрузите фото - здесь появятся размер, формат и результат
                       обработки.
                     </p>
                   </div>
@@ -877,8 +1007,8 @@ function App() {
                 <div>
                   <h1 className='sectionTitle'>Примеры обработки</h1>
                   <p className='sectionMuted'>
-                    Галерея демонстрирует, как разные AI-сценарии работают с
-                    шумом, четкостью, старым фото и web-экспортом.
+                    Галерея показывает, как сервис справляется со старым фото,
+                    шумом, мягкостью и подготовкой изображений для сайта.
                   </p>
                 </div>
                 <button
@@ -892,8 +1022,8 @@ function App() {
             </section>
             <ExamplesSection
               showFilter
-              title='Галерея сценариев'
-              description='Фильтруйте demo-кейсы по режимам и сразу открывайте нужный сценарий в рабочей студии.'
+              title='Галерея до / после'
+              description='Фильтруйте примеры по проблемам изображения и открывайте нужный сценарий прямо в рабочей студии.'
               onTryMode={openModeInWorkspace}
             />
           </div>

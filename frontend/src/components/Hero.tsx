@@ -7,10 +7,11 @@ export function Hero({ onStart, onExplore }: HeroProps) {
   return (
     <section id='home' className='heroSection'>
       <div className='heroText'>
-        <h1>AI-обработка изображений в браузере</h1>
+        <div className='heroIntroBadge'>Photo Lab / Restoration Studio</div>
+        <h1>Восстановите и улучшите изображение за минуту</h1>
         <p>
-          Загрузите изображение, выберите режим обработки, сравните результат и
-          скачайте готовый файл.
+          Загрузите фото, выберите сценарий обработки и сравните результат
+          до/после прямо в браузере.
         </p>
         <div className='heroActions'>
           <button
@@ -18,7 +19,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             className='primaryButton heroPrimary'
             onClick={onStart}
           >
-            Начать обработку
+            Загрузить фото
           </button>
           <button
             type='button'
@@ -29,10 +30,10 @@ export function Hero({ onStart, onExplore }: HeroProps) {
           </button>
         </div>
         <div className='heroMetrics'>
-          <span className='metricChip'>6 режимов</span>
-          <span className='metricChip'>до 10 МБ</span>
           <span className='metricChip'>JPG / PNG / WebP</span>
-          <span className='metricChip'>demo / API</span>
+          <span className='metricChip'>до 10 МБ</span>
+          <span className='metricChip'>6 сценариев обработки</span>
+          <span className='metricChip'>demo/API ready</span>
         </div>
       </div>
 
@@ -43,41 +44,32 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             <span />
             <span />
           </div>
-          <span className='mockupWindowTitle'>AI Image Processing</span>
+          <span className='mockupWindowTitle'>PhotoRestore AI</span>
         </div>
         <div className='mockupTop'>
-          <strong>Пример сценария обработки</strong>
-          <span className='mockupMetaText'>Light Image Studio</span>
+          <strong>Сравнение результата</strong>
+          <span className='mockupMetaText'>before / after preview</span>
         </div>
 
-        <div className='mockupWorkflow'>
-          <article className='mockupAssetCard'>
-            <div className='mockupAssetPreview mockupAssetPreviewSource' />
-            <div className='mockupAssetMeta'>
-              <strong>original.jpg</strong>
-              <span>Исходное изображение</span>
-            </div>
-          </article>
-
-          <div className='mockupProcessFlow'>
-            <span className='mockupProcessLabel'>processing</span>
-            <div className='mockupProcessArrow' aria-hidden='true' />
+        <div className='heroComparePreview'>
+          <div className='heroCompareHalf isBefore'>
+            <span className='heroCompareLabel'>До</span>
+            <div className='heroPhotoPreview heroPhotoBefore' />
           </div>
-
-          <article className='mockupAssetCard'>
-            <div className='mockupAssetPreview mockupAssetPreviewResult' />
-            <div className='mockupAssetMeta'>
-              <strong>result.png</strong>
-              <span>Готовый результат</span>
-            </div>
-          </article>
+          <div className='heroCompareDivider' aria-hidden='true'>
+            <span />
+          </div>
+          <div className='heroCompareHalf isAfter'>
+            <span className='heroCompareLabel isAfter'>После</span>
+            <div className='heroPhotoPreview heroPhotoAfter' />
+          </div>
         </div>
 
         <div className='mockupSettings'>
           <div className='mockupSettingsGrid'>
             <div className='mockupSetting'>
-              <span>Режим</span>
-              <strong>Автоулучшение</strong>
+              <span>Сценарий</span>
+              <strong>Восстановление</strong>
             </div>
             <div className='mockupSetting'>
               <span>Интенсивность</span>
