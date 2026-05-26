@@ -10,9 +10,11 @@ import './App.css';
 import {
   DEFAULT_PARAMETERS,
   MAX_FILE_SIZE,
+  MODE_DEFINITIONS,
   STORAGE_HISTORY_KEY,
 } from './constants';
 import { AboutSection } from './components/AboutSection';
+import { ExamplesSection } from './components/ExamplesSection';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import type { AppSection } from './components/Header';
@@ -213,6 +215,18 @@ function App() {
     inputRef.current?.click();
   };
 
+  const openModeInWorkspace = (nextMode: ProcessingMode) => {
+    setMode(nextMode);
+    setActiveSection('processing');
+    setOpenControlSection(hasSource ? 'settings' : 'source');
+    setContextTab('info');
+    if (!hasSource) {
+      setMessage(
+        'Выберите файл, затем настройте параметры и запустите обработку.',
+      );
+    }
+  };
+
   const handleProcess = async () => {
     if (!file || !sourceMeta) {
       setStage('idle');
@@ -371,6 +385,22 @@ function App() {
     [],
   );
 
+  const featuredScenarios = useMemo(
+    () =>
+      MODE_DEFINITIONS.map((item, index) => ({
+        id: item.id,
+        icon: item.iconLabel,
+        title: item.shortTitle,
+        text:
+          index % 2 === 0
+            ? item.bestFor
+            : item.description.length > 74
+              ? `${item.description.slice(0, 74)}...`
+              : item.description,
+      })),
+    [],
+  );
+
   const homeWorkflow = useMemo(
     () => [
       {
@@ -475,8 +505,39 @@ function App() {
           <div className='contentStack'>
             <Hero
               onStart={() => setActiveSection('processing')}
-              onExplore={() => setActiveSection('about')}
+              onExplore={() => setActiveSection('examples')}
             />
+            <ExamplesSection
+              compact
+              title='Примеры обработки'
+              description='Демонстрационные before/after карточки показывают, как разные режимы меняют изображение.'
+              onTryMode={openModeInWorkspace}
+            />
+            <section className='surfaceCard stackGap scenariosSection'>
+              <div className='sectionHeading'>
+                <div>
+                  <h2 className='sectionTitle'>Выберите сценарий обработки</h2>
+                  <p className='sectionMuted'>
+                    Визуальная лента режимов помогает быстрее понять, для какой
+                    задачи подходит каждый инструмент.
+                  </p>
+                </div>
+              </div>
+              <div className='scenarioRibbon' role='list'>
+                {featuredScenarios.map((item, index) => (
+                  <button
+                    key={item.id}
+                    type='button'
+                    className={`scenarioCard tone-${['blue', 'violet', 'cyan', 'orange'][index % 4]}`}
+                    onClick={() => openModeInWorkspace(item.id)}
+                  >
+                    <span className='scenarioIcon'>{item.icon}</span>
+                    <strong>{item.title}</strong>
+                    <span>{item.text}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
             <section className='surfaceCard stackGap homeWorkflowSection'>
               <div>
                 <h2 className='sectionTitle'>Как это работает</h2>
@@ -807,6 +868,35 @@ function App() {
               </div>
             </aside>
           </section>
+        );
+      case 'examples':
+        return (
+          <div className='contentStack'>
+            <section className='surfaceCard pageIntroCard examplesIntroCard'>
+              <div className='sectionHeading'>
+                <div>
+                  <h1 className='sectionTitle'>Примеры обработки</h1>
+                  <p className='sectionMuted'>
+                    Галерея демонстрирует, как разные AI-сценарии работают с
+                    шумом, четкостью, старым фото и web-экспортом.
+                  </p>
+                </div>
+                <button
+                  type='button'
+                  className='primaryButton'
+                  onClick={() => setActiveSection('processing')}
+                >
+                  Открыть обработку
+                </button>
+              </div>
+            </section>
+            <ExamplesSection
+              showFilter
+              title='Галерея сценариев'
+              description='Фильтруйте demo-кейсы по режимам и сразу открывайте нужный сценарий в рабочей студии.'
+              onTryMode={openModeInWorkspace}
+            />
+          </div>
         );
       case 'history':
         return (

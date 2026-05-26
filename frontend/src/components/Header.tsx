@@ -1,6 +1,12 @@
 import type { RuntimeMode } from '../types';
 
-type AppSection = 'home' | 'processing' | 'history' | 'about' | 'help';
+type AppSection =
+  | 'home'
+  | 'processing'
+  | 'examples'
+  | 'history'
+  | 'about'
+  | 'help';
 
 type HeaderProps = {
   apiOk: boolean;
@@ -13,6 +19,7 @@ type HeaderProps = {
 const NAV_ITEMS: Array<{ id: AppSection; label: string }> = [
   { id: 'home', label: 'Главная' },
   { id: 'processing', label: 'Обработка' },
+  { id: 'examples', label: 'Примеры' },
   { id: 'history', label: 'История' },
   { id: 'about', label: 'О системе' },
   { id: 'help', label: 'Помощь' },
@@ -30,7 +37,7 @@ export function Header({
         <div className='brandMark' aria-hidden='true' />
         <div>
           <div className='brandTitle'>AI Image Processing</div>
-          <div className='brandSubtitle'>Сервис обработки изображений</div>
+          <div className='brandSubtitle'>AI-сервис обработки изображений</div>
         </div>
       </div>
 
@@ -58,6 +65,13 @@ export function Header({
           value={aiAvailable ? 'online' : 'demo'}
           tone={aiAvailable ? 'info' : 'warning'}
         />
+        <button
+          type='button'
+          className='primaryButton headerCtaButton'
+          onClick={() => onNavigate('processing')}
+        >
+          Начать обработку
+        </button>
       </div>
     </header>
   );

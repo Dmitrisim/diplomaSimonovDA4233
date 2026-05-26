@@ -32,9 +32,10 @@ export function InfoPanel({
         </div>
         <div className='infoEmptyState'>
           <div className='emptyPreviewIcon'>INF</div>
-          <strong>Информация появится после загрузки изображения</strong>
+          <strong>Параметры появятся после загрузки изображения</strong>
           <span>
-            После загрузки здесь появятся параметры файла и результат обработки.
+            После загрузки здесь появятся параметры файла, сведения о режиме и
+            результат обработки.
           </span>
         </div>
       </section>

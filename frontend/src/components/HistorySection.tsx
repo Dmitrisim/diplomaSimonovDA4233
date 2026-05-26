@@ -40,8 +40,8 @@ export function HistorySection({
           <div className='emptyPreviewIcon'>LOG</div>
           <strong>История пока пуста</strong>
           <span>
-            История сохраняется локально в браузере и появится после первой
-            обработки изображения.
+            После первой обработки здесь появятся последние результаты. История
+            сохраняется локально в браузере.
           </span>
           {onGoToProcessing ? (
             <button

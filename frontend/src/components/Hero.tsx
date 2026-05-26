@@ -25,7 +25,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             className='ghostButton heroSecondary'
             onClick={onExplore}
           >
-            О сервисе
+            Смотреть примеры
           </button>
         </div>
         <div className='heroMetrics'>
