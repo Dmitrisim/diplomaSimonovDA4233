@@ -10,10 +10,17 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
   const selected = MODE_DEFINITIONS.find((item) => item.id === mode)!;
 
   return (
-    <section className='surfaceCard stackGap'>
+    <section className='surfaceCard stackGap modeSelectorSection'>
       <div>
-        <div className='sectionLabel'>Modes</div>
-        <h2 className='sectionTitle'>Выбор режима</h2>
+        <div className='sectionTitleRow'>
+          <h2 className='sectionTitle'>Режим обработки</h2>
+          <span className='inlineStateChip isAccent'>
+            {selected.shortTitle}
+          </span>
+        </div>
+        <p className='sectionMuted'>
+          Выберите один сценарий обработки для текущего изображения.
+        </p>
       </div>
 
       <div className='modeGrid'>
@@ -26,14 +33,19 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
           >
             <div className='modeCardTop'>
               <span className='modeIcon'>{item.iconLabel}</span>
-              <strong>{item.shortTitle}</strong>
+              <div className='modeCardText'>
+                <strong>{item.shortTitle}</strong>
+                <span>{item.description}</span>
+              </div>
             </div>
-            <span>{item.description}</span>
+            <span className='modeCardArrow' aria-hidden='true'>
+              {item.id === mode ? '●' : '○'}
+            </span>
           </button>
         ))}
       </div>
 
-      <div className='modeInfo'>
+      <div className='modeInfo modeInfoPanel'>
         <div>
           <div className='infoLabel'>Что делает режим</div>
           <p>{selected.description}</p>

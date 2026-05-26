@@ -19,151 +19,180 @@ export function ParametersPanel({
   const showWeb = mode === 'web-export';
 
   return (
-    <section className='surfaceCard stackGap'>
+    <section className='surfaceCard stackGap parametersSection'>
       <div>
-        <div className='sectionLabel'>Controls</div>
-        <h2 className='sectionTitle'>Настройки</h2>
+        <div className='sectionTitleRow'>
+          <h2 className='sectionTitle'>Параметры</h2>
+          <span className='inlineStateChip isAccent'>
+            {params.resultFormat.toUpperCase()}
+          </span>
+        </div>
+        <p className='sectionMuted'>
+          Настройте интенсивность, итоговый формат и дополнительные опции.
+        </p>
       </div>
 
-      <div className='formGrid'>
-        <label className='field'>
-          <span className='fieldLabel'>Интенсивность</span>
-          <strong className='fieldValue'>{params.intensity}%</strong>
-          <input
-            className='range'
-            type='range'
-            min={0}
-            max={100}
-            value={params.intensity}
-            onChange={(e) => onChange('intensity', Number(e.target.value))}
-          />
-        </label>
+      <div className='parameterGroup'>
+        <div className='parameterGroupHeader'>
+          <strong>Базовые настройки</strong>
+          <span>Интенсивность, формат, качество</span>
+        </div>
+        <div className='formGrid'>
+          <label className='field'>
+            <span className='fieldLabel'>Интенсивность</span>
+            <strong className='fieldValue'>{params.intensity}%</strong>
+            <input
+              className='range'
+              type='range'
+              min={0}
+              max={100}
+              value={params.intensity}
+              onChange={(e) => onChange('intensity', Number(e.target.value))}
+            />
+          </label>
 
-        <label className='field'>
-          <span className='fieldLabel'>Формат результата</span>
-          <div className='segmentedControl fullWidth'>
-            {(['png', 'jpeg', 'webp'] as const).map((format) => (
-              <button
-                key={format}
-                type='button'
-                className={params.resultFormat === format ? 'active' : ''}
-                onClick={() => onChange('resultFormat', format)}
-              >
-                {format.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </label>
+          <label className='field'>
+            <span className='fieldLabel'>Формат результата</span>
+            <div className='segmentedControl fullWidth'>
+              {(['png', 'jpeg', 'webp'] as const).map((format) => (
+                <button
+                  key={format}
+                  type='button'
+                  className={params.resultFormat === format ? 'active' : ''}
+                  onClick={() => onChange('resultFormat', format)}
+                >
+                  {format.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </label>
 
-        <label className='field'>
-          <span className='fieldLabel'>Качество</span>
-          <strong className='fieldValue'>{params.quality}</strong>
-          <input
-            className='range'
-            type='range'
-            min={1}
-            max={100}
-            value={params.quality}
-            onChange={(e) => onChange('quality', Number(e.target.value))}
-          />
-        </label>
+          <label className='field'>
+            <span className='fieldLabel'>Качество</span>
+            <strong className='fieldValue'>{params.quality}</strong>
+            <input
+              className='range'
+              type='range'
+              min={1}
+              max={100}
+              value={params.quality}
+              onChange={(e) => onChange('quality', Number(e.target.value))}
+            />
+          </label>
+        </div>
+      </div>
 
-        <label className='toggleRow'>
-          <input
-            type='checkbox'
-            checked={params.keepAspectRatio}
-            onChange={(e) => onChange('keepAspectRatio', e.target.checked)}
-          />
-          <span>Сохранять пропорции</span>
-        </label>
+      <div className='parameterGroup'>
+        <div className='parameterGroupHeader'>
+          <strong>Поведение обработки</strong>
+          <span>Что делать с исходным изображением</span>
+        </div>
+        <div className='formGrid'>
+          <label className='toggleRow'>
+            <input
+              type='checkbox'
+              checked={params.keepAspectRatio}
+              onChange={(e) => onChange('keepAspectRatio', e.target.checked)}
+            />
+            <span>Сохранять пропорции</span>
+          </label>
 
-        <label className='toggleRow'>
-          <input
-            type='checkbox'
-            checked={params.autoResizeLarge}
-            onChange={(e) => onChange('autoResizeLarge', e.target.checked)}
-          />
-          <span>Автоуменьшение больших файлов</span>
-        </label>
+          <label className='toggleRow'>
+            <input
+              type='checkbox'
+              checked={params.autoResizeLarge}
+              onChange={(e) => onChange('autoResizeLarge', e.target.checked)}
+            />
+            <span>Автоуменьшение больших файлов</span>
+          </label>
 
-        <label className='toggleRow'>
-          <input
-            type='checkbox'
-            checked={params.preferAi}
-            onChange={(e) => onChange('preferAi', e.target.checked)}
-          />
-          <span>Использовать AI, если доступна</span>
-        </label>
+          <label className='toggleRow'>
+            <input
+              type='checkbox'
+              checked={params.preferAi}
+              onChange={(e) => onChange('preferAi', e.target.checked)}
+            />
+            <span>Использовать AI, если доступна</span>
+          </label>
+        </div>
+      </div>
 
-        <label className={`field ${showUpscale ? '' : 'isDisabled'}`}>
-          <span className='fieldLabel'>Масштаб</span>
-          <div className='segmentedControl fullWidth'>
-            {(['x2', 'x4'] as const).map((scale) => (
-              <button
-                key={scale}
-                type='button'
-                disabled={!showUpscale}
-                className={params.upscaleFactor === scale ? 'active' : ''}
-                onClick={() => onChange('upscaleFactor', scale)}
-              >
-                {scale}
-              </button>
-            ))}
-          </div>
-        </label>
+      <div className='parameterGroup'>
+        <div className='parameterGroupHeader'>
+          <strong>Специальные настройки режима</strong>
+          <span>Отображаются в зависимости от выбранного режима</span>
+        </div>
+        <div className='formGrid'>
+          <label className={`field ${showUpscale ? '' : 'isDisabled'}`}>
+            <span className='fieldLabel'>Масштаб</span>
+            <div className='segmentedControl fullWidth'>
+              {(['x2', 'x4'] as const).map((scale) => (
+                <button
+                  key={scale}
+                  type='button'
+                  disabled={!showUpscale}
+                  className={params.upscaleFactor === scale ? 'active' : ''}
+                  onClick={() => onChange('upscaleFactor', scale)}
+                >
+                  {scale}
+                </button>
+              ))}
+            </div>
+          </label>
 
-        <label className={`field ${showDenoise ? '' : 'isDisabled'}`}>
-          <span className='fieldLabel'>Сила шумоподавления</span>
-          <div className='segmentedControl fullWidth'>
-            {(
-              [
-                ['low', 'Низкая'],
-                ['medium', 'Средняя'],
-                ['high', 'Высокая'],
-              ] as const
-            ).map(([level, label]) => (
-              <button
-                key={level}
-                type='button'
-                disabled={!showDenoise}
-                className={params.denoiseLevel === level ? 'active' : ''}
-                onClick={() => onChange('denoiseLevel', level)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </label>
+          <label className={`field ${showDenoise ? '' : 'isDisabled'}`}>
+            <span className='fieldLabel'>Сила шумоподавления</span>
+            <div className='segmentedControl fullWidth'>
+              {(
+                [
+                  ['low', 'Низкая'],
+                  ['medium', 'Средняя'],
+                  ['high', 'Высокая'],
+                ] as const
+              ).map(([level, label]) => (
+                <button
+                  key={level}
+                  type='button'
+                  disabled={!showDenoise}
+                  className={params.denoiseLevel === level ? 'active' : ''}
+                  onClick={() => onChange('denoiseLevel', level)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </label>
 
-        <label className={`field ${showWeb ? '' : 'isDisabled'}`}>
-          <span className='fieldLabel'>Максимальная ширина</span>
-          <input
-            type='number'
-            disabled={!showWeb}
-            value={params.maxWidth}
-            onChange={(e) => onChange('maxWidth', Number(e.target.value))}
-          />
-        </label>
+          <label className={`field ${showWeb ? '' : 'isDisabled'}`}>
+            <span className='fieldLabel'>Максимальная ширина</span>
+            <input
+              type='number'
+              disabled={!showWeb}
+              value={params.maxWidth}
+              onChange={(e) => onChange('maxWidth', Number(e.target.value))}
+            />
+          </label>
 
-        <label className={`field ${showWeb ? '' : 'isDisabled'}`}>
-          <span className='fieldLabel'>Максимальная высота</span>
-          <input
-            type='number'
-            disabled={!showWeb}
-            value={params.maxHeight}
-            onChange={(e) => onChange('maxHeight', Number(e.target.value))}
-          />
-        </label>
+          <label className={`field ${showWeb ? '' : 'isDisabled'}`}>
+            <span className='fieldLabel'>Максимальная высота</span>
+            <input
+              type='number'
+              disabled={!showWeb}
+              value={params.maxHeight}
+              onChange={(e) => onChange('maxHeight', Number(e.target.value))}
+            />
+          </label>
 
-        <label className={`toggleRow ${showWeb ? '' : 'isDisabled'}`}>
-          <input
-            type='checkbox'
-            disabled={!showWeb}
-            checked={params.optimizeFileSize}
-            onChange={(e) => onChange('optimizeFileSize', e.target.checked)}
-          />
-          <span>Оптимизировать размер файла</span>
-        </label>
+          <label className={`toggleRow ${showWeb ? '' : 'isDisabled'}`}>
+            <input
+              type='checkbox'
+              disabled={!showWeb}
+              checked={params.optimizeFileSize}
+              onChange={(e) => onChange('optimizeFileSize', e.target.checked)}
+            />
+            <span>Оптимизировать размер файла</span>
+          </label>
+        </div>
       </div>
     </section>
   );

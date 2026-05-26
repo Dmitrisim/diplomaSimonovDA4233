@@ -30,17 +30,21 @@ export function UploadPanel(props: UploadPanelProps) {
   } = props;
 
   return (
-    <section className='surfaceCard stackGap'>
+    <section className='surfaceCard stackGap uploadSection'>
       <div>
-        <div className='sectionLabel'>Upload</div>
-        <h2 className='sectionTitle'>Загрузите изображение</h2>
+        <div className='sectionTitleRow'>
+          <h2 className='sectionTitle'>Источник</h2>
+          <span className={`inlineStateChip ${fileMeta ? 'isReady' : 'isIdle'}`}>
+            {fileMeta ? 'Готово' : 'Ожидание'}
+          </span>
+        </div>
         <p className='sectionMuted'>
-          Перетащите файл в рабочую область или выберите его вручную.
+          Перетащите изображение в панель или выберите файл вручную.
         </p>
       </div>
 
       <div
-        className={`dropzone ${isDragActive ? 'isActive' : ''}`}
+        className={`dropzone uploadDropzone ${isDragActive ? 'isActive' : ''}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -67,7 +71,7 @@ export function UploadPanel(props: UploadPanelProps) {
           >
             Выбрать файл
           </button>
-          <div className='chipRow'>
+          <div className='chipRow uploadFormatChips'>
             <span className='metricChip'>JPG</span>
             <span className='metricChip'>PNG</span>
             <span className='metricChip'>WebP</span>
@@ -78,6 +82,12 @@ export function UploadPanel(props: UploadPanelProps) {
 
       {fileMeta && (
         <div className='uploadDetails'>
+          <div className='uploadSummaryBar'>
+            <span className='inlineStateChip isReady'>Источник добавлен</span>
+            <span className='sectionMuted'>
+              Изображение готово для выбора режима и запуска обработки.
+            </span>
+          </div>
           <div className='uploadAssetRow'>
             <div className='filePreviewBox'>
               {previewUrl ? (
@@ -87,7 +97,7 @@ export function UploadPanel(props: UploadPanelProps) {
                 />
               ) : null}
             </div>
-            <div className='fileMetaGrid'>
+            <div className='fileMetaGrid compactMetaGrid'>
               <MetaItem label='Имя файла' value={fileMeta.name} />
               <MetaItem label='Формат' value={fileTypeLabel(fileMeta.type)} />
               <MetaItem

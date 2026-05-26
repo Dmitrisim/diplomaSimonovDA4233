@@ -1027,7 +1027,7 @@
 .workspaceStudio {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr) 280px;
-  gap: 18px;
+  gap: 14px;
   height: calc(100svh - 104px);
   min-height: 620px;
 }
@@ -1039,6 +1039,9 @@
 .controlPanel {
   background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
   border-color: #d7e3f4;
+  box-shadow:
+    0 10px 22px rgba(37, 99, 235, 0.06),
+    0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
 .canvasPanel {
@@ -1052,6 +1055,9 @@
 .contextPanel {
   background: linear-gradient(180deg, #fbfcff 0%, #f7f9fd 100%);
   border-color: #dee7f2;
+  box-shadow:
+    0 10px 22px rgba(37, 99, 235, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
 .workspacePanelShell {
@@ -1068,6 +1074,11 @@
   gap: 16px;
   padding: 20px 20px 16px;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    rgba(248, 251, 255, 0.92),
+    rgba(255, 255, 255, 0.92)
+  );
 }
 
 .workspacePanelHeader .sectionTitle {
@@ -1156,7 +1167,7 @@
 .workspacePanelBody,
 .canvasPanelBody {
   min-height: 0;
-  padding: 20px;
+  padding: 16px;
 }
 
 .workspacePanelBody {
@@ -1213,6 +1224,11 @@
 
 .controlSection + .controlSection {
   border-top: 1px solid var(--border);
+}
+
+.controlSection {
+  display: grid;
+  gap: 10px;
 }
 
 .controlSectionToggle {
@@ -1281,7 +1297,7 @@
 
 .controlSectionBody {
   display: none;
-  padding-bottom: 18px;
+  padding: 0 0 12px;
 }
 
 .controlSectionBody.isOpen {
@@ -1291,8 +1307,8 @@
 .dropzone {
   border: 1px dashed #cbd5e1;
   border-radius: 14px;
-  background: #f8fafc;
-  padding: 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #f5f8fd 100%);
+  padding: 14px;
   transition:
     border-color 0.18s ease,
     background-color 0.18s ease;
@@ -1305,11 +1321,79 @@
 }
 
 .dropzoneInner {
-  min-height: 180px;
+  min-height: 156px;
   display: grid;
   place-items: center;
-  gap: 10px;
+  gap: 8px;
   text-align: center;
+}
+
+.uploadDropzone {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.inlineStateChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f1f5fb;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inlineStateChip.isReady {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success);
+}
+
+.inlineStateChip.isIdle {
+  background: #eef2f7;
+  color: #64748b;
+}
+
+.inlineStateChip.isAccent {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.1),
+    rgba(124, 58, 237, 0.1)
+  );
+  color: var(--primary);
+}
+
+.uploadFormatChips {
+  justify-content: center;
+}
+
+.uploadSection .metricChip,
+.uploadSection .tinyBadge {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.uploadSummaryBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border: 1px solid #e1e9f3;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+}
+
+.compactMetaGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .dropIcon,
@@ -1407,14 +1491,15 @@
 
 .modeGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .modeCard {
   display: grid;
-  gap: 8px;
-  padding: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px;
   text-align: left;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -1443,8 +1528,24 @@
 
 .modeCardTop {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+}
+
+.modeCardText {
+  display: grid;
+  gap: 4px;
+}
+
+.modeCardText span {
+  line-height: 1.45;
+}
+
+.modeCardArrow {
+  align-self: center;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .modeCard strong {
@@ -1466,9 +1567,14 @@
   background: linear-gradient(180deg, #f8fbff 0%, #f4f8ff 100%);
 }
 
+.modeInfoPanel {
+  border: 1px solid #e1e8f4;
+  border-radius: 14px;
+}
+
 .formGrid {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .field {
@@ -1505,11 +1611,15 @@
 
 .toggleRow {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 18px 1fr;
   align-items: center;
   gap: 10px;
   font-size: 14px;
   color: var(--text-h);
+  padding: 10px 12px;
+  border: 1px solid #e6edf6;
+  border-radius: 12px;
+  background: #fbfcfe;
 }
 
 .toggleRow input {
@@ -1521,6 +1631,34 @@
 .toggleRow.isDisabled,
 .field.isDisabled {
   opacity: 0.5;
+}
+
+.parametersSection {
+  gap: 12px;
+}
+
+.parameterGroup {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e1e8f4;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.parameterGroupHeader {
+  display: grid;
+  gap: 2px;
+}
+
+.parameterGroupHeader strong {
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.parameterGroupHeader span {
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .segmentedControl {
@@ -1634,7 +1772,8 @@ button:disabled {
   padding: 14px;
   display: grid;
   gap: 10px;
-  background: #f8fafc;
+  background: linear-gradient(180deg, #f8fbff 0%, #f2f6fd 100%);
+  border: 1px solid #dfe8f3;
 }
 
 .statusHeader {
@@ -1672,8 +1811,33 @@ button:disabled {
 
 .previewPanel {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   min-height: 100%;
+}
+
+.canvasMetaStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.canvasMetaChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.canvasMetaChip.isActive {
+  border-color: rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary);
 }
 
 .canvasToolbar {
@@ -1730,6 +1894,26 @@ button:disabled {
   grid-template-rows: minmax(0, 1fr) auto;
 }
 
+.canvasStageFrame {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+}
+
+.canvasStageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e1e8f4;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .compareStage {
   position: relative;
   min-height: 420px;
@@ -1752,6 +1936,16 @@ button:disabled {
 .canvasPanel .compareStage {
   min-height: clamp(420px, 60vh, 720px);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.canvasStageLegend {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .compareImg {
@@ -1869,6 +2063,10 @@ button:disabled {
   text-align: center;
 }
 
+.canvasPanel .emptyPreviewState {
+  min-height: clamp(360px, 54vh, 620px);
+}
+
 .emptyPreviewButton {
   margin-top: 4px;
 }
@@ -1901,7 +2099,7 @@ button:disabled {
 .infoGroup {
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: #fbfcfe;
+  background: linear-gradient(180deg, #fcfdff 0%, #f7faff 100%);
   padding: 14px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }

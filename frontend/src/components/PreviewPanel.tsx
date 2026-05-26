@@ -72,6 +72,18 @@ export function PreviewPanel(props: PreviewPanelProps) {
         </div>
       </div>
 
+      <div className='canvasMetaStrip'>
+        <span className={`canvasMetaChip ${sourceUrl ? 'isActive' : ''}`}>
+          {sourceUrl ? 'Источник загружен' : 'Источник не выбран'}
+        </span>
+        <span className={`canvasMetaChip ${result ? 'isActive' : ''}`}>
+          {result ? (result.isDemo ? 'Demo-результат' : 'Результат готов') : 'Нет результата'}
+        </span>
+        <span className='canvasMetaChip'>
+          {compareView === 'slider' ? 'Режим сравнения: слайдер' : 'Режим сравнения: рядом'}
+        </span>
+      </div>
+
       {!sourceUrl && !result ? (
         <div className='emptyPreviewState'>
           <div className='emptyPreviewIcon'>IMG</div>
@@ -90,35 +102,47 @@ export function PreviewPanel(props: PreviewPanelProps) {
         </div>
       ) : compareView === 'slider' ? (
         <div className='compareCard'>
-          <div className='compareStage'>
-            {sourceUrl ? (
-              <img
-                className='compareImg'
-                src={sourceUrl}
-                alt='Исходное изображение'
-              />
-            ) : null}
-            {result ? (
-              <div className='compareTop' style={{ width: `${compareValue}%` }}>
+          <div className='canvasStageFrame'>
+            <div className='canvasStageHeader'>
+              <span>Холст сравнения</span>
+              <span>{result?.isDemo ? 'demo output' : 'processing output'}</span>
+            </div>
+            <div className='compareStage'>
+              {sourceUrl ? (
                 <img
                   className='compareImg'
-                  src={result.resultUrl}
-                  alt='Результат обработки'
+                  src={sourceUrl}
+                  alt='Исходное изображение'
                 />
-              </div>
-            ) : null}
-            {result ? (
-              <div
-                className='compareHandle'
-                style={{ left: `${compareValue}%` }}
-              />
-            ) : null}
-            {isProcessing ? (
-              <div className='loadingOverlay'>
-                <div className='loadingCard'>
-                  <div className='spinner' />
-                  <span>Идет обработка изображения...</span>
+              ) : null}
+              {result ? (
+                <div className='compareTop' style={{ width: `${compareValue}%` }}>
+                  <img
+                    className='compareImg'
+                    src={result.resultUrl}
+                    alt='Результат обработки'
+                  />
                 </div>
+              ) : null}
+              {result ? (
+                <div
+                  className='compareHandle'
+                  style={{ left: `${compareValue}%` }}
+                />
+              ) : null}
+              {isProcessing ? (
+                <div className='loadingOverlay'>
+                  <div className='loadingCard'>
+                    <div className='spinner' />
+                    <span>Идет обработка изображения...</span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            {sourceUrl ? (
+              <div className='canvasStageLegend'>
+                <span>До</span>
+                <span>После</span>
               </div>
             ) : null}
           </div>
