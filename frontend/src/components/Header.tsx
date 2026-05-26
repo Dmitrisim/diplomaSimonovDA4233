@@ -9,9 +9,9 @@ type AppSection =
   | 'help';
 
 type HeaderProps = {
-  apiOk: boolean;
-  aiAvailable: boolean;
-  runtimeMode: RuntimeMode;
+  apiOk?: boolean;
+  aiAvailable?: boolean;
+  runtimeMode?: RuntimeMode;
   activeSection: AppSection;
   onNavigate: (section: AppSection) => void;
 };
@@ -25,22 +25,12 @@ const NAV_ITEMS: Array<{ id: AppSection; label: string }> = [
   { id: 'help', label: 'Помощь' },
 ];
 
-export function Header({
-  apiOk,
-  aiAvailable,
-  activeSection,
-  onNavigate,
-}: HeaderProps) {
+export function Header({ activeSection, onNavigate }: HeaderProps) {
   return (
     <header className='appHeader'>
       <div className='brandBlock'>
         <div className='brandMark' aria-hidden='true' />
-        <div>
-          <div className='brandTitle'>PhotoRestore AI</div>
-          <div className='brandSubtitle'>
-            восстановление и улучшение изображений
-          </div>
-        </div>
+        <div className='brandTitle'>Artful</div>
       </div>
 
       <nav className='mainNav' aria-label='Навигация'>
@@ -57,16 +47,6 @@ export function Header({
       </nav>
 
       <div className='statusGroup'>
-        <StatusBadge
-          label='API'
-          value={apiOk ? 'online' : 'offline'}
-          tone={apiOk ? 'success' : 'danger'}
-        />
-        <StatusBadge
-          label='Model'
-          value={aiAvailable ? 'online' : 'demo'}
-          tone={aiAvailable ? 'info' : 'warning'}
-        />
         <button
           type='button'
           className='primaryButton headerCtaButton'
@@ -83,22 +63,3 @@ export function Header({
 }
 
 export type { AppSection };
-
-function StatusBadge({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: 'success' | 'danger' | 'warning' | 'info' | 'muted';
-}) {
-  return (
-    <span className={`statusBadge tone-${tone}`}>
-      <span className='statusDot' aria-hidden='true' />
-      <span className='statusValue'>
-        {label} {value}
-      </span>
-    </span>
-  );
-}

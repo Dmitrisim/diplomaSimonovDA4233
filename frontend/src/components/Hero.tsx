@@ -7,7 +7,6 @@ export function Hero({ onStart, onExplore }: HeroProps) {
   return (
     <section id='home' className='heroSection'>
       <div className='heroText'>
-        <div className='heroIntroBadge'>Photo Lab / Restoration Studio</div>
         <h1>Восстановите и улучшите изображение за минуту</h1>
         <p>
           Загрузите фото, выберите сценарий обработки и сравните результат
@@ -44,7 +43,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             <span />
             <span />
           </div>
-          <span className='mockupWindowTitle'>PhotoRestore AI</span>
+          <span className='mockupWindowTitle'>Artful</span>
         </div>
         <div className='mockupTop'>
           <strong>Сравнение результата</strong>

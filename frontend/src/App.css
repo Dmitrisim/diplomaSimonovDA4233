@@ -119,16 +119,11 @@
 }
 
 .brandTitle {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-h);
-  line-height: 1.15;
-}
-
-.brandSubtitle {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .mainNav {
@@ -136,17 +131,17 @@
   justify-content: center;
   gap: 4px;
   flex-wrap: wrap;
-  padding: 6px;
-  border-radius: 18px;
-  background: rgba(255, 252, 246, 0.72);
-  border: 1px solid rgba(231, 222, 208, 0.72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  padding: 7px;
+  border-radius: 16px;
+  background: rgba(255, 252, 246, 0.62);
+  border: 1px solid rgba(231, 222, 208, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66);
 }
 
 .navButton {
   height: 42px;
-  padding: 0 18px;
-  border-radius: 12px;
+  padding: 0 17px;
+  border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
@@ -160,7 +155,7 @@
 }
 
 .navButton:hover {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.84);
   border-color: transparent;
   color: var(--primary);
   transform: none;
@@ -169,11 +164,11 @@
 .navButton.isActive {
   position: relative;
   background: #ffffff;
-  border-color: rgba(231, 222, 208, 0.9);
+  border-color: rgba(231, 222, 208, 0.76);
   color: var(--primary);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 4px 12px rgba(17, 24, 39, 0.04);
+    0 3px 10px rgba(17, 24, 39, 0.035);
 }
 
 .navButton.isActive::after {
@@ -196,79 +191,9 @@
 .statusGroup {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 0;
+  flex-wrap: nowrap;
   align-items: center;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(231, 222, 208, 0.82);
-  background: rgba(255, 252, 246, 0.92);
-  font-size: 12px;
-  color: var(--text-h);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-.statusLabel {
-  color: var(--muted);
-}
-
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: currentColor;
-  opacity: 0.8;
-}
-
-.statusValue {
-  font-weight: 500;
-}
-
-.tone-success {
-  border-color: rgba(22, 163, 74, 0.18);
-  background: #eaf7ef;
-}
-
-.tone-success .statusDot {
-  background: #16a34a;
-}
-
-.tone-danger {
-  border-color: rgba(220, 38, 38, 0.18);
-  background: #fef0f0;
-}
-
-.tone-danger .statusDot {
-  background: #dc2626;
-}
-
-.tone-warning {
-  border-color: rgba(245, 158, 11, 0.26);
-  background: #fff4de;
-}
-
-.tone-warning .statusDot {
-  background: #f59e0b;
-}
-
-.tone-info {
-  border-color: rgba(30, 64, 175, 0.18);
-  background: #eaf1ff;
-}
-
-.tone-info .statusDot {
-  background: #1e40af;
-}
-
-.tone-muted {
-  background: #ffffff;
 }
 
 .appContent {
@@ -436,17 +361,7 @@
 }
 
 .heroIntroBadge {
-  width: fit-content;
-  min-height: 30px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: rgba(255, 244, 222, 0.96);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  color: #92400e;
-  font-size: 12px;
-  font-weight: 700;
+  display: none;
 }
 
 .heroText h1 {
@@ -525,12 +440,12 @@
   color: #5f6b7e;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: none;
 }
 
 .heroMetrics .metricChip {
   border: 1px solid rgba(231, 222, 208, 0.9);
-  background: rgba(255, 252, 246, 0.84);
+  background: rgba(255, 252, 246, 0.78);
   color: #475569;
 }
 
