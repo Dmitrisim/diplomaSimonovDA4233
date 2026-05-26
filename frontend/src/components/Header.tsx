@@ -72,6 +72,9 @@ export function Header({
           className='primaryButton headerCtaButton'
           onClick={() => onNavigate('processing')}
         >
+          <span className='headerCtaIcon' aria-hidden='true'>
+            UP
+          </span>
           Загрузить фото
         </button>
       </div>
@@ -93,6 +96,7 @@ function StatusBadge({
   return (
     <span className={`statusBadge tone-${tone}`}>
       <span className='statusLabel'>{label}</span>
+      <span className='statusDot' aria-hidden='true' />
       <span className='statusValue'>{value}</span>
     </span>
   );

@@ -163,7 +163,7 @@ export function ExamplesSection({
               <p className='sectionText'>{item.description}</p>
               <button
                 type='button'
-                className='secondaryButton'
+                className='secondaryButton exampleCardButton'
                 onClick={() => onTryMode(item.mode)}
               >
                 Попробовать режим

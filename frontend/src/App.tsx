@@ -400,10 +400,10 @@ function App() {
     () => [
       { icon: 'SP', title: 'Царапины и пятна', tone: 'amber' },
       { icon: 'NZ', title: 'Шум и зернистость', tone: 'blue' },
-      { icon: 'BL', title: 'Размытие', tone: 'blue' },
-      { icon: 'HD', title: 'Низкое разрешение', tone: 'indigo' },
-      { icon: 'CL', title: 'Тусклые цвета', tone: 'amber' },
-      { icon: 'WB', title: 'Большой размер файла', tone: 'indigo' },
+      { icon: 'BL', title: 'Размытие', tone: 'violet' },
+      { icon: 'HD', title: 'Низкое разрешение', tone: 'cyan' },
+      { icon: 'CL', title: 'Тусклые цвета', tone: 'peach' },
+      { icon: 'WB', title: 'Большой размер файла', tone: 'green' },
     ],
     [],
   );
