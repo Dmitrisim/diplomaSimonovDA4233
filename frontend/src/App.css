@@ -36,11 +36,11 @@
 }
 
 .appHeader {
-  height: 64px;
+  min-height: 76px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   position: sticky;
   top: 0;
   z-index: 40;
@@ -49,6 +49,7 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   overflow: hidden;
+  padding: 12px 0;
 }
 
 .appHeader::after {
@@ -57,19 +58,19 @@
   left: 0;
   right: 0;
   bottom: -1px;
-  height: 2px;
+  height: 1px;
   background: linear-gradient(
     90deg,
-    rgba(245, 158, 11, 0.5),
-    rgba(30, 64, 175, 0.35),
-    rgba(245, 158, 11, 0.2)
+    rgba(232, 221, 204, 0.95),
+    rgba(191, 211, 255, 0.55),
+    rgba(232, 221, 204, 0.95)
   );
 }
 
 .brandBlock {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -90,7 +91,7 @@
     ),
     linear-gradient(135deg, #172554 0%, #1e40af 48%, #fff4de 48%, #f5d9a4 100%);
   box-shadow:
-    0 10px 20px rgba(23, 37, 84, 0.18),
+    0 8px 18px rgba(23, 37, 84, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
@@ -121,61 +122,31 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--text-h);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .brandSubtitle {
   font-size: 12px;
   color: var(--muted);
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .mainNav {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
   flex-wrap: wrap;
-  padding: 6px 12px;
+  padding: 6px;
   border-radius: 18px;
-  position: relative;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 252, 246, 0.95),
-    rgba(255, 247, 236, 0.92)
-  );
-  border: 1px solid rgba(231, 222, 208, 0.9);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    0 6px 14px rgba(17, 24, 39, 0.04);
-}
-
-.mainNav::before,
-.mainNav::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  width: 6px;
-  background: radial-gradient(
-      circle,
-      rgba(191, 211, 255, 0.9) 1.2px,
-      transparent 1.5px
-    )
-    center/6px 12px repeat-y;
-}
-
-.mainNav::before {
-  left: 4px;
-}
-
-.mainNav::after {
-  right: 4px;
+  background: rgba(255, 252, 246, 0.72);
+  border: 1px solid rgba(231, 222, 208, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 .navButton {
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 14px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 12px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
@@ -189,32 +160,32 @@
 }
 
 .navButton:hover {
-  background: rgba(255, 244, 222, 0.68);
-  border-color: rgba(232, 214, 184, 0.5);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: transparent;
   color: var(--primary);
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .navButton.isActive {
   position: relative;
-  background: linear-gradient(180deg, #fffcf6 0%, #fff4de 100%);
-  border-color: #e8d6b8;
+  background: #ffffff;
+  border-color: rgba(231, 222, 208, 0.9);
   color: var(--primary);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 6px 16px rgba(17, 24, 39, 0.05);
+    0 4px 12px rgba(17, 24, 39, 0.04);
 }
 
 .navButton.isActive::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: 4px;
-  width: 18px;
-  height: 3px;
+  bottom: 5px;
+  width: 16px;
+  height: 2px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: linear-gradient(90deg, #f59e0b, #1e40af);
+  background: #f59e0b;
 }
 
 .navButton:focus-visible {
@@ -225,22 +196,23 @@
 .statusGroup {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 32px;
+  gap: 8px;
+  min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(231, 222, 208, 0.82);
+  background: rgba(255, 252, 246, 0.92);
   font-size: 12px;
   color: var(--text-h);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .statusLabel {
@@ -256,7 +228,7 @@
 }
 
 .statusValue {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .tone-success {
@@ -429,40 +401,28 @@
 .heroSection {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
-  gap: 28px;
+  gap: 36px;
   align-items: center;
-  padding: 56px;
+  padding: 60px 56px;
   position: relative;
   overflow: hidden;
   border-radius: 24px;
   border: 1px solid #e6dccc;
   background:
-    linear-gradient(0deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.05) 75%,
-      transparent 75%,
-      transparent
+    linear-gradient(0deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28)),
+    radial-gradient(
+      circle at 78% 22%,
+      rgba(245, 158, 11, 0.12),
+      transparent 22%
     ),
     radial-gradient(
-      circle at 82% 24%,
-      rgba(245, 158, 11, 0.16),
+      circle at 18% 20%,
+      rgba(30, 64, 175, 0.07),
       transparent 24%
     ),
-    radial-gradient(circle at 18% 18%, rgba(30, 64, 175, 0.1), transparent 28%),
-    linear-gradient(135deg, #fffaf3 0%, #fdf8f1 42%, #eef4ff 100%);
-  background-size:
-    auto,
-    24px 24px,
-    auto,
-    auto,
-    auto;
+    linear-gradient(135deg, #fffcf7 0%, #faf5ee 42%, #eef4ff 100%);
   box-shadow:
-    0 24px 60px rgba(23, 37, 84, 0.08),
+    0 20px 46px rgba(23, 37, 84, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
@@ -472,7 +432,7 @@
 
 .heroText {
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
 .heroIntroBadge {
@@ -491,17 +451,17 @@
 
 .heroText h1 {
   margin: 0;
-  max-width: 640px;
-  font-size: clamp(40px, 4vw, 48px);
-  line-height: 1.05;
+  max-width: 580px;
+  font-size: clamp(38px, 4vw, 46px);
+  line-height: 1.04;
   color: var(--text-h);
 }
 
 .heroText p {
   margin: 0;
-  max-width: 640px;
-  font-size: 17px;
-  line-height: 1.6;
+  max-width: 560px;
+  font-size: 16px;
+  line-height: 1.65;
   color: var(--muted);
 }
 
@@ -545,12 +505,12 @@
 .historyActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .heroPrimary,
 .heroSecondary {
-  min-width: 172px;
+  min-width: 180px;
 }
 
 .metricChip,
@@ -569,21 +529,21 @@
 }
 
 .heroMetrics .metricChip {
-  border: 1px solid rgba(191, 211, 255, 0.8);
-  background: rgba(255, 255, 255, 0.82);
-  color: #334155;
+  border: 1px solid rgba(231, 222, 208, 0.9);
+  background: rgba(255, 252, 246, 0.84);
+  color: #475569;
 }
 
 .heroMockup {
   display: grid;
   gap: 14px;
-  padding: 14px;
+  padding: 16px;
   position: relative;
   z-index: 1;
   box-shadow:
-    0 20px 42px rgba(15, 23, 42, 0.1),
-    0 2px 8px rgba(15, 23, 42, 0.04);
-  transform: translate(10px, 8px) rotate(1.2deg);
+    0 18px 34px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.03);
+  transform: translate(6px, 4px);
 }
 
 .heroMockup::before,
@@ -597,42 +557,24 @@
     rgba(255, 253, 250, 0.96),
     rgba(238, 244, 255, 0.72)
   );
-  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.06);
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.05);
   z-index: -1;
 }
 
 .heroMockup::before {
-  width: 112px;
-  height: 86px;
-  right: -18px;
-  top: 10px;
-  transform: rotate(8deg);
+  width: 84px;
+  height: 62px;
+  right: -8px;
+  top: 14px;
+  transform: rotate(5deg);
 }
 
 .heroMockup::after {
-  width: 124px;
-  height: 94px;
-  left: -26px;
+  width: 92px;
+  height: 68px;
+  left: -10px;
   bottom: 18px;
-  transform: rotate(-9deg);
-}
-
-.heroMockupStamp {
-  position: absolute;
-  right: 12px;
-  top: -14px;
-  min-height: 28px;
-  padding: 0 10px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(245, 158, 11, 0.32);
-  background: rgba(255, 244, 222, 0.96);
-  color: #9a5b00;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
+  transform: rotate(-5deg);
 }
 
 .heroSection .primaryButton {
@@ -645,8 +587,8 @@
 }
 
 .heroSection .ghostButton {
-  background: rgba(255, 255, 255, 0.74);
-  border-color: #e6dccc;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(231, 222, 208, 0.9);
   color: var(--text-h);
 }
 
@@ -655,32 +597,32 @@
 }
 
 .headerCtaButton {
-  min-height: 36px;
-  padding-inline: 16px;
+  min-height: 42px;
+  padding-inline: 18px;
   white-space: nowrap;
-  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);
   color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(23, 37, 84, 0.16);
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
 .headerCtaButton:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
   transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(249, 115, 22, 0.24);
+  box-shadow: 0 12px 24px rgba(23, 37, 84, 0.18);
 }
 
 .headerCtaIcon {
   display: inline-grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  font-size: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
   font-weight: 700;
 }
 

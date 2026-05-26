@@ -38,7 +38,6 @@ export function Hero({ onStart, onExplore }: HeroProps) {
       </div>
 
       <div className='heroMockup productMockup'>
-        <div className='heroMockupStamp'>AI restored</div>
         <div className='mockupWindowBar'>
           <div className='mockupWindowDots' aria-hidden='true'>
             <span />
