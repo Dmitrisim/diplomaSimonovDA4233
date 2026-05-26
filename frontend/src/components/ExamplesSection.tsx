@@ -7,15 +7,10 @@ type ExampleCardData = {
   mode: ProcessingMode;
   title: string;
   description: string;
+  meta: string;
   tone: 'blue' | 'violet' | 'cyan' | 'orange';
   filter: 'restore' | 'noise' | 'sharpness' | 'resolution' | 'web';
-  visual:
-    | 'restore'
-    | 'noise'
-    | 'portrait'
-    | 'scan'
-    | 'web'
-    | 'enhance';
+  visual: 'restore' | 'noise' | 'portrait' | 'scan' | 'web' | 'enhance';
 };
 
 type ExamplesSectionProps = {
@@ -31,7 +26,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'restore-photo',
     mode: 'restore-photo',
     title: 'Восстановление старого фото',
-    description: 'Поднимает контраст, ослабляет следы времени и делает старые снимки чище.',
+    description:
+      'Поднимает контраст, ослабляет следы времени и делает старые снимки чище.',
+    meta: 'старое фото',
     tone: 'orange',
     filter: 'restore',
     visual: 'restore',
@@ -40,7 +37,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'sharpen',
     mode: 'sharpen',
     title: 'Повысить чёткость',
-    description: 'Возвращает контуры и детали на мягких портретах, сканах и предметных фото.',
+    description:
+      'Возвращает контуры и детали на мягких портретах, сканах и предметных фото.',
+    meta: 'резкость',
     tone: 'blue',
     filter: 'sharpness',
     visual: 'portrait',
@@ -49,7 +48,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'denoise',
     mode: 'denoise',
     title: 'Убрать шум',
-    description: 'Снижает зернистость и цифровой шум на вечерних и архивных снимках.',
+    description:
+      'Снижает зернистость и цифровой шум на вечерних и архивных снимках.',
+    meta: 'шум',
     tone: 'cyan',
     filter: 'noise',
     visual: 'noise',
@@ -58,7 +59,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'super-resolution',
     mode: 'super-resolution',
     title: 'Увеличить разрешение',
-    description: 'Делает маленькие изображения крупнее и пригоднее для печати или показа.',
+    description:
+      'Делает маленькие изображения крупнее и пригоднее для печати или показа.',
+    meta: 'разрешение',
     tone: 'violet',
     filter: 'resolution',
     visual: 'scan',
@@ -67,7 +70,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'web-export',
     mode: 'web-export',
     title: 'Подготовить для сайта',
-    description: 'Оптимизирует размер файла и качество изображения перед публикацией.',
+    description:
+      'Оптимизирует размер файла и качество изображения перед публикацией.',
+    meta: 'web',
     tone: 'blue',
     filter: 'web',
     visual: 'web',
@@ -76,7 +81,9 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     id: 'auto-enhance',
     mode: 'auto-enhance',
     title: 'Быстро улучшить снимок',
-    description: 'Быстрый сценарий для общей коррекции света, цвета и выразительности фото.',
+    description:
+      'Быстрый сценарий для общей коррекции света, цвета и выразительности фото.',
+    meta: 'ai result',
     tone: 'violet',
     filter: 'sharpness',
     visual: 'enhance',
@@ -156,8 +163,14 @@ export function ExamplesSection({
             </div>
 
             <div className='exampleCardBody'>
-              <div className='exampleModeTag'>
-                {MODE_DEFINITIONS.find((mode) => mode.id === item.mode)?.shortTitle}
+              <div className='exampleCardMetaRow'>
+                <div className='exampleModeTag'>
+                  {
+                    MODE_DEFINITIONS.find((mode) => mode.id === item.mode)
+                      ?.shortTitle
+                  }
+                </div>
+                <div className='exampleTinyMeta'>{item.meta}</div>
               </div>
               <h3>{item.title}</h3>
               <p className='sectionText'>{item.description}</p>

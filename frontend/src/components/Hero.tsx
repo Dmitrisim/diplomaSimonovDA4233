@@ -38,6 +38,7 @@ export function Hero({ onStart, onExplore }: HeroProps) {
       </div>
 
       <div className='heroMockup productMockup'>
+        <div className='heroMockupStamp'>AI restored</div>
         <div className='mockupWindowBar'>
           <div className='mockupWindowDots' aria-hidden='true'>
             <span />
@@ -63,6 +64,10 @@ export function Hero({ onStart, onExplore }: HeroProps) {
             <span className='heroCompareLabel isAfter'>После</span>
             <div className='heroPhotoPreview heroPhotoAfter' />
           </div>
+        </div>
+        <div className='heroCompareCaption'>
+          <span>Старая фотография</span>
+          <span>Восстановленная версия</span>
         </div>
 
         <div className='mockupSettings'>
