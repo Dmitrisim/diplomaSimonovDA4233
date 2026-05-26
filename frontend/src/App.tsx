@@ -353,14 +353,17 @@ function App() {
   const processingSummary = useMemo(
     () => [
       {
+        icon: 'IMG',
         title: 'Поддержка JPG, PNG, WebP',
         text: 'Загружайте популярные форматы изображений и проверяйте их параметры перед обработкой.',
       },
       {
+        icon: 'AI',
         title: 'Режимы обработки изображений',
         text: 'Выбирайте подходящий сценарий: улучшение, увеличение, шумоподавление и другие режимы.',
       },
       {
+        icon: 'HIS',
         title: 'История последних результатов',
         text: 'Открывайте, скачивайте и удаляйте последние результаты без повторной загрузки файла.',
       },
@@ -510,6 +513,7 @@ function App() {
               <div className='sectionGrid compactFeatureGrid'>
                 {processingSummary.map((item) => (
                   <article key={item.title} className='miniCard featureCard'>
+                    <div className='featureCardBadge'>{item.icon}</div>
                     <h3>{item.title}</h3>
                     <p className='sectionText'>{item.text}</p>
                   </article>
