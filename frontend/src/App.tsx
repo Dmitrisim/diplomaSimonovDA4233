@@ -715,209 +715,7 @@ function App() {
 
         return (
           <section className='workspaceStudio'>
-            <aside className='workspacePanel controlPanel'>
-              <div className='workspacePanelShell'>
-                <div className='workspacePanelHeader'>
-                  <div>
-                    <h2 className='sectionTitle'>Панель обработки</h2>
-                    <p className='sectionMuted'>
-                      Выберите сценарий, настройте параметры и запустите
-                      обработку изображения.
-                    </p>
-                    <div className='pipelineOverview'>
-                      {controlPipeline.map((item) => (
-                        <div
-                          key={item.id}
-                          className={`pipelineOverviewItem is-${item.state}`}
-                        >
-                          <span className='pipelineOverviewStep'>
-                            {item.step}
-                          </span>
-                          <div className='pipelineOverviewBody'>
-                            <strong>{item.title}</strong>
-                            <span>{item.text}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <span className='panelStateChip'>
-                    {processingWorkspaceState}
-                  </span>
-                </div>
-                <div className='workspacePanelBody'>
-                  <section className='controlSection'>
-                    <button
-                      type='button'
-                      className='controlSectionToggle isOpen'
-                      onClick={() => setOpenControlSection('source')}
-                    >
-                      <span className='pipelineStepTitle'>
-                        <span className='pipelineStepNumber'>1</span>
-                        <span>Источник</span>
-                      </span>
-                      <span className='controlSectionMeta'>
-                        {sourceMeta ? 'файл загружен' : 'ожидает файл'}
-                      </span>
-                    </button>
-                    <div
-                      className={`controlSectionBody ${openControlSection === 'source' ? 'isOpen' : ''}`}
-                    >
-                      <UploadPanel
-                        inputRef={inputRef}
-                        fileMeta={sourceMeta}
-                        previewUrl={sourceUrl}
-                        isDragActive={dragActive}
-                        onInputChange={onInputChange}
-                        onDrop={onDrop}
-                        onDragOver={onDragOver}
-                        onDragLeave={onDragLeave}
-                        onPickClick={handlePick}
-                        onClear={clearAll}
-                      />
-                    </div>
-                  </section>
-
-                  <section className='controlSection'>
-                    <button
-                      type='button'
-                      className={`controlSectionToggle ${openControlSection === 'mode' ? 'isOpen' : ''}`}
-                      disabled={!hasSource}
-                      onClick={() => setOpenControlSection('mode')}
-                    >
-                      <span className='pipelineStepTitle'>
-                        <span className='pipelineStepNumber'>2</span>
-                        <span>Режим</span>
-                      </span>
-                      <span className='controlSectionMeta'>
-                        {hasSource
-                          ? 'выберите сценарий'
-                          : 'недоступно до загрузки'}
-                      </span>
-                    </button>
-                    <div
-                      className={`controlSectionBody ${openControlSection === 'mode' ? 'isOpen' : ''}`}
-                    >
-                      <ModeSelector mode={mode} onChange={setMode} />
-                    </div>
-                  </section>
-
-                  <section className='controlSection'>
-                    <button
-                      type='button'
-                      className={`controlSectionToggle ${openControlSection === 'settings' ? 'isOpen' : ''}`}
-                      disabled={!hasSource}
-                      onClick={() => setOpenControlSection('settings')}
-                    >
-                      <span className='pipelineStepTitle'>
-                        <span className='pipelineStepNumber'>3</span>
-                        <span>Параметры</span>
-                      </span>
-                      <span className='controlSectionMeta'>
-                        {hasSource
-                          ? 'интенсивность, формат, AI'
-                          : 'станут доступны позже'}
-                      </span>
-                    </button>
-                    <div
-                      className={`controlSectionBody ${openControlSection === 'settings' ? 'isOpen' : ''}`}
-                    >
-                      <ParametersPanel
-                        mode={mode}
-                        params={params}
-                        onChange={updateParam}
-                      />
-                    </div>
-                  </section>
-
-                  <section className='controlSection'>
-                    <button
-                      type='button'
-                      className={`controlSectionToggle ${openControlSection === 'run' ? 'isOpen' : ''}`}
-                      disabled={!hasSource}
-                      onClick={() => setOpenControlSection('run')}
-                    >
-                      <span className='pipelineStepTitle'>
-                        <span className='pipelineStepNumber'>4</span>
-                        <span>Запуск</span>
-                      </span>
-                      <span className='controlSectionMeta'>
-                        {processing
-                          ? 'обработка выполняется'
-                          : 'запустите pipeline'}
-                      </span>
-                    </button>
-                    <div
-                      className={`controlSectionBody ${openControlSection === 'run' ? 'isOpen' : ''}`}
-                    >
-                      <section className='surfaceCard stackGap actionCard'>
-                        <div className='buttonGrid'>
-                          <button
-                            type='button'
-                            className='primaryButton'
-                            disabled={!canProcess}
-                            onClick={handleProcess}
-                          >
-                            Запустить обработку
-                          </button>
-                          <button
-                            type='button'
-                            className='ghostButton'
-                            disabled={!processing}
-                            onClick={handleCancel}
-                          >
-                            Отменить
-                          </button>
-                          <button
-                            type='button'
-                            className='ghostButton'
-                            onClick={handleResetSettings}
-                          >
-                            Сбросить
-                          </button>
-                          <button
-                            type='button'
-                            className='dangerButton'
-                            disabled={!file && !result}
-                            onClick={clearAll}
-                          >
-                            Очистить
-                          </button>
-                          <button
-                            type='button'
-                            className='successButton'
-                            disabled={!result}
-                            onClick={() => handleDownload(params.resultFormat)}
-                          >
-                            Скачать результат
-                          </button>
-                        </div>
-
-                        <div className='statusPanel'>
-                          <div className='statusHeader'>
-                            <strong>Состояние обработки</strong>
-                            <span>{progress.label}</span>
-                          </div>
-                          <div className='progressBar'>
-                            <div
-                              className='progressValue'
-                              style={{ width: `${progress.value}%` }}
-                            />
-                          </div>
-                          <p
-                            className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}
-                          >
-                            {currentInfoMessage}
-                          </p>
-                        </div>
-                      </section>
-                    </div>
-                  </section>
-                </div>
-              </div>
-            </aside>
-
-            <section className='workspacePanel canvasPanel'>
+            <section className='workspacePanel canvasPanel workspacePrimaryPanel'>
               <div className='workspacePanelShell'>
                 <div className='workspacePanelHeader'>
                   <div>
@@ -948,55 +746,261 @@ function App() {
               </div>
             </section>
 
-            <aside className='workspacePanel contextPanel'>
-              <div className='workspacePanelShell'>
-                <div className='workspacePanelHeader'>
-                  <div>
-                    <h2 className='sectionTitle'>Информация</h2>
-                    <p className='sectionMuted'>
-                      Загрузите фото - здесь появятся размер, формат и результат
-                      обработки.
-                    </p>
+            <section className='workspaceSupportStack'>
+              <aside className='workspacePanel controlPanel'>
+                <div className='workspacePanelShell'>
+                  <div className='workspacePanelHeader'>
+                    <div>
+                      <h2 className='sectionTitle'>Панель обработки</h2>
+                      <p className='sectionMuted'>
+                        Выберите сценарий, настройте параметры и запустите
+                        обработку изображения.
+                      </p>
+                      <div className='pipelineOverview'>
+                        {controlPipeline.map((item) => (
+                          <div
+                            key={item.id}
+                            className={`pipelineOverviewItem is-${item.state}`}
+                          >
+                            <span className='pipelineOverviewStep'>
+                              {item.step}
+                            </span>
+                            <div className='pipelineOverviewBody'>
+                              <strong>{item.title}</strong>
+                              <span>{item.text}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <span className='panelStateChip'>
+                      {processingWorkspaceState}
+                    </span>
                   </div>
-                  <div className='segmentedControl compactSegmented'>
-                    <button
-                      type='button'
-                      className={contextTab === 'info' ? 'active' : ''}
-                      onClick={() => setContextTab('info')}
-                    >
-                      Инфо
-                    </button>
-                    <button
-                      type='button'
-                      className={contextTab === 'history' ? 'active' : ''}
-                      onClick={() => setContextTab('history')}
-                    >
-                      История
-                    </button>
+                  <div className='workspacePanelBody'>
+                    <section className='controlSection'>
+                      <button
+                        type='button'
+                        className='controlSectionToggle isOpen'
+                        onClick={() => setOpenControlSection('source')}
+                      >
+                        <span className='pipelineStepTitle'>
+                          <span className='pipelineStepNumber'>1</span>
+                          <span>Источник</span>
+                        </span>
+                        <span className='controlSectionMeta'>
+                          {sourceMeta ? 'файл загружен' : 'ожидает файл'}
+                        </span>
+                      </button>
+                      <div
+                        className={`controlSectionBody ${openControlSection === 'source' ? 'isOpen' : ''}`}
+                      >
+                        <UploadPanel
+                          inputRef={inputRef}
+                          fileMeta={sourceMeta}
+                          previewUrl={sourceUrl}
+                          isDragActive={dragActive}
+                          onInputChange={onInputChange}
+                          onDrop={onDrop}
+                          onDragOver={onDragOver}
+                          onDragLeave={onDragLeave}
+                          onPickClick={handlePick}
+                          onClear={clearAll}
+                        />
+                      </div>
+                    </section>
+
+                    <section className='controlSection'>
+                      <button
+                        type='button'
+                        className={`controlSectionToggle ${openControlSection === 'mode' ? 'isOpen' : ''}`}
+                        disabled={!hasSource}
+                        onClick={() => setOpenControlSection('mode')}
+                      >
+                        <span className='pipelineStepTitle'>
+                          <span className='pipelineStepNumber'>2</span>
+                          <span>Режим</span>
+                        </span>
+                        <span className='controlSectionMeta'>
+                          {hasSource
+                            ? 'выберите сценарий'
+                            : 'недоступно до загрузки'}
+                        </span>
+                      </button>
+                      <div
+                        className={`controlSectionBody ${openControlSection === 'mode' ? 'isOpen' : ''}`}
+                      >
+                        <ModeSelector mode={mode} onChange={setMode} />
+                      </div>
+                    </section>
+
+                    <section className='controlSection'>
+                      <button
+                        type='button'
+                        className={`controlSectionToggle ${openControlSection === 'settings' ? 'isOpen' : ''}`}
+                        disabled={!hasSource}
+                        onClick={() => setOpenControlSection('settings')}
+                      >
+                        <span className='pipelineStepTitle'>
+                          <span className='pipelineStepNumber'>3</span>
+                          <span>Параметры</span>
+                        </span>
+                        <span className='controlSectionMeta'>
+                          {hasSource
+                            ? 'интенсивность, формат, AI'
+                            : 'станут доступны позже'}
+                        </span>
+                      </button>
+                      <div
+                        className={`controlSectionBody ${openControlSection === 'settings' ? 'isOpen' : ''}`}
+                      >
+                        <ParametersPanel
+                          mode={mode}
+                          params={params}
+                          onChange={updateParam}
+                        />
+                      </div>
+                    </section>
+
+                    <section className='controlSection'>
+                      <button
+                        type='button'
+                        className={`controlSectionToggle ${openControlSection === 'run' ? 'isOpen' : ''}`}
+                        disabled={!hasSource}
+                        onClick={() => setOpenControlSection('run')}
+                      >
+                        <span className='pipelineStepTitle'>
+                          <span className='pipelineStepNumber'>4</span>
+                          <span>Запуск</span>
+                        </span>
+                        <span className='controlSectionMeta'>
+                          {processing
+                            ? 'обработка выполняется'
+                            : 'запустите pipeline'}
+                        </span>
+                      </button>
+                      <div
+                        className={`controlSectionBody ${openControlSection === 'run' ? 'isOpen' : ''}`}
+                      >
+                        <section className='surfaceCard stackGap actionCard'>
+                          <div className='buttonGrid'>
+                            <button
+                              type='button'
+                              className='primaryButton'
+                              disabled={!canProcess}
+                              onClick={handleProcess}
+                            >
+                              Запустить обработку
+                            </button>
+                            <button
+                              type='button'
+                              className='ghostButton'
+                              disabled={!processing}
+                              onClick={handleCancel}
+                            >
+                              Отменить
+                            </button>
+                            <button
+                              type='button'
+                              className='ghostButton'
+                              onClick={handleResetSettings}
+                            >
+                              Сбросить
+                            </button>
+                            <button
+                              type='button'
+                              className='dangerButton'
+                              disabled={!file && !result}
+                              onClick={clearAll}
+                            >
+                              Очистить
+                            </button>
+                            <button
+                              type='button'
+                              className='successButton'
+                              disabled={!result}
+                              onClick={() =>
+                                handleDownload(params.resultFormat)
+                              }
+                            >
+                              Скачать результат
+                            </button>
+                          </div>
+
+                          <div className='statusPanel'>
+                            <div className='statusHeader'>
+                              <strong>Состояние обработки</strong>
+                              <span>{progress.label}</span>
+                            </div>
+                            <div className='progressBar'>
+                              <div
+                                className='progressValue'
+                                style={{ width: `${progress.value}%` }}
+                              />
+                            </div>
+                            <p
+                              className={`statusMessage ${stage.includes('error') ? 'isError' : ''}`}
+                            >
+                              {currentInfoMessage}
+                            </p>
+                          </div>
+                        </section>
+                      </div>
+                    </section>
                   </div>
                 </div>
-                <div className='workspacePanelBody'>
-                  {contextTab === 'info' ? (
-                    <InfoPanel
-                      sourceMeta={sourceMeta}
-                      result={result}
-                      mode={mode}
-                      params={params}
-                      stage={stage}
-                    />
-                  ) : (
-                    <HistorySection
-                      items={history}
-                      onOpen={handleHistoryOpen}
-                      onDownload={handleHistoryDownload}
-                      onDelete={handleHistoryDelete}
-                      onClear={handleClearHistory}
-                      onGoToProcessing={() => setActiveSection('processing')}
-                    />
-                  )}
+              </aside>
+
+              <aside className='workspacePanel contextPanel'>
+                <div className='workspacePanelShell'>
+                  <div className='workspacePanelHeader'>
+                    <div>
+                      <h2 className='sectionTitle'>Информация</h2>
+                      <p className='sectionMuted'>
+                        Загрузите фото - здесь появятся размер, формат и
+                        результат обработки.
+                      </p>
+                    </div>
+                    <div className='segmentedControl compactSegmented'>
+                      <button
+                        type='button'
+                        className={contextTab === 'info' ? 'active' : ''}
+                        onClick={() => setContextTab('info')}
+                      >
+                        Инфо
+                      </button>
+                      <button
+                        type='button'
+                        className={contextTab === 'history' ? 'active' : ''}
+                        onClick={() => setContextTab('history')}
+                      >
+                        История
+                      </button>
+                    </div>
+                  </div>
+                  <div className='workspacePanelBody'>
+                    {contextTab === 'info' ? (
+                      <InfoPanel
+                        sourceMeta={sourceMeta}
+                        result={result}
+                        mode={mode}
+                        params={params}
+                        stage={stage}
+                      />
+                    ) : (
+                      <HistorySection
+                        items={history}
+                        onOpen={handleHistoryOpen}
+                        onDownload={handleHistoryDownload}
+                        onDelete={handleHistoryDelete}
+                        onClear={handleClearHistory}
+                        onGoToProcessing={() => setActiveSection('processing')}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            </section>
           </section>
         );
       case 'examples':
