@@ -8,7 +8,13 @@ import type {
   ResultMeta,
   ServiceStatus,
 } from './types';
-import { blobToDataUrl, delay, fileTypeLabel, getImageDimensions, progressStages, urlToBlob } from './utils';
+import {
+  blobToDataUrl,
+  delay,
+  fileTypeLabel,
+  progressStages,
+  urlToBlob,
+} from './utils';
 
 type ProcessRequest = {
   file: File;
@@ -19,11 +25,53 @@ type ProcessRequest = {
   signal?: AbortSignal;
 };
 
+type BackendProcessResponse = {
+  id: string;
+  status: string;
+  message: string;
+  input: {
+    filename: string | null;
+    format: string | null;
+    size_bytes: number | null;
+    width: number | null;
+    height: number | null;
+  };
+  output: {
+    filename: string;
+    format: string;
+    size_bytes: number;
+    width: number;
+    height: number;
+  };
+  processing: {
+    mode: string;
+    used_ai: boolean;
+    model: string | null;
+    time_ms: number | null;
+  };
+  urls: {
+    result: string;
+    download: string;
+  };
+};
+
 function nextId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-async function emitProgress(onProgress?: (stage: ProgressState) => void, signal?: AbortSignal) {
+function toResultFormat(
+  value: string | null | undefined,
+): 'png' | 'jpeg' | 'webp' {
+  const normalized = (value || '').toLowerCase();
+  if (normalized === 'jpg' || normalized === 'jpeg') return 'jpeg';
+  if (normalized === 'webp') return 'webp';
+  return 'png';
+}
+
+async function emitProgress(
+  onProgress?: (stage: ProgressState) => void,
+  signal?: AbortSignal,
+) {
   for (const stage of progressStages().slice(0, 4)) {
     if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
     onProgress?.(stage);
@@ -42,7 +90,9 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
       const modelResp = await fetch('/api/model/status');
       if (modelResp.ok) {
         const modelData = await modelResp.json();
-        aiAvailable = Boolean(modelData?.available ?? modelData?.ai_model_present ?? aiAvailable);
+        aiAvailable = Boolean(
+          modelData?.available ?? modelData?.ai_model_present ?? aiAvailable,
+        );
       }
     } catch {
       // Keep health-derived value.
@@ -62,14 +112,19 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
   }
 }
 
-export async function processImageRequest(request: ProcessRequest): Promise<ProcessResult> {
+export async function processImageRequest(
+  request: ProcessRequest,
+): Promise<ProcessResult> {
   await emitProgress(request.onProgress, request.signal);
 
   const modeConfig = MODE_BY_ID[request.mode];
   const canUseBackend = Boolean(modeConfig.backendMode);
 
   if (!canUseBackend) {
-    return simulateProcess(request, `${modeConfig.title}: используется demo-режим`);
+    return simulateProcess(
+      request,
+      `${modeConfig.title}: используется demo-режим`,
+    );
   }
 
   try {
@@ -88,42 +143,55 @@ export async function processImageRequest(request: ProcessRequest): Promise<Proc
       throw new Error(`api_error_${response.status}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as BackendProcessResponse;
     request.onProgress?.({ value: 100, label: '100% · результат готов' });
 
-    const resultUrl = String(data.result_url);
-    const fullUrl = resultUrl.startsWith('http') ? resultUrl : resultUrl;
-    const blob = await urlToBlob(fullUrl);
+    const downloadUrl = String(data.urls?.download || '');
+    if (!downloadUrl) {
+      throw new Error('api_error_invalid_contract');
+    }
+
+    const blob = await urlToBlob(downloadUrl);
     const previewUrl = await blobToDataUrl(blob);
-    const dimensions = await getImageDimensions(previewUrl);
 
     const resultMeta: ResultMeta = {
-      format: request.params.resultFormat,
-      size: blob.size,
-      width: dimensions.width,
-      height: dimensions.height,
+      format: toResultFormat(data.output?.format),
+      size: Number(data.output?.size_bytes ?? blob.size),
+      width: Number(data.output?.width ?? request.sourceMeta.width),
+      height: Number(data.output?.height ?? request.sourceMeta.height),
     };
 
     return {
-      id: String(data.job_id ?? nextId()),
+      id: String(data.id ?? nextId()),
       resultUrl: previewUrl,
-      downloadUrl: fullUrl,
+      downloadUrl,
       mode: request.mode,
-      usedAi: Boolean(data.used_ai),
-      modelName: data.model_name ? String(data.model_name) : null,
-      timingMs: Number(data.timing_ms ?? 1600),
+      usedAi: Boolean(data.processing?.used_ai),
+      modelName: data.processing?.model ? String(data.processing.model) : null,
+      timingMs: Number(data.processing?.time_ms ?? 1600),
       resultMeta,
-      sourceMeta: request.sourceMeta,
+      sourceMeta: {
+        name: String(data.input?.filename || request.sourceMeta.name),
+        type: request.sourceMeta.type,
+        size: Number(data.input?.size_bytes ?? request.sourceMeta.size),
+        width: Number(data.input?.width ?? request.sourceMeta.width),
+        height: Number(data.input?.height ?? request.sourceMeta.height),
+      },
       isDemo: false,
-      statusText: Boolean(data.used_ai)
-        ? 'Обработка выполнена с подключенной AI-моделью.'
-        : 'AI-модель недоступна, использована fallback-обработка.',
+      statusText:
+        data.message ||
+        (Boolean(data.processing?.used_ai)
+          ? 'Обработка выполнена с подключенной AI-моделью.'
+          : 'Изображение обработано через fallback-обработку OpenCV/Pillow.'),
     };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw error;
     }
-    return simulateProcess(request, 'Демо-режим: реальная AI-обработка не выполнялась');
+    return simulateProcess(
+      request,
+      'Демо-режим: реальная AI-обработка не выполнялась',
+    );
   }
 }
 
@@ -135,8 +203,12 @@ export async function deleteRemoteResult(id: string): Promise<void> {
   }
 }
 
-async function simulateProcess(request: ProcessRequest, statusText: string): Promise<ProcessResult> {
-  if (request.signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+async function simulateProcess(
+  request: ProcessRequest,
+  statusText: string,
+): Promise<ProcessResult> {
+  if (request.signal?.aborted)
+    throw new DOMException('Cancelled', 'AbortError');
 
   await delay(350);
   request.onProgress?.({ value: 100, label: '100% · результат готов' });

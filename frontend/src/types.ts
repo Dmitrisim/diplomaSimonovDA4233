@@ -80,6 +80,7 @@ export type HistoryItem = {
   id: string;
   createdAt: string;
   fileName: string;
+  downloadUrl: string;
   mode: ProcessingMode;
   status: string;
   timingMs: number;

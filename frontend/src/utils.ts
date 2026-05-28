@@ -45,11 +45,15 @@ export async function getImageMeta(file: File): Promise<FileMeta> {
   }
 }
 
-export function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
+export function getImageDimensions(
+  src: string,
+): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = () => reject(new Error('Не удалось получить размеры изображения'));
+    img.onload = () =>
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () =>
+      reject(new Error('Не удалось получить размеры изображения'));
     img.src = src;
   });
 }
@@ -96,7 +100,11 @@ export async function urlToBlob(url: string): Promise<Blob> {
   return response.blob();
 }
 
-export async function convertImageBlob(blob: Blob, format: ResultFormat, quality: number): Promise<Blob> {
+export async function convertImageBlob(
+  blob: Blob,
+  format: ResultFormat,
+  quality: number,
+): Promise<Blob> {
   if (format === 'png' && blob.type === 'image/png') {
     return blob;
   }
@@ -110,7 +118,12 @@ export async function convertImageBlob(blob: Blob, format: ResultFormat, quality
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas недоступен');
     ctx.drawImage(img, 0, 0);
-    const mime = format === 'jpeg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png';
+    const mime =
+      format === 'jpeg'
+        ? 'image/jpeg'
+        : format === 'webp'
+          ? 'image/webp'
+          : 'image/png';
     return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
         (result) => {
@@ -138,6 +151,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
 export function createHistoryItem(input: {
   id: string;
   fileName: string;
+  downloadUrl: string;
   mode: ProcessingMode;
   status: string;
   timingMs: number;

@@ -269,6 +269,7 @@ function App() {
       const historyItem = createHistoryItem({
         id: processed.id,
         fileName: sourceMeta.name,
+        downloadUrl: processed.downloadUrl,
         mode,
         status: processed.isDemo ? 'demo' : 'готово',
         timingMs: processed.timingMs,
@@ -330,7 +331,7 @@ function App() {
     setResult({
       id: item.id,
       resultUrl: item.resultPreview,
-      downloadUrl: item.resultPreview,
+      downloadUrl: item.downloadUrl || item.resultPreview,
       mode: item.mode,
       usedAi: item.usedAi,
       modelName: item.modelName,
@@ -350,7 +351,7 @@ function App() {
   };
 
   const handleHistoryDownload = async (item: HistoryItem) => {
-    const blob = await urlToBlob(item.resultPreview);
+    const blob = await urlToBlob(item.downloadUrl || item.resultPreview);
     downloadBlob(blob, item.fileName.replace(/\.[^.]+$/, '') + '.png');
   };
 

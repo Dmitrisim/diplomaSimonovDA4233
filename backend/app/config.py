@@ -14,6 +14,7 @@ class Settings:
     models_dir: Path
     frontend_dist_dir: Path
     max_upload_bytes: int
+    cors_origins: tuple[str, ...]
 
 
 def get_settings() -> Settings:
@@ -34,4 +35,12 @@ def get_settings() -> Settings:
         models_dir=models_dir,
         frontend_dist_dir=frontend_dist_dir,
         max_upload_bytes=10 * 1024 * 1024,
+        cors_origins=(
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+            "http://127.0.0.1:4173",
+            "http://localhost:4173",
+            "http://127.0.0.1:3000",
+            "http://localhost:3000",
+        ),
     )

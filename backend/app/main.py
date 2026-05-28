@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
@@ -18,6 +19,14 @@ settings = get_settings()
 ensure_dirs(settings.uploads_dir, settings.results_dir, settings.models_dir)
 
 app = FastAPI(title="AI Image Processing System", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(settings.cors_origins),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 RESULT_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 
@@ -132,6 +141,19 @@ def _model_path() -> Path:
     return settings.models_dir / "EDSR_x2.pb"
 
 
+def _normalize_image_format(value: str | None) -> str:
+    if not value:
+        return "PNG"
+    normalized = value.strip().lower()
+    if normalized in {"jpg", "jpeg"}:
+        return "JPEG"
+    if normalized == "png":
+        return "PNG"
+    if normalized == "webp":
+        return "WebP"
+    return normalized.upper()
+
+
 def _metadata_path(job_id: str) -> Path:
     return settings.results_dir / f"{job_id}.json"
 
@@ -171,31 +193,32 @@ def _build_job_payload(
 ) -> dict:
     return {
         "id": job_id,
-        "status": "ready",
-        "mode": mode,
-        "used_ai": used_ai,
-        "model_name": model_name,
-        "timing_ms": timing_ms,
+        "status": "completed",
+        "message": "Изображение успешно обработано",
         "created_at": int(time.time()),
-        "source": {
-            "name": source_name,
-            "format": source_format,
-            "size": source_size,
+        "input": {
+            "filename": source_name,
+            "format": _normalize_image_format(source_format),
+            "size_bytes": source_size,
             "width": source_width,
             "height": source_height,
         },
-        "result": {
-            "file_name": result_path.name,
-            "format": result_format,
-            "size": result_path.stat().st_size,
+        "output": {
+            "filename": result_path.name,
+            "format": _normalize_image_format(result_format),
+            "size_bytes": result_path.stat().st_size,
             "width": result_width,
             "height": result_height,
         },
+        "processing": {
+            "mode": mode,
+            "used_ai": used_ai,
+            "model": model_name or "fallback-opencv-pillow",
+            "time_ms": timing_ms,
+        },
         "urls": {
-            "result": f"/api/result/{job_id}",
-            "download": f"/api/download/{job_id}",
-            "download_direct": f"/download/{job_id}",
-            "delete": f"/api/result/{job_id}",
+            "result": f"/result/{job_id}",
+            "download": f"/download/{job_id}",
         },
     }
 
@@ -215,25 +238,32 @@ def _load_job_metadata(job_id: str) -> dict:
     result_path = _find_result_path(job_id)
     return {
         "id": job_id,
-        "status": "ready",
-        "mode": "unknown",
-        "used_ai": False,
-        "model_name": None,
-        "timing_ms": None,
+        "status": "completed",
+        "message": "Изображение успешно обработано",
         "created_at": None,
-        "source": None,
-        "result": {
-            "file_name": result_path.name,
-            "format": result_path.suffix.lstrip("."),
-            "size": result_path.stat().st_size,
+        "input": {
+            "filename": None,
+            "format": None,
+            "size_bytes": None,
             "width": None,
             "height": None,
         },
+        "output": {
+            "filename": result_path.name,
+            "format": _normalize_image_format(result_path.suffix.lstrip(".")),
+            "size_bytes": result_path.stat().st_size,
+            "width": None,
+            "height": None,
+        },
+        "processing": {
+            "mode": "unknown",
+            "used_ai": False,
+            "model": "fallback-opencv-pillow",
+            "time_ms": None,
+        },
         "urls": {
-            "result": f"/api/result/{job_id}",
-            "download": f"/api/download/{job_id}",
-            "download_direct": f"/download/{job_id}",
-            "delete": f"/api/result/{job_id}",
+            "result": f"/result/{job_id}",
+            "download": f"/download/{job_id}",
         },
     }
 
@@ -261,7 +291,7 @@ def model_status() -> dict:
         "available": available,
         "demo_mode": not available,
         "model_name": model_path.name if available else None,
-        "framework": "OpenCV super-resolution fallback",
+        "framework": "opencv-pillow-fallback",
     }
 
 
@@ -327,17 +357,13 @@ async def process_endpoint(
     _save_job_metadata(job.job_id, payload)
 
     return {
-        "job_id": job.job_id,
         "id": job.job_id,
-        "used_ai": result.used_ai,
-        "model_name": result.model_name,
-        "mode": result.mode,
-        "timing_ms": dt_ms,
-        "input": {"width": in_w, "height": in_h, "bytes": len(content)},
-        "output": {"width": out_w, "height": out_h, "bytes": job.result_path.stat().st_size},
-        "result_url": f"/api/download/{job.job_id}?inline=true",
-        "download_url": f"/api/download/{job.job_id}",
-        "result": payload,
+        "status": payload["status"],
+        "message": payload["message"],
+        "input": payload["input"],
+        "output": payload["output"],
+        "processing": payload["processing"],
+        "urls": payload["urls"],
     }
 
 
