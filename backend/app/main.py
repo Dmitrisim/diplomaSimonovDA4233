@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import io
+import json
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
@@ -17,6 +18,8 @@ settings = get_settings()
 ensure_dirs(settings.uploads_dir, settings.results_dir, settings.models_dir)
 
 app = FastAPI(title="AI Image Processing System", version="0.1.0")
+
+RESULT_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 
 if settings.frontend_dist_dir.exists():
     assets_dir = settings.frontend_dist_dir / "assets"
@@ -125,12 +128,144 @@ def index() -> str:
 </html>"""
 
 
+def _model_path() -> Path:
+    return settings.models_dir / "EDSR_x2.pb"
+
+
+def _metadata_path(job_id: str) -> Path:
+    return settings.results_dir / f"{job_id}.json"
+
+
+def _find_result_path(job_id: str) -> Path:
+    for suffix in RESULT_SUFFIXES:
+        candidate = settings.results_dir / f"{job_id}{suffix}"
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    raise HTTPException(status_code=404, detail="Результат не найден")
+
+
+def _find_upload_path(job_id: str) -> Path | None:
+    for suffix in RESULT_SUFFIXES:
+        candidate = settings.uploads_dir / f"{job_id}{suffix}"
+        if candidate.exists() and candidate.is_file():
+            return candidate
+    return None
+
+
+def _build_job_payload(
+    *,
+    job_id: str,
+    source_name: str,
+    source_format: str,
+    source_size: int,
+    source_width: int,
+    source_height: int,
+    result_path: Path,
+    result_format: str,
+    result_width: int,
+    result_height: int,
+    mode: str,
+    used_ai: bool,
+    model_name: str | None,
+    timing_ms: int,
+) -> dict:
+    return {
+        "id": job_id,
+        "status": "ready",
+        "mode": mode,
+        "used_ai": used_ai,
+        "model_name": model_name,
+        "timing_ms": timing_ms,
+        "created_at": int(time.time()),
+        "source": {
+            "name": source_name,
+            "format": source_format,
+            "size": source_size,
+            "width": source_width,
+            "height": source_height,
+        },
+        "result": {
+            "file_name": result_path.name,
+            "format": result_format,
+            "size": result_path.stat().st_size,
+            "width": result_width,
+            "height": result_height,
+        },
+        "urls": {
+            "result": f"/api/result/{job_id}",
+            "download": f"/api/download/{job_id}",
+            "download_direct": f"/download/{job_id}",
+            "delete": f"/api/result/{job_id}",
+        },
+    }
+
+
+def _save_job_metadata(job_id: str, payload: dict) -> None:
+    _metadata_path(job_id).write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def _load_job_metadata(job_id: str) -> dict:
+    metadata_path = _metadata_path(job_id)
+    if metadata_path.exists() and metadata_path.is_file():
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+
+    result_path = _find_result_path(job_id)
+    return {
+        "id": job_id,
+        "status": "ready",
+        "mode": "unknown",
+        "used_ai": False,
+        "model_name": None,
+        "timing_ms": None,
+        "created_at": None,
+        "source": None,
+        "result": {
+            "file_name": result_path.name,
+            "format": result_path.suffix.lstrip("."),
+            "size": result_path.stat().st_size,
+            "width": None,
+            "height": None,
+        },
+        "urls": {
+            "result": f"/api/result/{job_id}",
+            "download": f"/api/download/{job_id}",
+            "download_direct": f"/download/{job_id}",
+            "delete": f"/api/result/{job_id}",
+        },
+    }
+
+
+@app.get("/health")
 @app.get("/api/health")
 def health() -> dict:
-    model_path = settings.models_dir / "EDSR_x2.pb"
-    return {"status": "ok", "ai_model_present": model_path.exists()}
+    model_path = _model_path()
+    return {
+        "status": "ok",
+        "service": "backend",
+        "ai_model_present": model_path.exists(),
+        "uploads_dir": str(settings.uploads_dir),
+        "results_dir": str(settings.results_dir),
+    }
 
 
+@app.get("/model/status")
+@app.get("/api/model/status")
+def model_status() -> dict:
+    model_path = _model_path()
+    available = model_path.exists()
+    return {
+        "status": "ok",
+        "available": available,
+        "demo_mode": not available,
+        "model_name": model_path.name if available else None,
+        "framework": "OpenCV super-resolution fallback",
+    }
+
+
+@app.post("/process")
 @app.post("/api/process")
 async def process_endpoint(
     file: UploadFile = File(...),
@@ -173,24 +308,94 @@ async def process_endpoint(
     in_w, in_h = image.size
     out_w, out_h = result.image.size
 
+    payload = _build_job_payload(
+        job_id=job.job_id,
+        source_name=file.filename or job.upload_path.name,
+        source_format=suffix.lstrip("."),
+        source_size=len(content),
+        source_width=in_w,
+        source_height=in_h,
+        result_path=job.result_path,
+        result_format="png",
+        result_width=out_w,
+        result_height=out_h,
+        mode=result.mode,
+        used_ai=result.used_ai,
+        model_name=result.model_name,
+        timing_ms=dt_ms,
+    )
+    _save_job_metadata(job.job_id, payload)
+
     return {
         "job_id": job.job_id,
+        "id": job.job_id,
         "used_ai": result.used_ai,
         "model_name": result.model_name,
         "mode": result.mode,
         "timing_ms": dt_ms,
         "input": {"width": in_w, "height": in_h, "bytes": len(content)},
         "output": {"width": out_w, "height": out_h, "bytes": job.result_path.stat().st_size},
-        "result_url": f"/api/result/{job.job_id}.png",
+        "result_url": f"/api/download/{job.job_id}?inline=true",
+        "download_url": f"/api/download/{job.job_id}",
+        "result": payload,
     }
 
 
-@app.get("/api/result/{name}")
-def result_file(name: str) -> FileResponse:
+@app.get("/result/{job_id}")
+@app.get("/api/result/{job_id}")
+def result_info(job_id: str) -> dict:
+    return _load_job_metadata(job_id)
+
+
+@app.get("/download/{job_id}")
+@app.get("/api/download/{job_id}")
+def download_result(job_id: str, inline: bool = Query(False)) -> FileResponse:
+    path = _find_result_path(job_id)
+    filename = path.name if inline else f"{job_id}{path.suffix}"
+    content_disposition_type = "inline" if inline else "attachment"
+    return FileResponse(
+        path,
+        filename=filename,
+        content_disposition_type=content_disposition_type,
+    )
+
+
+@app.get("/api/result/file/{name}")
+def legacy_result_file(name: str) -> FileResponse:
     path = settings.results_dir / name
     if not path.exists() or path.is_dir():
         raise HTTPException(status_code=404, detail="Файл не найден")
     return FileResponse(path)
+
+
+@app.delete("/result/{job_id}")
+@app.delete("/api/result/{job_id}")
+def delete_result(job_id: str) -> dict:
+    deleted: list[str] = []
+
+    metadata_path = _metadata_path(job_id)
+    if metadata_path.exists():
+        metadata_path.unlink()
+        deleted.append(metadata_path.name)
+
+    try:
+        result_path = _find_result_path(job_id)
+    except HTTPException:
+        result_path = None
+
+    if result_path is not None and result_path.exists():
+        result_path.unlink()
+        deleted.append(result_path.name)
+
+    upload_path = _find_upload_path(job_id)
+    if upload_path is not None and upload_path.exists():
+        upload_path.unlink()
+        deleted.append(upload_path.name)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Результат не найден")
+
+    return {"status": "deleted", "id": job_id, "deleted_files": deleted}
 
 
 @app.get("/favicon.svg")
