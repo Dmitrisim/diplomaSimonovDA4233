@@ -1,35 +1,67 @@
-# Backend API
+# PhotoRestore AI Backend
 
-Минимальный backend для сервиса обработки изображений `Artful / AI Image Processing`.
+Backend построен на `FastAPI` и разделен на слои, чтобы сохранить стабильный API-контракт и отдельно развивать inference-часть.
 
-## Что сейчас делает backend
+## Структура
 
-- принимает изображение от frontend;
-- валидирует формат и размер файла;
-- сохраняет исходный файл в `storage/uploads/`;
-- запускает fallback-обработку через `Pillow + OpenCV`;
-- сохраняет результат в `storage/results/`;
-- отдает metadata, файл результата и позволяет удалить job.
+```text
+backend/
+  app/
+    api/
+      routes.py
+    inference/
+      base.py
+      fallback.py
+      ai_processor.py
+      model_loader.py
+    processing/
+      filters.py
+      pipeline.py
+    config.py
+    main.py
+    schemas.py
+    storage.py
+  models/
+    README.md
+  scripts/
+    check_model.py
+  tests/
+    test_api.py
+```
 
-На текущем этапе полноценная `PyTorch`-модель не подключена. Если AI-модель отсутствует, backend работает в fallback-режиме `opencv-pillow`.
+## Inference Layer
 
-## Установка зависимостей
+- `fallback.py` содержит стабильную обработку через `OpenCV + Pillow`
+- `ai_processor.py` подключает реальный `EDSR_x2.pb` для сценария `super-resolution / upscale`
+- `model_loader.py` безопасно выбирает между AI-процессором и fallback
+- `pipeline.py` вызывает runtime, не зная деталей конкретной модели
+
+Если реальная модель отсутствует, backend не падает и продолжает работать через `fallback-opencv-pillow`.
+
+## Поддерживаемые режимы
+
+- `enhance`
+- `restore`
+- `upscale`
+- `colorize`
+
+Сейчас реальный AI-сценарий подготовлен для `upscale`. Остальные режимы обрабатываются через fallback.
+
+## Установка
 
 Из корня проекта:
 
-```bash
+```powershell
 python -m pip install -r backend/requirements.txt
 ```
 
-## Запуск backend
+## Локальный запуск backend
 
-Из корня проекта:
-
-```bash
+```powershell
 python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
 ```
 
-## Основные endpoints
+## Endpoints
 
 - `GET /health`
 - `GET /api/health`
@@ -44,7 +76,9 @@ python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
 - `DELETE /result/{id}`
 - `DELETE /api/result/{id}`
 
-## Формат ответа `POST /process`
+## Контракт `POST /process`
+
+Контракт сохранен для frontend:
 
 ```json
 {
@@ -52,23 +86,23 @@ python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
   "status": "completed",
   "message": "Изображение успешно обработано",
   "input": {
-    "filename": "original.jpg",
+    "filename": "image.jpg",
     "format": "JPEG",
-    "size_bytes": 123456,
+    "size_bytes": 12345,
     "width": 1200,
     "height": 800
   },
   "output": {
-    "filename": "result.png",
+    "filename": "uuid.png",
     "format": "PNG",
-    "size_bytes": 654321,
-    "width": 1200,
-    "height": 800
+    "size_bytes": 23456,
+    "width": 2400,
+    "height": 1600
   },
   "processing": {
-    "mode": "enhance",
-    "used_ai": false,
-    "model": "fallback-opencv-pillow",
+    "mode": "upscale",
+    "used_ai": true,
+    "model": "EDSR_x2.pb",
     "time_ms": 1234
   },
   "urls": {
@@ -78,73 +112,91 @@ python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload
 }
 ```
 
-## Пример запроса `process`
+## Как подключить `EDSR_x2.pb`
 
-```bash
-curl -X POST "http://127.0.0.1:8001/api/process" ^
-  -F "file=@example.jpg" ^
-  -F "prefer_ai=false" ^
-  -F "mode=enhance"
+По умолчанию backend ищет модель здесь:
+
+```text
+backend/models/EDSR_x2.pb
 ```
 
-Для PowerShell удобнее так:
+Если модель лежит в другом месте, можно задать путь через `PHOTORESTORE_AI_MODEL_PATH`.
+
+Windows PowerShell:
 
 ```powershell
-$form = @{
-  file = Get-Item ".\example.jpg"
-  prefer_ai = "false"
-  mode = "enhance"
-}
-Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/process" -Method Post -Form $form
+$env:PHOTORESTORE_AI_MODEL_PATH="C:\path\to\EDSR_x2.pb"
 ```
 
-## Где хранятся файлы
+Linux:
 
-- исходные загрузки: `storage/uploads/`
-- результаты и metadata: `storage/results/`
+```bash
+export PHOTORESTORE_AI_MODEL_PATH=/var/www/project/backend/models/EDSR_x2.pb
+```
 
-Для каждого job сохраняются:
+### Systemd
 
-- исходный файл;
-- результат обработки;
-- metadata JSON с итоговым контрактом ответа.
+Для сервиса `ai-image-processing` можно добавить:
+
+```ini
+[Service]
+Environment="PHOTORESTORE_AI_MODEL_PATH=/var/www/project/backend/models/EDSR_x2.pb"
+```
+
+После изменения:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart ai-image-processing
+```
+
+## Как проверить, что модель активна
+
+1. Положить настоящий файл `EDSR_x2.pb`
+2. Выполнить:
+
+```powershell
+python backend/scripts/check_model.py
+```
+
+3. Проверить `GET /api/model/status`
+
+Ожидаемо при успешной загрузке:
+
+- `available = true`
+- `model_file_exists = true`
+- `active_processor = "ai-superres-opencv"`
+- `framework = "opencv-dnn-superres"`
+
+4. Проверить `POST /api/process` с `mode=upscale` и `prefer_ai=true`
+
+Ожидаемо:
+
+- `processing.used_ai = true`
+- `processing.model = "EDSR_x2.pb"`
+- `output.width` и `output.height` примерно в 2 раза больше исходных
+
+## Если модель не загрузилась
+
+Проверь:
+
+- существует ли файл по ожидаемому пути
+- правильно ли задан `PHOTORESTORE_AI_MODEL_PATH`
+- доступен ли `cv2.dnn_superres`
+- что показывает `python backend/scripts/check_model.py`
+- что возвращает `GET /api/model/status`
+
+Если модель не найдена или не инициализируется, backend честно сообщит причину в `availability_reason` и продолжит работу через fallback.
 
 ## Тесты
 
-Запуск из корня проекта:
-
-```bash
-python -m pytest backend/tests -q
+```powershell
+python -m pytest backend/tests -q -rA
 ```
 
-Покрыты сценарии:
+## Frontend Build
 
-- `health`
-- `model/status`
-- успешный `process`
-- получение `result/{id}`
-- скачивание `download/{id}`
-- удаление через `DELETE /result/{id}`
-- ошибка для неподдерживаемого файла
-- ошибка для слишком большого файла
-
-## CORS
-
-Для frontend dev-сервера разрешены:
-
-- `http://127.0.0.1:5173`
-- `http://localhost:5173`
-- `http://127.0.0.1:4173`
-- `http://localhost:4173`
-- `http://127.0.0.1:3000`
-- `http://localhost:3000`
-
-## Как подключить реальную AI-модель позже
-
-Следующий этап:
-
-1. добавить загрузку `PyTorch` / pretrained CV model;
-2. выделить отдельный сервис инференса;
-3. расширить `processing.mode` под реальные сценарии;
-4. заменить fallback-ветку на AI-ветку для нужных режимов;
-5. при необходимости добавить очередь задач и постоянное хранение результатов.
+```powershell
+cd frontend
+npm run build
+```

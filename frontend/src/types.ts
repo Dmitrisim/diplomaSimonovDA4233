@@ -60,6 +60,10 @@ export type ServiceStatus = {
   apiOk: boolean;
   aiAvailable: boolean;
   runtimeMode: RuntimeMode;
+  activeProcessor?: string | null;
+  modelName?: string | null;
+  availabilityReason?: string | null;
+  fallbackAvailable?: boolean;
 };
 
 export type ProcessResult = {

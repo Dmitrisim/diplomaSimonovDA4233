@@ -1,24 +1,28 @@
 from __future__ import annotations
 
-import io
-import json
-import time
-from pathlib import Path
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, UnidentifiedImageError
 
+from .api import router as api_router
 from .config import get_settings
-from .processing.pipeline import process_image
-from .storage import ensure_dirs, new_job_paths, safe_suffix
+from .inference import log_processor_runtime_status
+from .storage import ensure_dirs
 
 settings = get_settings()
 ensure_dirs(settings.uploads_dir, settings.results_dir, settings.models_dir)
 
-app = FastAPI(title="AI Image Processing System", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    log_processor_runtime_status(settings.models_dir)
+    yield
+
+
+app = FastAPI(title="AI Image Processing System", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,12 +32,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-RESULT_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
-
 if settings.frontend_dist_dir.exists():
     assets_dir = settings.frontend_dist_dir / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+app.include_router(api_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -61,11 +65,11 @@ def index() -> str:
   </head>
 <body>
   <h1>Система обработки изображений</h1>
-  <p class="muted">Загрузка → обработка → результат. AI-режим работает, если в папке backend/models есть файл EDSR_x2.pb.</p>
+  <p class="muted">Backend работает через inference layer. Пока используется fallback `opencv-pillow`.</p>
 
   <div class="card">
     <input id="file" type="file" accept="image/png,image/jpeg,image/webp" />
-    <label class="muted"><input id="preferAi" type="checkbox" checked /> Предпочитать AI (если модель доступна)</label>
+    <label class="muted"><input id="preferAi" type="checkbox" checked /> Предпочитать AI (когда реальная модель будет подключена)</label>
     <div style="margin-top: 10px;">
       <button id="run">Обработать</button>
       <span id="status" class="muted" style="margin-left: 10px;"></span>
@@ -121,10 +125,10 @@ def index() -> str:
         const resp = await fetch('/api/process', { method: 'POST', body: fd });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data?.detail || 'Ошибка');
-        dstPreview.src = data.result_url;
-        downloadEl.href = data.result_url;
+        dstPreview.src = data.urls.download + '?inline=true';
+        downloadEl.href = data.urls.download;
         downloadEl.style.display = 'inline';
-        metaEl.textContent = `used_ai=${data.used_ai}` + (data.model_name ? `, model=${data.model_name}` : '');
+        metaEl.textContent = `used_ai=${data.processing.used_ai}, model=${data.processing.model}`;
         statusEl.textContent = 'Готово.';
       } catch (e) {
         statusEl.textContent = e?.message || 'Ошибка';
@@ -135,293 +139,6 @@ def index() -> str:
   </script>
 </body>
 </html>"""
-
-
-def _model_path() -> Path:
-    return settings.models_dir / "EDSR_x2.pb"
-
-
-def _normalize_image_format(value: str | None) -> str:
-    if not value:
-        return "PNG"
-    normalized = value.strip().lower()
-    if normalized in {"jpg", "jpeg"}:
-        return "JPEG"
-    if normalized == "png":
-        return "PNG"
-    if normalized == "webp":
-        return "WebP"
-    return normalized.upper()
-
-
-def _metadata_path(job_id: str) -> Path:
-    return settings.results_dir / f"{job_id}.json"
-
-
-def _find_result_path(job_id: str) -> Path:
-    for suffix in RESULT_SUFFIXES:
-        candidate = settings.results_dir / f"{job_id}{suffix}"
-        if candidate.exists() and candidate.is_file():
-            return candidate
-    raise HTTPException(status_code=404, detail="Результат не найден")
-
-
-def _find_upload_path(job_id: str) -> Path | None:
-    for suffix in RESULT_SUFFIXES:
-        candidate = settings.uploads_dir / f"{job_id}{suffix}"
-        if candidate.exists() and candidate.is_file():
-            return candidate
-    return None
-
-
-def _build_job_payload(
-    *,
-    job_id: str,
-    source_name: str,
-    source_format: str,
-    source_size: int,
-    source_width: int,
-    source_height: int,
-    result_path: Path,
-    result_format: str,
-    result_width: int,
-    result_height: int,
-    mode: str,
-    used_ai: bool,
-    model_name: str | None,
-    timing_ms: int,
-) -> dict:
-    return {
-        "id": job_id,
-        "status": "completed",
-        "message": "Изображение успешно обработано",
-        "created_at": int(time.time()),
-        "input": {
-            "filename": source_name,
-            "format": _normalize_image_format(source_format),
-            "size_bytes": source_size,
-            "width": source_width,
-            "height": source_height,
-        },
-        "output": {
-            "filename": result_path.name,
-            "format": _normalize_image_format(result_format),
-            "size_bytes": result_path.stat().st_size,
-            "width": result_width,
-            "height": result_height,
-        },
-        "processing": {
-            "mode": mode,
-            "used_ai": used_ai,
-            "model": model_name or "fallback-opencv-pillow",
-            "time_ms": timing_ms,
-        },
-        "urls": {
-            "result": f"/result/{job_id}",
-            "download": f"/download/{job_id}",
-        },
-    }
-
-
-def _save_job_metadata(job_id: str, payload: dict) -> None:
-    _metadata_path(job_id).write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-
-def _load_job_metadata(job_id: str) -> dict:
-    metadata_path = _metadata_path(job_id)
-    if metadata_path.exists() and metadata_path.is_file():
-        return json.loads(metadata_path.read_text(encoding="utf-8"))
-
-    result_path = _find_result_path(job_id)
-    return {
-        "id": job_id,
-        "status": "completed",
-        "message": "Изображение успешно обработано",
-        "created_at": None,
-        "input": {
-            "filename": None,
-            "format": None,
-            "size_bytes": None,
-            "width": None,
-            "height": None,
-        },
-        "output": {
-            "filename": result_path.name,
-            "format": _normalize_image_format(result_path.suffix.lstrip(".")),
-            "size_bytes": result_path.stat().st_size,
-            "width": None,
-            "height": None,
-        },
-        "processing": {
-            "mode": "unknown",
-            "used_ai": False,
-            "model": "fallback-opencv-pillow",
-            "time_ms": None,
-        },
-        "urls": {
-            "result": f"/result/{job_id}",
-            "download": f"/download/{job_id}",
-        },
-    }
-
-
-@app.get("/health")
-@app.get("/api/health")
-def health() -> dict:
-    model_path = _model_path()
-    return {
-        "status": "ok",
-        "service": "backend",
-        "ai_model_present": model_path.exists(),
-        "uploads_dir": str(settings.uploads_dir),
-        "results_dir": str(settings.results_dir),
-    }
-
-
-@app.get("/model/status")
-@app.get("/api/model/status")
-def model_status() -> dict:
-    model_path = _model_path()
-    available = model_path.exists()
-    return {
-        "status": "ok",
-        "available": available,
-        "demo_mode": not available,
-        "model_name": model_path.name if available else None,
-        "framework": "opencv-pillow-fallback",
-    }
-
-
-@app.post("/process")
-@app.post("/api/process")
-async def process_endpoint(
-    file: UploadFile = File(...),
-    prefer_ai: str = Form("true"),
-    mode: str = Form("enhance"),
-) -> dict:
-    suffix = safe_suffix(file.filename)
-    if suffix == ".bin":
-        raise HTTPException(status_code=400, detail="Поддерживаются только JPG/PNG/WebP")
-
-    content = await file.read()
-    if not content:
-        raise HTTPException(status_code=400, detail="Пустой файл")
-    if len(content) > settings.max_upload_bytes:
-        raise HTTPException(status_code=413, detail="Файл слишком большой")
-
-    job = new_job_paths(settings.uploads_dir, settings.results_dir, upload_suffix=suffix, result_suffix=".png")
-    job.upload_path.write_bytes(content)
-
-    try:
-        image = Image.open(io.BytesIO(content))
-        image.load()
-    except UnidentifiedImageError:
-        raise HTTPException(status_code=400, detail="Не удалось прочитать изображение")
-
-    prefer_ai_bool = (prefer_ai or "").strip().lower() in {"1", "true", "yes", "on"}
-    t0 = time.perf_counter()
-    try:
-        result = process_image(
-            image=image,
-            models_dir=settings.models_dir,
-            prefer_ai=prefer_ai_bool,
-            mode=mode,
-        )
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Неподдерживаемый режим обработки")
-    dt_ms = int((time.perf_counter() - t0) * 1000)
-    result.image.save(job.result_path, format="PNG", optimize=True)
-
-    in_w, in_h = image.size
-    out_w, out_h = result.image.size
-
-    payload = _build_job_payload(
-        job_id=job.job_id,
-        source_name=file.filename or job.upload_path.name,
-        source_format=suffix.lstrip("."),
-        source_size=len(content),
-        source_width=in_w,
-        source_height=in_h,
-        result_path=job.result_path,
-        result_format="png",
-        result_width=out_w,
-        result_height=out_h,
-        mode=result.mode,
-        used_ai=result.used_ai,
-        model_name=result.model_name,
-        timing_ms=dt_ms,
-    )
-    _save_job_metadata(job.job_id, payload)
-
-    return {
-        "id": job.job_id,
-        "status": payload["status"],
-        "message": payload["message"],
-        "input": payload["input"],
-        "output": payload["output"],
-        "processing": payload["processing"],
-        "urls": payload["urls"],
-    }
-
-
-@app.get("/result/{job_id}")
-@app.get("/api/result/{job_id}")
-def result_info(job_id: str) -> dict:
-    return _load_job_metadata(job_id)
-
-
-@app.get("/download/{job_id}")
-@app.get("/api/download/{job_id}")
-def download_result(job_id: str, inline: bool = Query(False)) -> FileResponse:
-    path = _find_result_path(job_id)
-    filename = path.name if inline else f"{job_id}{path.suffix}"
-    content_disposition_type = "inline" if inline else "attachment"
-    return FileResponse(
-        path,
-        filename=filename,
-        content_disposition_type=content_disposition_type,
-    )
-
-
-@app.get("/api/result/file/{name}")
-def legacy_result_file(name: str) -> FileResponse:
-    path = settings.results_dir / name
-    if not path.exists() or path.is_dir():
-        raise HTTPException(status_code=404, detail="Файл не найден")
-    return FileResponse(path)
-
-
-@app.delete("/result/{job_id}")
-@app.delete("/api/result/{job_id}")
-def delete_result(job_id: str) -> dict:
-    deleted: list[str] = []
-
-    metadata_path = _metadata_path(job_id)
-    if metadata_path.exists():
-        metadata_path.unlink()
-        deleted.append(metadata_path.name)
-
-    try:
-        result_path = _find_result_path(job_id)
-    except HTTPException:
-        result_path = None
-
-    if result_path is not None and result_path.exists():
-        result_path.unlink()
-        deleted.append(result_path.name)
-
-    upload_path = _find_upload_path(job_id)
-    if upload_path is not None and upload_path.exists():
-        upload_path.unlink()
-        deleted.append(upload_path.name)
-
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Результат не найден")
-
-    return {"status": "deleted", "id": job_id, "deleted_files": deleted}
 
 
 @app.get("/favicon.svg")

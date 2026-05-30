@@ -3,7 +3,7 @@
 .venv/
 venv/
 storage/
-models/
+/models/
 __pycache__/
 *.py[cod]
 
@@ -12,3 +12,8 @@ frontend/dist/
 
 backend/app/__pycache__/
 backend/app/processing/__pycache__/
+backend/models/*.pb
+backend/models/*.onnx
+backend/models/*.pth
+backend/models/*.pt
+!backend/models/README.md

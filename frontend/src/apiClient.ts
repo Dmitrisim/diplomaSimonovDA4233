@@ -86,12 +86,26 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
     const healthData = await healthResp.json();
 
     let aiAvailable = Boolean(healthData?.ai_model_present);
+    let activeProcessor: string | null = null;
+    let modelName: string | null = null;
+    let availabilityReason: string | null = null;
+    let fallbackAvailable = true;
     try {
       const modelResp = await fetch('/api/model/status');
       if (modelResp.ok) {
         const modelData = await modelResp.json();
         aiAvailable = Boolean(
           modelData?.available ?? modelData?.ai_model_present ?? aiAvailable,
+        );
+        activeProcessor = modelData?.active_processor
+          ? String(modelData.active_processor)
+          : null;
+        modelName = modelData?.model ? String(modelData.model) : null;
+        availabilityReason = modelData?.availability_reason
+          ? String(modelData.availability_reason)
+          : null;
+        fallbackAvailable = Boolean(
+          modelData?.fallback_available ?? fallbackAvailable,
         );
       }
     } catch {
@@ -102,12 +116,20 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
       apiOk: true,
       aiAvailable,
       runtimeMode: 'production',
+      activeProcessor,
+      modelName,
+      availabilityReason,
+      fallbackAvailable,
     };
   } catch {
     return {
       apiOk: false,
       aiAvailable: false,
       runtimeMode: 'demo',
+      activeProcessor: null,
+      modelName: null,
+      availabilityReason: 'API недоступен',
+      fallbackAvailable: false,
     };
   }
 }

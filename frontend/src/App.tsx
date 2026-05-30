@@ -987,6 +987,7 @@ function App() {
                         mode={mode}
                         params={params}
                         stage={stage}
+                        serviceStatus={serviceStatus}
                       />
                     ) : (
                       <HistorySection

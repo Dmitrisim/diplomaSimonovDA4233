@@ -6,6 +6,7 @@ import type {
   ProcessingParameters,
   ProcessingMode,
   ProcessStage,
+  ServiceStatus,
 } from '../types';
 import { fileTypeLabel, formatBytes } from '../utils';
 
@@ -15,6 +16,7 @@ type InfoPanelProps = {
   mode: ProcessingMode;
   params: ProcessingParameters;
   stage: ProcessStage;
+  serviceStatus: ServiceStatus;
 };
 
 export function InfoPanel({
@@ -23,6 +25,7 @@ export function InfoPanel({
   mode,
   params,
   stage,
+  serviceStatus,
 }: InfoPanelProps) {
   if (!sourceMeta) {
     return (
@@ -89,6 +92,16 @@ export function InfoPanel({
 
         <InfoGroup title='Модель'>
           <InfoRow
+            label='Статус AI'
+            value={
+              serviceStatus.aiAvailable
+                ? 'Model online / AI доступна'
+                : serviceStatus.apiOk
+                  ? 'Model demo / AI недоступна'
+                  : 'Demo mode / API недоступен'
+            }
+          />
+          <InfoRow
             label='AI-обработка'
             value={result ? (result.usedAi ? 'Да' : 'Нет') : 'Ожидание запуска'}
           />
@@ -96,12 +109,25 @@ export function InfoPanel({
             label='Модель'
             value={
               result?.modelName ??
+              serviceStatus.modelName ??
               (params.preferAi ? 'Будет выбрана автоматически' : 'AI отключена')
             }
           />
           <InfoRow
             label='Режим работы'
-            value={result?.isDemo ? 'Demo mode' : 'API / processing'}
+            value={
+              result?.isDemo
+                ? 'Demo mode'
+                : result
+                  ? result.usedAi
+                    ? 'AI super-resolution'
+                    : 'Fallback mode'
+                  : serviceStatus.activeProcessor || 'Ожидание запуска'
+            }
+          />
+          <InfoRow
+            label='Причина недоступности'
+            value={serviceStatus.availabilityReason || 'AI активна или готова к запуску'}
           />
         </InfoGroup>
       </div>
