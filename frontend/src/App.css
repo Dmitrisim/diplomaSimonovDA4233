@@ -3045,6 +3045,18 @@ button:disabled {
   object-fit: contain;
 }
 
+.imageCard.isSplitPreview .imageCardBody {
+  height: clamp(420px, 68vh, 760px);
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+.imageCard.isSplitPreview .imageCardBody img {
+  object-fit: contain !important;
+  object-position: center center;
+}
+
 .emptyPreviewState,
 .emptyResult {
   min-height: 220px;

@@ -195,10 +195,15 @@ export function PreviewPanel(props: PreviewPanelProps) {
         </div>
       ) : (
         <div className='splitPreview'>
-          <ImageCard title='Исходное изображение' url={sourceUrl} />
+          <ImageCard
+            title='Исходное изображение'
+            url={sourceUrl}
+            variant='split'
+          />
           <ImageCard
             title={result?.isDemo ? 'Результат (демо)' : 'Результат обработки'}
             url={result?.resultUrl ?? null}
+            variant='split'
           />
         </div>
       )}
@@ -206,9 +211,17 @@ export function PreviewPanel(props: PreviewPanelProps) {
   );
 }
 
-function ImageCard({ title, url }: { title: string; url: string | null }) {
+function ImageCard({
+  title,
+  url,
+  variant = 'default',
+}: {
+  title: string;
+  url: string | null;
+  variant?: 'default' | 'split';
+}) {
   return (
-    <div className='imageCard'>
+    <div className={`imageCard ${variant === 'split' ? 'isSplitPreview' : ''}`}>
       <div className='cardTitle'>{title}</div>
       <div className='imageCardBody'>
         {url ? (
