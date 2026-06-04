@@ -47,6 +47,29 @@ backend/
 
 Сейчас реальный AI-сценарий подготовлен для `upscale`. Остальные режимы обрабатываются через fallback.
 
+## AI и fallback
+
+Backend всегда пытается сохранить рабочий пользовательский сценарий: если реальная AI-модель недоступна или режим не поддерживается AI-процессором, изображение обрабатывается через `fallback-opencv-pillow`.
+
+Фактическое использование AI видно в ответе `POST /api/process`:
+
+- `processing.used_ai = true` и `processing.model = "EDSR_x2.pb"` — использована модель super-resolution
+- `processing.used_ai = false` и `processing.model = "fallback-opencv-pillow"` — использована обработка через OpenCV/Pillow
+
+На текущем этапе AI используется только для режима `upscale` при `prefer_ai=true`. Режимы `enhance`, `restore` и `colorize` остаются рабочими за счет fallback-обработки.
+
+## Лимит для AI-upscale
+
+Для защиты VPS от нехватки памяти в `Settings` задан лимит:
+
+```text
+max_ai_upscale_pixels = 512 * 512
+```
+
+Если пользователь отправляет изображение в режиме `upscale` с `prefer_ai=true`, но размер исходника больше этого лимита, backend не запускает `EDSR_x2.pb` и автоматически переключается на fallback. Контракт ответа не меняется: пользователь получает результат, а в блоке `processing` видно, что использовался `fallback-opencv-pillow`.
+
+Это поведение нужно для стабильности сервера: большие изображения могут требовать слишком много RAM при super-resolution.
+
 ## Установка
 
 Из корня проекта:
@@ -176,6 +199,12 @@ python backend/scripts/check_model.py
 - `processing.model = "EDSR_x2.pb"`
 - `output.width` и `output.height` примерно в 2 раза больше исходных
 
+Для проверки защитного лимита можно отправить изображение больше `512 * 512` пикселей с `mode=upscale` и `prefer_ai=true`. Ожидаемо:
+
+- `processing.used_ai = false`
+- `processing.model = "fallback-opencv-pillow"`
+- backend продолжает работать и возвращает результат
+
 ## Если модель не загрузилась
 
 Проверь:
@@ -187,6 +216,48 @@ python backend/scripts/check_model.py
 - что возвращает `GET /api/model/status`
 
 Если модель не найдена или не инициализируется, backend честно сообщит причину в `availability_reason` и продолжит работу через fallback.
+
+## Проверка production
+
+На сервере Beget/VPS основной сайт доступен по адресу:
+
+```text
+http://212.67.12.19/
+```
+
+Базовая проверка backend:
+
+```powershell
+Invoke-RestMethod -Uri "http://212.67.12.19/api/health"
+Invoke-RestMethod -Uri "http://212.67.12.19/api/model/status"
+```
+
+При активной AI-модели `/api/model/status` должен показывать:
+
+- `available = true`
+- `active_processor = "ai-superres-opencv"`
+- `model = "EDSR_x2.pb"`
+- `model_file_exists = true`
+
+После деплоя изменений с лимитом AI-upscale нужно проверить два сценария:
+
+- маленькое изображение, например `96x64`, в режиме `upscale` должно дать `processing.used_ai = true`
+- изображение больше `512 * 512` пикселей в режиме `upscale` должно дать `processing.used_ai = false` и `processing.model = "fallback-opencv-pillow"`
+
+## Обновление сервера
+
+Обычный порядок обновления production:
+
+1. Локально внести изменения в проект.
+2. Сделать commit и push через GitHub Desktop или git.
+3. Подключиться к серверу по SSH.
+4. В каталоге `/opt/ai-image-processing` выполнить:
+
+```bash
+./deploy/quick-update.sh
+```
+
+Скрипт подтягивает изменения, пересобирает frontend и перезапускает сервис `ai-image-processing.service`.
 
 ## Тесты
 

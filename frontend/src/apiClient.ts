@@ -79,6 +79,27 @@ async function emitProgress(
   }
 }
 
+function buildBackendStatusText(
+  data: BackendProcessResponse,
+  backendMode: NonNullable<(typeof MODE_BY_ID)[ProcessingMode]['backendMode']>,
+  preferAi: boolean,
+): string {
+  const usedAi = Boolean(data.processing?.used_ai);
+  const model = data.processing?.model || 'fallback-opencv-pillow';
+
+  if (usedAi) {
+    return `Результат готов. Использована AI-модель ${model}.`;
+  }
+
+  if (backendMode === 'upscale') {
+    return preferAi
+      ? 'Результат готов. Для этого изображения использована fallback-обработка OpenCV/Pillow вместо AI.'
+      : 'Результат готов. AI отключена в параметрах, использована fallback-обработка OpenCV/Pillow.';
+  }
+
+  return 'Результат готов. Режим выполнен backend-обработкой OpenCV/Pillow.';
+}
+
 export async function getServiceStatus(): Promise<ServiceStatus> {
   try {
     const healthResp = await fetch('/api/health');
@@ -200,11 +221,11 @@ export async function processImageRequest(
         height: Number(data.input?.height ?? request.sourceMeta.height),
       },
       isDemo: false,
-      statusText:
-        data.message ||
-        (Boolean(data.processing?.used_ai)
-          ? 'Обработка выполнена с подключенной AI-моделью.'
-          : 'Изображение обработано через fallback-обработку OpenCV/Pillow.'),
+      statusText: buildBackendStatusText(
+        data,
+        modeConfig.backendMode!,
+        request.params.preferAi,
+      ),
     };
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {

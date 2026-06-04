@@ -49,6 +49,19 @@ import {
 type ControlSectionId = 'source' | 'mode' | 'settings' | 'run';
 type ContextTabId = 'info' | 'history';
 
+function readStoredHistory(): HistoryItem[] {
+  const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
+  if (!saved) return [];
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? (parsed as HistoryItem[]) : [];
+  } catch {
+    localStorage.removeItem(STORAGE_HISTORY_KEY);
+    return [];
+  }
+}
+
 function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -62,7 +75,7 @@ function App() {
   const [sourceMeta, setSourceMeta] = useState<FileMeta | null>(null);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [result, setResult] = useState<ProcessResult | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>(readStoredHistory);
   const [mode, setMode] = useState<ProcessingMode>('auto-enhance');
   const [params, setParams] =
     useState<ProcessingParameters>(DEFAULT_PARAMETERS);
@@ -82,17 +95,6 @@ function App() {
   const [openControlSection, setOpenControlSection] =
     useState<ControlSectionId>('source');
   const [contextTab, setContextTab] = useState<ContextTabId>('info');
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_HISTORY_KEY);
-    if (saved) {
-      try {
-        setHistory(JSON.parse(saved) as HistoryItem[]);
-      } catch {
-        localStorage.removeItem(STORAGE_HISTORY_KEY);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));

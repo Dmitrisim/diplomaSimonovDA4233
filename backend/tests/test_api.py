@@ -83,6 +83,7 @@ def test_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Settings:
         models_dir=tmp_path / "backend" / "models",
         frontend_dist_dir=tmp_path / "frontend-dist",
         max_upload_bytes=1024 * 1024,
+        max_ai_upscale_pixels=512 * 512,
         cors_origins=("http://127.0.0.1:5173", "http://localhost:5173"),
     )
     monkeypatch.delenv(AI_MODEL_PATH_ENV, raising=False)
@@ -312,6 +313,54 @@ def test_process_upscale_uses_ai_when_runtime_is_available(
     assert payload["output"]["height"] == 96
 
 
+def test_process_upscale_uses_fallback_when_image_exceeds_ai_limit(
+    client: TestClient,
+    test_settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    limited_settings = Settings(
+        project_root=test_settings.project_root,
+        backend_dir=test_settings.backend_dir,
+        storage_dir=test_settings.storage_dir,
+        uploads_dir=test_settings.uploads_dir,
+        results_dir=test_settings.results_dir,
+        models_dir=test_settings.models_dir,
+        frontend_dist_dir=test_settings.frontend_dist_dir,
+        max_upload_bytes=test_settings.max_upload_bytes,
+        max_ai_upscale_pixels=16 * 16,
+        cors_origins=test_settings.cors_origins,
+    )
+    runtime = ProcessorRuntime(
+        ai_processor=_MockAiProcessor(),
+        fallback_processor=_MockFallbackProcessor(),
+        available=True,
+        active_processor="ai-superres-opencv",
+        default_processor="ai-superres-opencv",
+        model="EDSR_x2.pb",
+        model_name="EDSR_x2.pb",
+        framework="opencv-dnn-superres",
+        model_path="C:/fake/EDSR_x2.pb",
+        model_file_exists=True,
+        availability_reason=None,
+        supported_modes=("enhance", "restore", "upscale", "colorize"),
+        fallback_available=True,
+    )
+    monkeypatch.setattr(config_module, "get_settings", lambda: limited_settings)
+    monkeypatch.setattr(pipeline_module, "load_processor_runtime", lambda _: runtime)
+
+    process_response = client.post(
+        "/api/process",
+        files={"file": ("large-for-ai.jpg", _make_image_bytes(fmt="JPEG", size=(64, 48)), "image/jpeg")},
+        data={"prefer_ai": "true", "mode": "upscale"},
+    )
+
+    assert process_response.status_code == 200
+    payload = process_response.json()
+    assert payload["processing"]["mode"] == "upscale"
+    assert payload["processing"]["used_ai"] is False
+    assert payload["processing"]["model"] == "fallback-opencv-pillow"
+
+
 def test_process_colorize_returns_result(client: TestClient) -> None:
     process_response = client.post(
         "/api/process",
@@ -351,6 +400,7 @@ def test_process_rejects_too_large_file(
         models_dir=test_settings.models_dir,
         frontend_dist_dir=test_settings.frontend_dist_dir,
         max_upload_bytes=64,
+        max_ai_upscale_pixels=test_settings.max_ai_upscale_pixels,
         cors_origins=test_settings.cors_origins,
     )
     monkeypatch.setattr(config_module, "get_settings", lambda: smaller_settings)

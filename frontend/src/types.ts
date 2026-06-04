@@ -105,7 +105,7 @@ export type ModeDefinition = {
   description: string;
   bestFor: string;
   limitations: string;
-  backendMode?: 'enhance' | 'upscale';
+  backendMode?: 'enhance' | 'restore' | 'upscale' | 'colorize';
 };
 
 export type ProgressState = {

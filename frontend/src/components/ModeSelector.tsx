@@ -34,7 +34,12 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
             <div className='modeCardTop'>
               <span className='modeIcon'>{item.iconLabel}</span>
               <div className='modeCardText'>
-                <strong>{item.shortTitle}</strong>
+                <div className='modeCardTitleRow'>
+                  <strong>{item.shortTitle}</strong>
+                  <span className={`modeRuntimeChip ${runtimeClass(item)}`}>
+                    {runtimeLabel(item)}
+                  </span>
+                </div>
                 <span>{item.description}</span>
               </div>
             </div>
@@ -61,4 +66,16 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
       </div>
     </section>
   );
+}
+
+function runtimeLabel(item: (typeof MODE_DEFINITIONS)[number]): string {
+  if (!item.backendMode) return 'demo';
+  if (item.backendMode === 'upscale') return 'AI/API';
+  return 'API';
+}
+
+function runtimeClass(item: (typeof MODE_DEFINITIONS)[number]): string {
+  if (!item.backendMode) return 'isDemo';
+  if (item.backendMode === 'upscale') return 'isAi';
+  return 'isApi';
 }

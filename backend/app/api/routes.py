@@ -226,6 +226,14 @@ async def process_endpoint(
         raise HTTPException(status_code=400, detail="Не удалось прочитать изображение") from exc
 
     prefer_ai_bool = (prefer_ai or "").strip().lower() in {"1", "true", "yes", "on"}
+    mode_norm = (mode or "").strip().lower()
+    if (
+        prefer_ai_bool
+        and mode_norm == "upscale"
+        and image.width * image.height > settings.max_ai_upscale_pixels
+    ):
+        prefer_ai_bool = False
+
     t0 = time.perf_counter()
     try:
         result = process_image(

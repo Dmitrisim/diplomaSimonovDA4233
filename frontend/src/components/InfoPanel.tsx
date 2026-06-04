@@ -45,6 +45,45 @@ export function InfoPanel({
     );
   }
 
+  const modeConfig = MODE_BY_ID[mode];
+  const selectedModeUsesBackend = Boolean(modeConfig.backendMode);
+  const selectedModeCanUseAi = modeConfig.backendMode === 'upscale';
+  const aiProcessingLabel = result
+    ? result.usedAi
+      ? 'Да'
+      : result.isDemo
+        ? 'Нет, demo-сценарий'
+        : 'Нет, backend fallback'
+    : selectedModeCanUseAi
+      ? 'Возможна для этого режима'
+      : 'Не используется в этом режиме';
+  const modelLabel =
+    result?.modelName ??
+    (selectedModeCanUseAi
+      ? serviceStatus.modelName ||
+        (params.preferAi ? 'Будет выбрана автоматически' : 'AI отключена')
+      : selectedModeUsesBackend
+        ? 'fallback-opencv-pillow'
+        : 'demo-сценарий');
+  const runtimeLabel = result?.isDemo
+    ? 'Demo mode'
+    : result
+      ? result.usedAi
+        ? 'AI super-resolution'
+        : 'Backend fallback'
+      : selectedModeCanUseAi
+        ? 'AI/API при доступности модели'
+        : selectedModeUsesBackend
+          ? 'Backend API fallback'
+          : 'Demo mode';
+  const modelComment =
+    serviceStatus.availabilityReason ||
+    (selectedModeCanUseAi
+      ? 'AI применяется для увеличения разрешения при доступной модели и подходящем размере изображения.'
+      : selectedModeUsesBackend
+        ? 'Этот режим выполняется серверной обработкой OpenCV/Pillow без AI-модели.'
+        : 'Этот сценарий пока демонстрационный и выполняется на клиенте.');
+
   return (
     <section className='surfaceCard stackGap'>
       <div>
@@ -63,7 +102,7 @@ export function InfoPanel({
         </InfoGroup>
 
         <InfoGroup title='Обработка'>
-          <InfoRow label='Режим' value={MODE_BY_ID[mode].title} />
+          <InfoRow label='Режим' value={modeConfig.title} />
           <InfoRow label='Интенсивность' value={`${params.intensity}%`} />
           <InfoRow
             label='Формат результата'
@@ -95,39 +134,21 @@ export function InfoPanel({
             label='Статус AI'
             value={
               serviceStatus.aiAvailable
-                ? 'Model online / AI доступна'
+                ? 'Model online'
                 : serviceStatus.apiOk
-                  ? 'Model demo / AI недоступна'
-                  : 'Demo mode / API недоступен'
+                  ? 'AI недоступна'
+                  : 'API недоступен'
             }
           />
           <InfoRow
             label='AI-обработка'
-            value={result ? (result.usedAi ? 'Да' : 'Нет') : 'Ожидание запуска'}
+            value={aiProcessingLabel}
           />
+          <InfoRow label='Модель' value={modelLabel} />
+          <InfoRow label='Режим работы' value={runtimeLabel} />
           <InfoRow
-            label='Модель'
-            value={
-              result?.modelName ??
-              serviceStatus.modelName ??
-              (params.preferAi ? 'Будет выбрана автоматически' : 'AI отключена')
-            }
-          />
-          <InfoRow
-            label='Режим работы'
-            value={
-              result?.isDemo
-                ? 'Demo mode'
-                : result
-                  ? result.usedAi
-                    ? 'AI super-resolution'
-                    : 'Fallback mode'
-                  : serviceStatus.activeProcessor || 'Ожидание запуска'
-            }
-          />
-          <InfoRow
-            label='Причина недоступности'
-            value={serviceStatus.availabilityReason || 'AI активна или готова к запуску'}
+            label='Комментарий'
+            value={modelComment}
           />
         </InfoGroup>
       </div>
