@@ -101,6 +101,7 @@ def _build_job_payload(
             "time_ms": timing_ms,
         },
         "urls": {
+            "source": f"/source/{job_id}",
             "result": f"/result/{job_id}",
             "download": f"/download/{job_id}",
         },
@@ -146,6 +147,7 @@ def _load_job_metadata(job_id: str) -> dict:
             "time_ms": None,
         },
         "urls": {
+            "source": f"/source/{job_id}" if _find_upload_path(job_id) else None,
             "result": f"/result/{job_id}",
             "download": f"/download/{job_id}",
         },
@@ -297,6 +299,20 @@ def download_result(job_id: str, inline: bool = Query(False)) -> FileResponse:
     return FileResponse(
         path,
         filename=filename,
+        content_disposition_type=content_disposition_type,
+    )
+
+
+@router.get("/source/{job_id}")
+@router.get("/api/source/{job_id}")
+def source_file(job_id: str, inline: bool = Query(True)) -> FileResponse:
+    path = _find_upload_path(job_id)
+    if path is None:
+        raise HTTPException(status_code=404, detail="Исходный файл не найден")
+    content_disposition_type = "inline" if inline else "attachment"
+    return FileResponse(
+        path,
+        filename=path.name,
         content_disposition_type=content_disposition_type,
     )
 

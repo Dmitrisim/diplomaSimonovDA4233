@@ -27,6 +27,7 @@ class ProcessingMeta(BaseModel):
 
 
 class UrlsMeta(BaseModel):
+    source: str | None = None
     result: str
     download: str
 

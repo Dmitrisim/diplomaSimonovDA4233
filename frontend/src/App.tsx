@@ -312,6 +312,7 @@ function App() {
       const historyItem = createHistoryItem({
         id: processed.id,
         fileName: sourceMeta.name,
+        sourceUrl: processed.sourceUrl,
         downloadUrl: processed.downloadUrl,
         mode,
         status: processed.isDemo ? 'demo' : 'готово',
@@ -369,12 +370,21 @@ function App() {
   };
 
   const handleHistoryOpen = (item: HistoryItem) => {
+    const fullSourceUrl =
+      item.sourceUrl ||
+      (!item.isDemo && item.id ? `/source/${item.id}` : '') ||
+      item.sourcePreview ||
+      null;
+    const fullResultUrl =
+      item.downloadUrl || item.resultPreview || item.sourcePreview || '';
+
     setSourceMeta(item.sourceMeta);
     setImageAnalysis(null);
-    setSourceUrl(item.sourcePreview || null);
+    setSourceUrl(fullSourceUrl);
     setResult({
       id: item.id,
-      resultUrl: item.resultPreview || item.downloadUrl,
+      sourceUrl: fullSourceUrl || undefined,
+      resultUrl: fullResultUrl,
       downloadUrl: item.downloadUrl || item.resultPreview,
       mode: item.mode,
       usedAi: item.usedAi,

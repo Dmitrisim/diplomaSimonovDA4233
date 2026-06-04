@@ -259,7 +259,13 @@ def test_process_result_download_delete_cycle_jpg(client: TestClient) -> None:
     result_payload = result_response.json()
     assert result_payload["id"] == job_id
     assert result_payload["output"]["filename"].endswith(".png")
+    assert result_payload["urls"]["source"] == f"/source/{job_id}"
     assert result_payload["urls"]["download"] == f"/download/{job_id}"
+
+    source_response = client.get(f"/source/{job_id}")
+    assert source_response.status_code == 200
+    assert source_response.headers["content-type"] == "image/jpeg"
+    assert len(source_response.content) > 0
 
     download_response = client.get(f"/download/{job_id}")
     assert download_response.status_code == 200

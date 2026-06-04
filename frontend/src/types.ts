@@ -72,6 +72,7 @@ export type ServiceStatus = {
 
 export type ProcessResult = {
   id: string;
+  sourceUrl?: string;
   resultUrl: string;
   downloadUrl: string;
   mode: ProcessingMode;
@@ -88,6 +89,7 @@ export type HistoryItem = {
   id: string;
   createdAt: string;
   fileName: string;
+  sourceUrl?: string;
   downloadUrl: string;
   mode: ProcessingMode;
   status: string;

@@ -51,6 +51,7 @@ type BackendProcessResponse = {
     time_ms: number | null;
   };
   urls: {
+    source?: string | null;
     result: string;
     download: string;
   };
@@ -228,6 +229,7 @@ export async function processImageRequest(
     if (!downloadUrl) {
       throw new Error('api_error_invalid_contract');
     }
+    const sourceUrl = data.urls?.source ? String(data.urls.source) : undefined;
 
     const blob = await urlToBlob(downloadUrl);
     const previewUrl = await blobToDataUrl(blob);
@@ -241,6 +243,7 @@ export async function processImageRequest(
 
     return {
       id: String(data.id ?? nextId()),
+      sourceUrl,
       resultUrl: previewUrl,
       downloadUrl,
       mode: request.mode,
@@ -302,6 +305,7 @@ async function simulateProcess(
 
   return {
     id: nextId(),
+    sourceUrl: sourceDataUrl,
     resultUrl: sourceDataUrl,
     downloadUrl: sourceDataUrl,
     mode: request.mode,

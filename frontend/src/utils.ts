@@ -297,6 +297,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
 export function createHistoryItem(input: {
   id: string;
   fileName: string;
+  sourceUrl?: string;
   downloadUrl: string;
   mode: ProcessingMode;
   status: string;
