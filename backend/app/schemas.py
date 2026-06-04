@@ -63,6 +63,8 @@ class ModelStatusResponse(BaseModel):
     model_file_exists: bool
     availability_reason: str | None
     supported_modes: list[str]
+    ai_supported_modes: list[str]
+    ai_processors: list[str]
     fallback_available: bool
     modes: list[str]
 

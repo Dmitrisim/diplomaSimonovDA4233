@@ -13,6 +13,9 @@ frontend/dist/
 backend/app/__pycache__/
 backend/app/processing/__pycache__/
 backend/models/*.pb
+backend/models/*.caffemodel
+backend/models/*.npy
+backend/models/*.prototxt
 backend/models/*.onnx
 backend/models/*.pth
 backend/models/*.pt

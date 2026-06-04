@@ -4,6 +4,7 @@ export type ProcessingMode =
   | 'denoise'
   | 'sharpen'
   | 'restore-photo'
+  | 'colorize-photo'
   | 'web-export';
 
 export type ResultFormat = 'png' | 'jpeg' | 'webp';
@@ -11,6 +12,7 @@ export type ScaleFactor = 'x2' | 'x4';
 export type DenoiseLevel = 'low' | 'medium' | 'high';
 export type CompareView = 'slider' | 'split';
 export type RuntimeMode = 'demo' | 'production';
+export type BackendProcessingMode = 'enhance' | 'restore' | 'upscale' | 'colorize';
 
 export type ProcessStage =
   | 'idle'
@@ -63,6 +65,8 @@ export type ServiceStatus = {
   activeProcessor?: string | null;
   modelName?: string | null;
   availabilityReason?: string | null;
+  aiSupportedModes?: BackendProcessingMode[];
+  aiProcessors?: string[];
   fallbackAvailable?: boolean;
 };
 
@@ -105,7 +109,20 @@ export type ModeDefinition = {
   description: string;
   bestFor: string;
   limitations: string;
-  backendMode?: 'enhance' | 'restore' | 'upscale' | 'colorize';
+  backendMode?: BackendProcessingMode;
+};
+
+export type ImageAnalysis = {
+  brightness: number;
+  contrast: number;
+  sharpness: number;
+  noise: number;
+  colorfulness: number;
+  lowResolution: boolean;
+  exceedsAiUpscaleLimit: boolean;
+  likelyGrayscale: boolean;
+  recommendedMode: ProcessingMode;
+  reasons: string[];
 };
 
 export type ProgressState = {

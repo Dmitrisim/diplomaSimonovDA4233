@@ -1,5 +1,6 @@
-import { ACCEPTED_TYPES, MODE_BY_ID } from './constants';
+import { ACCEPTED_TYPES, AI_UPSCALE_LIMIT_PIXELS, MODE_BY_ID } from './constants';
 import type {
+  BackendProcessingMode,
   FileMeta,
   ProcessingMode,
   ProcessingParameters,
@@ -68,6 +69,15 @@ function toResultFormat(
   return 'png';
 }
 
+function isBackendProcessingMode(value: unknown): value is BackendProcessingMode {
+  return (
+    value === 'enhance' ||
+    value === 'restore' ||
+    value === 'upscale' ||
+    value === 'colorize'
+  );
+}
+
 async function emitProgress(
   onProgress?: (stage: ProgressState) => void,
   signal?: AbortSignal,
@@ -83,18 +93,31 @@ function buildBackendStatusText(
   data: BackendProcessResponse,
   backendMode: NonNullable<(typeof MODE_BY_ID)[ProcessingMode]['backendMode']>,
   preferAi: boolean,
+  sourceMeta: FileMeta,
 ): string {
   const usedAi = Boolean(data.processing?.used_ai);
   const model = data.processing?.model || 'fallback-opencv-pillow';
+  const sourceExceedsAiUpscaleLimit =
+    sourceMeta.width * sourceMeta.height > AI_UPSCALE_LIMIT_PIXELS;
 
   if (usedAi) {
     return `Результат готов. Использована AI-модель ${model}.`;
   }
 
   if (backendMode === 'upscale') {
+    if (preferAi && sourceExceedsAiUpscaleLimit) {
+      return 'Результат готов. Исходник больше лимита AI-upscale, поэтому выполнено безопасное fallback-увеличение OpenCV/Pillow.';
+    }
+
     return preferAi
       ? 'Результат готов. Для этого изображения использована fallback-обработка OpenCV/Pillow вместо AI.'
       : 'Результат готов. AI отключена в параметрах, использована fallback-обработка OpenCV/Pillow.';
+  }
+
+  if (backendMode === 'colorize') {
+    return preferAi
+      ? 'Результат готов. AI-колоризация недоступна, выполнено fallback-тонирование OpenCV/Pillow.'
+      : 'Результат готов. AI отключена в параметрах, выполнено fallback-тонирование OpenCV/Pillow.';
   }
 
   return 'Результат готов. Режим выполнен backend-обработкой OpenCV/Pillow.';
@@ -110,6 +133,8 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
     let activeProcessor: string | null = null;
     let modelName: string | null = null;
     let availabilityReason: string | null = null;
+    let aiSupportedModes: BackendProcessingMode[] = [];
+    let aiProcessors: string[] = [];
     let fallbackAvailable = true;
     try {
       const modelResp = await fetch('/api/model/status');
@@ -125,6 +150,12 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
         availabilityReason = modelData?.availability_reason
           ? String(modelData.availability_reason)
           : null;
+        aiSupportedModes = Array.isArray(modelData?.ai_supported_modes)
+          ? modelData.ai_supported_modes.filter(isBackendProcessingMode)
+          : [];
+        aiProcessors = Array.isArray(modelData?.ai_processors)
+          ? modelData.ai_processors.map(String)
+          : [];
         fallbackAvailable = Boolean(
           modelData?.fallback_available ?? fallbackAvailable,
         );
@@ -140,6 +171,8 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
       activeProcessor,
       modelName,
       availabilityReason,
+      aiSupportedModes,
+      aiProcessors,
       fallbackAvailable,
     };
   } catch {
@@ -150,6 +183,8 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
       activeProcessor: null,
       modelName: null,
       availabilityReason: 'API недоступен',
+      aiSupportedModes: [],
+      aiProcessors: [],
       fallbackAvailable: false,
     };
   }
@@ -225,6 +260,7 @@ export async function processImageRequest(
         data,
         modeConfig.backendMode!,
         request.params.preferAi,
+        request.sourceMeta,
       ),
     };
   } catch (error) {

@@ -1241,6 +1241,24 @@
     linear-gradient(135deg, #b6c2d3 0%, #dce5f1 48%, #f8fafc 100%);
 }
 
+.preview-colorize {
+  background:
+    radial-gradient(
+      circle at 50% 24%,
+      rgba(255, 255, 255, 0.2),
+      transparent 16%
+    ),
+    linear-gradient(135deg, #a8b0ba 0%, #d7dde5 45%, #f7e4bd 100%);
+}
+
+.preview-colorize.before {
+  filter: grayscale(1) contrast(0.88) brightness(0.96);
+}
+
+.preview-colorize.after {
+  filter: saturate(1.16) contrast(1.02) brightness(1.03);
+}
+
 .preview-web {
   background:
     radial-gradient(
@@ -1265,6 +1283,7 @@
 .preview-noise::before,
 .preview-portrait::before,
 .preview-scan::before,
+.preview-colorize::before,
 .preview-web::before,
 .preview-enhance::before {
   content: '';
@@ -1286,7 +1305,8 @@
 }
 
 .preview-noise::before,
-.preview-portrait::before {
+.preview-portrait::before,
+.preview-colorize::before {
   width: 34%;
   height: 48%;
   border-radius: 44% 44% 40% 40% / 38% 38% 52% 52%;
@@ -1310,6 +1330,16 @@
       transparent 26%
     ),
     linear-gradient(180deg, rgba(176, 146, 121, 0.92), rgba(138, 120, 104, 0.3));
+}
+
+.preview-colorize::before {
+  background:
+    radial-gradient(
+      circle at 50% 26%,
+      rgba(245, 216, 181, 0.66),
+      transparent 26%
+    ),
+    linear-gradient(180deg, rgba(128, 116, 102, 0.66), rgba(83, 99, 126, 0.24));
 }
 
 .preview-scan::before {
@@ -1358,6 +1388,7 @@
 .preview-noise::after,
 .preview-portrait::after,
 .preview-scan::after,
+.preview-colorize::after,
 .preview-web::after,
 .preview-enhance::after {
   content: '';

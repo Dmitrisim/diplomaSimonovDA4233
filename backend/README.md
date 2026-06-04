@@ -13,6 +13,7 @@ backend/
       base.py
       fallback.py
       ai_processor.py
+      colorization_processor.py
       model_loader.py
     processing/
       filters.py
@@ -33,6 +34,7 @@ backend/
 
 - `fallback.py` содержит стабильную обработку через `OpenCV + Pillow`
 - `ai_processor.py` подключает реальный `EDSR_x2.pb` для сценария `super-resolution / upscale`
+- `colorization_processor.py` подключает AI-колоризацию чёрно-белых фото через `OpenCV DNN`
 - `model_loader.py` безопасно выбирает между AI-процессором и fallback
 - `pipeline.py` вызывает runtime, не зная деталей конкретной модели
 
@@ -45,7 +47,7 @@ backend/
 - `upscale`
 - `colorize`
 
-Сейчас реальный AI-сценарий подготовлен для `upscale`. Остальные режимы обрабатываются через fallback.
+Реальные AI-сценарии подготовлены для `upscale` и `colorize`. Если нужная модель отсутствует, режим остается рабочим через fallback.
 
 ## AI и fallback
 
@@ -54,9 +56,10 @@ Backend всегда пытается сохранить рабочий поль
 Фактическое использование AI видно в ответе `POST /api/process`:
 
 - `processing.used_ai = true` и `processing.model = "EDSR_x2.pb"` — использована модель super-resolution
+- `processing.used_ai = true` и `processing.model = "colorization_release_v2.caffemodel"` — использована модель AI-колоризации
 - `processing.used_ai = false` и `processing.model = "fallback-opencv-pillow"` — использована обработка через OpenCV/Pillow
 
-На текущем этапе AI используется только для режима `upscale` при `prefer_ai=true`. Режимы `enhance`, `restore` и `colorize` остаются рабочими за счет fallback-обработки.
+На текущем этапе AI используется для режимов `upscale` и `colorize` при `prefer_ai=true` и наличии соответствующих model-файлов. Режимы `enhance` и `restore` остаются рабочими за счет fallback-обработки.
 
 ## Лимит для AI-upscale
 
@@ -157,6 +160,32 @@ Linux:
 export PHOTORESTORE_AI_MODEL_PATH=/var/www/project/backend/models/EDSR_x2.pb
 ```
 
+## Как подключить AI-колоризацию
+
+По умолчанию backend ищет три файла модели здесь:
+
+```text
+backend/models/colorization_deploy_v2.prototxt
+backend/models/colorization_release_v2.caffemodel
+backend/models/pts_in_hull.npy
+```
+
+Если файлы лежат в другом месте, пути можно задать через переменные:
+
+```powershell
+$env:PHOTORESTORE_COLORIZATION_PROTO_PATH="C:\path\to\colorization_deploy_v2.prototxt"
+$env:PHOTORESTORE_COLORIZATION_MODEL_PATH="C:\path\to\colorization_release_v2.caffemodel"
+$env:PHOTORESTORE_COLORIZATION_POINTS_PATH="C:\path\to\pts_in_hull.npy"
+```
+
+Linux:
+
+```bash
+export PHOTORESTORE_COLORIZATION_PROTO_PATH=/var/www/project/backend/models/colorization_deploy_v2.prototxt
+export PHOTORESTORE_COLORIZATION_MODEL_PATH=/var/www/project/backend/models/colorization_release_v2.caffemodel
+export PHOTORESTORE_COLORIZATION_POINTS_PATH=/var/www/project/backend/models/pts_in_hull.npy
+```
+
 ### Systemd
 
 Для сервиса `ai-image-processing` можно добавить:
@@ -164,6 +193,9 @@ export PHOTORESTORE_AI_MODEL_PATH=/var/www/project/backend/models/EDSR_x2.pb
 ```ini
 [Service]
 Environment="PHOTORESTORE_AI_MODEL_PATH=/var/www/project/backend/models/EDSR_x2.pb"
+Environment="PHOTORESTORE_COLORIZATION_PROTO_PATH=/var/www/project/backend/models/colorization_deploy_v2.prototxt"
+Environment="PHOTORESTORE_COLORIZATION_MODEL_PATH=/var/www/project/backend/models/colorization_release_v2.caffemodel"
+Environment="PHOTORESTORE_COLORIZATION_POINTS_PATH=/var/www/project/backend/models/pts_in_hull.npy"
 ```
 
 После изменения:
@@ -188,8 +220,9 @@ python backend/scripts/check_model.py
 
 - `available = true`
 - `model_file_exists = true`
-- `active_processor = "ai-superres-opencv"`
-- `framework = "opencv-dnn-superres"`
+- `ai_supported_modes` содержит `upscale` и/или `colorize`
+- `ai_processors` содержит `ai-superres-opencv` и/или `ai-colorization-opencv`
+- `active_processor = "ai-superres-opencv"` для одной модели или `active_processor = "ai-multi-opencv"` для нескольких AI-процессоров
 
 4. Проверить `POST /api/process` с `mode=upscale` и `prefer_ai=true`
 
@@ -198,6 +231,13 @@ python backend/scripts/check_model.py
 - `processing.used_ai = true`
 - `processing.model = "EDSR_x2.pb"`
 - `output.width` и `output.height` примерно в 2 раза больше исходных
+
+5. Проверить `POST /api/process` с `mode=colorize` и `prefer_ai=true` на чёрно-белом изображении
+
+Ожидаемо при подключенной модели колоризации:
+
+- `processing.used_ai = true`
+- `processing.model = "colorization_release_v2.caffemodel"`
 
 Для проверки защитного лимита можно отправить изображение больше `512 * 512` пикселей с `mode=upscale` и `prefer_ai=true`. Ожидаемо:
 
@@ -235,14 +275,16 @@ Invoke-RestMethod -Uri "http://212.67.12.19/api/model/status"
 При активной AI-модели `/api/model/status` должен показывать:
 
 - `available = true`
-- `active_processor = "ai-superres-opencv"`
-- `model = "EDSR_x2.pb"`
+- `active_processor = "ai-superres-opencv"` или `"ai-multi-opencv"`
+- `ai_supported_modes` содержит доступные AI-режимы
+- `model` содержит имя активной модели или список моделей
 - `model_file_exists = true`
 
 После деплоя изменений с лимитом AI-upscale нужно проверить два сценария:
 
 - маленькое изображение, например `96x64`, в режиме `upscale` должно дать `processing.used_ai = true`
 - изображение больше `512 * 512` пикселей в режиме `upscale` должно дать `processing.used_ai = false` и `processing.model = "fallback-opencv-pillow"`
+- чёрно-белое изображение в режиме `colorize` при подключенной модели колоризации должно дать `processing.used_ai = true`
 
 ## Обновление сервера
 

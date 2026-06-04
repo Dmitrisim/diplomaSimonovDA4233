@@ -49,6 +49,33 @@ class _MockAiProcessor(ImageProcessor):
         )
 
 
+class _MockColorizationAiProcessor(ImageProcessor):
+    name = "ai-colorization-opencv"
+    framework = "opencv-dnn-colorization"
+    supported_modes = ("colorize",)
+    model_name = "colorization_release_v2.caffemodel"
+
+    def process(
+        self,
+        *,
+        image: Image.Image,
+        mode: str = "enhance",
+        prefer_ai: bool = True,
+        upscale_scale: int = 2,
+    ) -> InferenceResult:
+        del prefer_ai
+        del upscale_scale
+        if mode != "colorize":
+            raise ValueError("unsupported_mode")
+        output = image.convert("L").convert("RGB")
+        return InferenceResult(
+            image=output,
+            used_ai=True,
+            model_name="colorization_release_v2.caffemodel",
+            mode="colorize",
+        )
+
+
 class _MockFallbackProcessor(ImageProcessor):
     name = "fallback-opencv-pillow"
     framework = "opencv-pillow-fallback"
@@ -132,6 +159,8 @@ def test_model_status_returns_ok(client: TestClient, path: str) -> None:
     assert payload["model_file_exists"] is False
     assert payload["availability_reason"] == "AI model path not configured"
     assert payload["supported_modes"] == ["enhance", "restore", "upscale", "colorize"]
+    assert payload["ai_supported_modes"] == []
+    assert payload["ai_processors"] == []
     assert payload["fallback_available"] is True
     assert payload["modes"] == ["enhance", "restore", "upscale", "colorize"]
     assert payload["framework"] == "opencv-pillow-fallback"
@@ -373,6 +402,42 @@ def test_process_colorize_returns_result(client: TestClient) -> None:
     assert payload["processing"]["mode"] == "colorize"
     assert payload["processing"]["used_ai"] is False
     assert payload["processing"]["model"] == "fallback-opencv-pillow"
+
+
+def test_process_colorize_uses_ai_when_runtime_is_available(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = ProcessorRuntime(
+        ai_processor=_MockColorizationAiProcessor(),
+        fallback_processor=_MockFallbackProcessor(),
+        available=True,
+        active_processor="ai-colorization-opencv",
+        default_processor="ai-colorization-opencv",
+        model="colorization_release_v2.caffemodel",
+        model_name="colorization_release_v2.caffemodel",
+        framework="opencv-dnn-colorization",
+        model_path="C:/fake/colorization_release_v2.caffemodel",
+        model_file_exists=True,
+        availability_reason=None,
+        supported_modes=("enhance", "restore", "upscale", "colorize"),
+        ai_supported_modes=("colorize",),
+        ai_processors=("ai-colorization-opencv",),
+        fallback_available=True,
+    )
+    monkeypatch.setattr(pipeline_module, "load_processor_runtime", lambda _: runtime)
+
+    process_response = client.post(
+        "/api/process",
+        files={"file": ("mono.png", _make_image_bytes(fmt="PNG"), "image/png")},
+        data={"prefer_ai": "true", "mode": "colorize"},
+    )
+
+    assert process_response.status_code == 200
+    payload = process_response.json()
+    assert payload["processing"]["mode"] == "colorize"
+    assert payload["processing"]["used_ai"] is True
+    assert payload["processing"]["model"] == "colorization_release_v2.caffemodel"
 
 
 def test_process_rejects_unsupported_file(client: TestClient) -> None:

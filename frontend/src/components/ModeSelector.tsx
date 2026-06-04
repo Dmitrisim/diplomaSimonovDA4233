@@ -19,7 +19,9 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
           </span>
         </div>
         <p className='sectionMuted'>
-          Выберите один сценарий обработки для текущего изображения.
+          Выберите сценарий: AI используется для увеличения разрешения и
+          колоризации ч/б фото, остальные режимы выполняются серверными
+          алгоритмами обработки.
         </p>
       </div>
 
@@ -70,12 +72,16 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
 
 function runtimeLabel(item: (typeof MODE_DEFINITIONS)[number]): string {
   if (!item.backendMode) return 'demo';
-  if (item.backendMode === 'upscale') return 'AI/API';
-  return 'API';
+  if (item.backendMode === 'upscale' || item.backendMode === 'colorize') {
+    return 'AI';
+  }
+  return 'Алгоритм';
 }
 
 function runtimeClass(item: (typeof MODE_DEFINITIONS)[number]): string {
   if (!item.backendMode) return 'isDemo';
-  if (item.backendMode === 'upscale') return 'isAi';
+  if (item.backendMode === 'upscale' || item.backendMode === 'colorize') {
+    return 'isAi';
+  }
   return 'isApi';
 }

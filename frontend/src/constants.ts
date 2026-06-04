@@ -2,6 +2,8 @@ import type { ModeDefinition, ProcessingParameters, ProcessingMode } from './typ
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 export const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const AI_UPSCALE_LIMIT_PIXELS = 512 * 512;
+export const AI_UPSCALE_LIMIT_LABEL = '512 × 512';
 
 export const DEFAULT_PARAMETERS: ProcessingParameters = {
   intensity: 65,
@@ -70,6 +72,17 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     bestFor: 'Подходит для архивных бумажных снимков, выцветших сканов и фото с серым налетом.',
     limitations: 'Не исправляет пикселизацию и не увеличивает разрешение. Для маленьких фото используйте режим "Разрешение".',
     backendMode: 'restore',
+  },
+  {
+    id: 'colorize-photo',
+    title: 'Раскрасить ч/б фото',
+    shortTitle: 'Колоризация',
+    iconLabel: 'CL',
+    description:
+      'Добавляет цвет к чёрно-белому изображению через AI-колоризацию при доступной модели.',
+    bestFor: 'Подходит для чёрно-белых архивных снимков, портретов и сканов без цвета.',
+    limitations: 'Цвета прогнозируются моделью и могут отличаться от реальных. Если AI-модель не подключена, используется fallback-тонирование.',
+    backendMode: 'colorize',
   },
   {
     id: 'web-export',

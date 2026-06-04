@@ -31,8 +31,8 @@ export function Hero({ onStart, onExplore }: HeroProps) {
         <div className='heroMetrics'>
           <span className='metricChip'>JPG / PNG / WebP</span>
           <span className='metricChip'>до 10 МБ</span>
-          <span className='metricChip'>6 сценариев обработки</span>
-          <span className='metricChip'>AI / API / demo</span>
+          <span className='metricChip'>7 сценариев обработки</span>
+          <span className='metricChip'>AI / алгоритмы / demo</span>
         </div>
       </div>
 

@@ -186,6 +186,8 @@ def model_status() -> dict:
         "model_file_exists": runtime.model_file_exists,
         "availability_reason": runtime.availability_reason,
         "supported_modes": supported_modes,
+        "ai_supported_modes": list(runtime.ai_supported_modes),
+        "ai_processors": list(runtime.ai_processors),
         "fallback_available": runtime.fallback_available,
         "modes": supported_modes,
     }

@@ -10,6 +10,7 @@ import './App.css';
 import {
   DEFAULT_PARAMETERS,
   MAX_FILE_SIZE,
+  MODE_BY_ID,
   MODE_DEFINITIONS,
   STORAGE_HISTORY_KEY,
 } from './constants';
@@ -30,6 +31,7 @@ import type {
   CompareView,
   FileMeta,
   HistoryItem,
+  ImageAnalysis,
   ProcessResult,
   ProcessStage,
   ProcessingMode,
@@ -38,6 +40,7 @@ import type {
   ServiceStatus,
 } from './types';
 import {
+  analyzeImageFile,
   convertImageBlob,
   createHistoryItem,
   createImageThumbnailDataUrl,
@@ -98,9 +101,12 @@ function App() {
     apiOk: false,
     aiAvailable: false,
     runtimeMode: 'demo',
+    aiSupportedModes: [],
+    aiProcessors: [],
   });
   const [file, setFile] = useState<File | null>(null);
   const [sourceMeta, setSourceMeta] = useState<FileMeta | null>(null);
+  const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysis | null>(null);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>(readStoredHistory);
@@ -173,6 +179,7 @@ function App() {
     }
     setFile(null);
     setSourceMeta(null);
+    setImageAnalysis(null);
     setSourceUrl(null);
     setResult(null);
     setStage('idle');
@@ -202,18 +209,23 @@ function App() {
 
     try {
       const meta = await getImageMeta(selected);
+      const analysis = await analyzeImageFile(selected, meta);
       if (sourceUrl?.startsWith('blob:')) {
         URL.revokeObjectURL(sourceUrl);
       }
       setFile(selected);
       setSourceMeta(meta);
+      setImageAnalysis(analysis);
       setSourceUrl(URL.createObjectURL(selected));
       setResult(null);
+      setMode(analysis.recommendedMode);
       setStage('file-selected');
       setActiveSection('processing');
       setOpenControlSection('mode');
       setContextTab('info');
-      setMessage('Фото загружено. Выберите сценарий и запустите обработку.');
+      setMessage(
+        `Фото загружено. Рекомендуемый режим: ${MODE_BY_ID[analysis.recommendedMode].title}.`,
+      );
       setCompareValue(50);
     } catch {
       setStage('format-error');
@@ -358,6 +370,7 @@ function App() {
 
   const handleHistoryOpen = (item: HistoryItem) => {
     setSourceMeta(item.sourceMeta);
+    setImageAnalysis(null);
     setSourceUrl(item.sourcePreview || null);
     setResult({
       id: item.id,
@@ -1019,6 +1032,7 @@ function App() {
                         params={params}
                         stage={stage}
                         serviceStatus={serviceStatus}
+                        analysis={imageAnalysis}
                       />
                     ) : (
                       <HistorySection

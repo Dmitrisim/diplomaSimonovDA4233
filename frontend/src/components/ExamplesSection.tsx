@@ -9,8 +9,8 @@ type ExampleCardData = {
   description: string;
   meta: string;
   tone: 'blue' | 'violet' | 'cyan' | 'orange';
-  filter: 'restore' | 'noise' | 'sharpness' | 'resolution' | 'web';
-  visual: 'restore' | 'noise' | 'portrait' | 'scan' | 'web' | 'enhance';
+  filter: 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web';
+  visual: 'restore' | 'colorize' | 'noise' | 'portrait' | 'scan' | 'web' | 'enhance';
 };
 
 type ExamplesSectionProps = {
@@ -32,6 +32,17 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     tone: 'orange',
     filter: 'restore',
     visual: 'restore',
+  },
+  {
+    id: 'colorize-photo',
+    mode: 'colorize-photo',
+    title: 'AI-колоризация ч/б фото',
+    description:
+      'Добавляет реалистичный цвет к чёрно-белым снимкам через отдельную AI-модель, а без неё использует fallback-тонирование.',
+    meta: 'ч/б фото',
+    tone: 'cyan',
+    filter: 'colorize',
+    visual: 'colorize',
   },
   {
     id: 'sharpen',
@@ -98,7 +109,7 @@ export function ExamplesSection({
   onTryMode,
 }: ExamplesSectionProps) {
   const [filter, setFilter] = useState<
-    'all' | 'restore' | 'noise' | 'sharpness' | 'resolution' | 'web'
+    'all' | 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web'
   >('all');
 
   const filteredItems = useMemo(() => {
@@ -112,6 +123,7 @@ export function ExamplesSection({
     () => [
       { id: 'all' as const, label: 'Все' },
       { id: 'restore' as const, label: 'Старые снимки' },
+      { id: 'colorize' as const, label: 'Колоризация' },
       { id: 'noise' as const, label: 'Шум' },
       { id: 'sharpness' as const, label: 'Резкость' },
       { id: 'resolution' as const, label: 'Разрешение' },

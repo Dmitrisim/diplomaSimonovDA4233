@@ -29,6 +29,8 @@ class ProcessorRuntime:
     model_file_exists: bool
     availability_reason: str | None
     supported_modes: tuple[str, ...]
+    ai_supported_modes: tuple[str, ...] = ()
+    ai_processors: tuple[str, ...] = ()
     fallback_available: bool = True
 
     def resolve_processor(self, mode: str, prefer_ai: bool) -> "ImageProcessor":
