@@ -44,6 +44,7 @@ backend/
 
 - `enhance`
 - `restore`
+- `denoise`
 - `upscale`
 - `colorize`
 
@@ -59,7 +60,7 @@ Backend всегда пытается сохранить рабочий поль
 - `processing.used_ai = true` и `processing.model = "colorization_release_v2.caffemodel"` — использована модель AI-колоризации
 - `processing.used_ai = false` и `processing.model = "fallback-opencv-pillow"` — использована обработка через OpenCV/Pillow
 
-На текущем этапе AI используется для режимов `upscale` и `colorize` при `prefer_ai=true` и наличии соответствующих model-файлов. Режимы `enhance` и `restore` остаются рабочими за счет fallback-обработки.
+На текущем этапе AI используется для режимов `upscale` и `colorize` при `prefer_ai=true` и наличии соответствующих model-файлов. Режимы `enhance`, `restore` и `denoise` остаются рабочими за счет fallback-обработки.
 
 ## Лимит для AI-upscale
 

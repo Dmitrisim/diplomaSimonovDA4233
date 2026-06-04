@@ -5,6 +5,7 @@ from PIL import Image
 from ..processing.filters import (
     bgr_to_pil,
     colorize_image,
+    denoise_image,
     enhance_image,
     pil_to_bgr,
     restore_image,
@@ -16,7 +17,7 @@ from .base import ImageProcessor, InferenceResult
 class FallbackImageProcessor(ImageProcessor):
     name = "fallback-opencv-pillow"
     framework = "opencv-pillow-fallback"
-    supported_modes = ("enhance", "restore", "upscale", "colorize")
+    supported_modes = ("enhance", "restore", "denoise", "upscale", "colorize")
 
     def process(
         self,
@@ -38,6 +39,8 @@ class FallbackImageProcessor(ImageProcessor):
             output_bgr = enhance_image(image_bgr)
         elif mode_norm == "restore":
             output_bgr = restore_image(image_bgr)
+        elif mode_norm == "denoise":
+            output_bgr = denoise_image(image_bgr)
         elif mode_norm == "upscale":
             output_bgr = upscale_image(image_bgr, scale=max(1, int(upscale_scale or 2)))
         else:

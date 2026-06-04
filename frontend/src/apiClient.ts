@@ -74,6 +74,7 @@ function isBackendProcessingMode(value: unknown): value is BackendProcessingMode
   return (
     value === 'enhance' ||
     value === 'restore' ||
+    value === 'denoise' ||
     value === 'upscale' ||
     value === 'colorize'
   );

@@ -43,6 +43,35 @@ def enhance_image(image_bgr: np.ndarray) -> np.ndarray:
     return _apply_unsharp_mask(vivid, amount=0.35, sigma=1.1)
 
 
+def denoise_image(image_bgr: np.ndarray) -> np.ndarray:
+    channel_spread = np.mean(
+        np.max(image_bgr, axis=2).astype(np.float32)
+        - np.min(image_bgr, axis=2).astype(np.float32),
+    )
+    if channel_spread < 8:
+        gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+        denoised_gray = cv2.fastNlMeansDenoising(
+            gray,
+            None,
+            h=18,
+            templateWindowSize=7,
+            searchWindowSize=21,
+        )
+        denoised = cv2.cvtColor(denoised_gray, cv2.COLOR_GRAY2BGR)
+    else:
+        denoised = cv2.fastNlMeansDenoisingColored(
+            image_bgr,
+            None,
+            h=9,
+            hColor=9,
+            templateWindowSize=7,
+            searchWindowSize=21,
+        )
+    smoothed = cv2.bilateralFilter(denoised, 5, 32, 32)
+    blended = cv2.addWeighted(image_bgr, 0.2, smoothed, 0.8, 0)
+    return _apply_unsharp_mask(blended, amount=0.08, sigma=1.0)
+
+
 def restore_image(image_bgr: np.ndarray) -> np.ndarray:
     denoised = cv2.fastNlMeansDenoisingColored(image_bgr, None, 5, 5, 7, 21)
     contrasted = _apply_clahe(denoised, clip_limit=1.25)

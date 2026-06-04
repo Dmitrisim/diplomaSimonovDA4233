@@ -12,7 +12,12 @@ export type ScaleFactor = 'x2' | 'x4';
 export type DenoiseLevel = 'low' | 'medium' | 'high';
 export type CompareView = 'slider' | 'split';
 export type RuntimeMode = 'demo' | 'production';
-export type BackendProcessingMode = 'enhance' | 'restore' | 'upscale' | 'colorize';
+export type BackendProcessingMode =
+  | 'enhance'
+  | 'restore'
+  | 'denoise'
+  | 'upscale'
+  | 'colorize';
 
 export type ProcessStage =
   | 'idle'

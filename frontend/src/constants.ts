@@ -50,7 +50,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     description: 'Снижает зернистость, цифровой шум и мелкие артефакты на шумных снимках.',
     bestFor: 'Подходит для фото при слабом освещении, старых цифровых кадров и темных сцен.',
     limitations: 'Слишком сильное шумоподавление может сделать детали мягче.',
-    backendMode: 'restore',
+    backendMode: 'denoise',
   },
   {
     id: 'sharpen',
