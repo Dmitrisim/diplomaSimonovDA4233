@@ -1,7 +1,8 @@
-import type { CompareView, ProcessResult } from '../types';
+import type { CompareView, FileMeta, ProcessResult } from '../types';
 
 type PreviewPanelProps = {
   sourceUrl: string | null;
+  sourceMeta: FileMeta | null;
   result: ProcessResult | null;
   compareValue: number;
   compareView: CompareView;
@@ -17,6 +18,7 @@ type PreviewPanelProps = {
 export function PreviewPanel(props: PreviewPanelProps) {
   const {
     sourceUrl,
+    sourceMeta,
     result,
     compareValue,
     compareView,
@@ -198,8 +200,8 @@ export function PreviewPanel(props: PreviewPanelProps) {
           <ImageCard
             title='Исходное изображение'
             url={sourceUrl}
-            width={result?.sourceMeta.width}
-            height={result?.sourceMeta.height}
+            width={result?.sourceMeta.width ?? sourceMeta?.width}
+            height={result?.sourceMeta.height ?? sourceMeta?.height}
             variant='split'
           />
           <ImageCard

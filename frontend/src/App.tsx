@@ -796,6 +796,7 @@ function App() {
                 <div className='canvasPanelBody'>
                   <PreviewPanel
                     sourceUrl={sourceUrl}
+                    sourceMeta={sourceMeta}
                     result={result}
                     compareValue={compareValue}
                     compareView={compareView}
