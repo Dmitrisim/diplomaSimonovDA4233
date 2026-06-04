@@ -116,7 +116,12 @@ export function PreviewPanel(props: PreviewPanelProps) {
                 />
               ) : null}
               {result ? (
-                <div className='compareTop' style={{ width: `${compareValue}%` }}>
+                <div
+                  className='compareTop'
+                  style={{
+                    clipPath: `inset(0 ${100 - compareValue}% 0 0)`,
+                  }}
+                >
                   <img
                     className='compareImg'
                     src={result.resultUrl}
