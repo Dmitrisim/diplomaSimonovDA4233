@@ -108,14 +108,20 @@ export function PreviewPanel(props: PreviewPanelProps) {
               <span>{result?.isDemo ? 'demo output' : 'processing output'}</span>
             </div>
             <div className='compareStage'>
-              {sourceUrl ? (
+              {result ? (
+                <img
+                  className='compareImg'
+                  src={result.resultUrl}
+                  alt='Результат обработки'
+                />
+              ) : sourceUrl ? (
                 <img
                   className='compareImg'
                   src={sourceUrl}
                   alt='Исходное изображение'
                 />
               ) : null}
-              {result ? (
+              {sourceUrl && result ? (
                 <div
                   className='compareTop'
                   style={{
@@ -124,8 +130,8 @@ export function PreviewPanel(props: PreviewPanelProps) {
                 >
                   <img
                     className='compareImg'
-                    src={result.resultUrl}
-                    alt='Результат обработки'
+                    src={sourceUrl}
+                    alt='Исходное изображение'
                   />
                 </div>
               ) : null}
