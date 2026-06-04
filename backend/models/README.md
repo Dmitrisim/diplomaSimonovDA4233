@@ -77,6 +77,7 @@ export PHOTORESTORE_COLORIZATION_POINTS_PATH=/var/www/project/backend/models/pts
 После размещения файла проверь:
 
 - `python backend/scripts/check_model.py`
+- `python backend/scripts/check_model.py --require-all`
 - `GET /api/model/status`
 
 Если файл отсутствует или не загружается, backend автоматически продолжит работу через `fallback-opencv-pillow`.

@@ -369,12 +369,22 @@ function App() {
     }
   };
 
-  const handleHistoryOpen = (item: HistoryItem) => {
-    const fullSourceUrl =
-      item.sourceUrl ||
-      (!item.isDemo && item.id ? `/source/${item.id}` : '') ||
-      item.sourcePreview ||
-      null;
+  const resolveHistorySourceUrl = async (item: HistoryItem) => {
+    if (item.sourceUrl) return item.sourceUrl;
+    if (!item.isDemo && item.id) {
+      const sourceUrl = `/source/${item.id}`;
+      try {
+        const response = await fetch(sourceUrl, { method: 'HEAD' });
+        if (response.ok) return sourceUrl;
+      } catch {
+        // Fall back to the thumbnail stored in local history.
+      }
+    }
+    return item.sourcePreview || null;
+  };
+
+  const handleHistoryOpen = async (item: HistoryItem) => {
+    const fullSourceUrl = await resolveHistorySourceUrl(item);
     const fullResultUrl =
       item.downloadUrl || item.resultPreview || item.sourcePreview || '';
 

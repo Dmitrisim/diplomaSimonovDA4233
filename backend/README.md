@@ -214,6 +214,19 @@ sudo systemctl restart ai-image-processing
 python backend/scripts/check_model.py
 ```
 
+Для строгой проверки обеих AI-моделей:
+
+```powershell
+python backend/scripts/check_model.py --require-all
+```
+
+Можно проверить отдельный режим:
+
+```powershell
+python backend/scripts/check_model.py --require upscale
+python backend/scripts/check_model.py --require colorize
+```
+
 3. Проверить `GET /api/model/status`
 
 Ожидаемо при успешной загрузке:
@@ -253,6 +266,7 @@ python backend/scripts/check_model.py
 - правильно ли задан `PHOTORESTORE_AI_MODEL_PATH`
 - доступен ли `cv2.dnn_superres`
 - что показывает `python backend/scripts/check_model.py`
+- что показывает `python backend/scripts/check_model.py --require-all`
 - что возвращает `GET /api/model/status`
 
 Если модель не найдена или не инициализируется, backend честно сообщит причину в `availability_reason` и продолжит работу через fallback.
