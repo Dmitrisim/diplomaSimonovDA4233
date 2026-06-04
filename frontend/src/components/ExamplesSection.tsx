@@ -25,10 +25,10 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
   {
     id: 'restore-photo',
     mode: 'restore-photo',
-    title: 'Восстановление старого фото',
+    title: 'Восстановление старого снимка',
     description:
-      'Поднимает контраст, ослабляет следы времени и делает старые снимки чище.',
-    meta: 'старое фото',
+      'Поднимает тон и контраст на выцветших сканах без увеличения разрешения.',
+    meta: 'старый скан',
     tone: 'orange',
     filter: 'restore',
     visual: 'restore',
@@ -60,7 +60,7 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     mode: 'super-resolution',
     title: 'Увеличить разрешение',
     description:
-      'Делает маленькие изображения крупнее и пригоднее для печати или показа.',
+      'Делает маленькие и пиксельные изображения крупнее через AI super-resolution.',
     meta: 'разрешение',
     tone: 'violet',
     filter: 'resolution',
@@ -111,7 +111,7 @@ export function ExamplesSection({
   const filterItems = useMemo(
     () => [
       { id: 'all' as const, label: 'Все' },
-      { id: 'restore' as const, label: 'Старые фото' },
+      { id: 'restore' as const, label: 'Старые снимки' },
       { id: 'noise' as const, label: 'Шум' },
       { id: 'sharpness' as const, label: 'Резкость' },
       { id: 'resolution' as const, label: 'Разрешение' },
