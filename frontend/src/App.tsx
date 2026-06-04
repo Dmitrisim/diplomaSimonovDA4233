@@ -40,8 +40,8 @@ import type {
 import {
   convertImageBlob,
   createHistoryItem,
+  createImageThumbnailDataUrl,
   downloadBlob,
-  fileToDataUrl,
   getImageMeta,
   urlToBlob,
 } from './utils';
@@ -59,6 +59,34 @@ function readStoredHistory(): HistoryItem[] {
   } catch {
     localStorage.removeItem(STORAGE_HISTORY_KEY);
     return [];
+  }
+}
+
+function writeStoredHistory(items: HistoryItem[]): void {
+  try {
+    localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(items));
+  } catch {
+    const compactItems = items
+      .map((item) => ({
+        ...item,
+        sourcePreview: '',
+        resultPreview: '',
+      }))
+      .slice(0, 6);
+
+    try {
+      localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(compactItems));
+    } catch {
+      localStorage.removeItem(STORAGE_HISTORY_KEY);
+    }
+  }
+}
+
+async function safeCreateHistoryPreview(source: Blob | string): Promise<string> {
+  try {
+    return await createImageThumbnailDataUrl(source);
+  } catch {
+    return '';
   }
 }
 
@@ -97,7 +125,7 @@ function App() {
   const [contextTab, setContextTab] = useState<ContextTabId>('info');
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
+    writeStoredHistory(history);
   }, [history]);
 
   useEffect(() => {
@@ -267,7 +295,8 @@ function App() {
       setContextTab('info');
       setMessage(processed.statusText);
 
-      const sourcePreview = await fileToDataUrl(file);
+      const sourcePreview = await safeCreateHistoryPreview(file);
+      const resultPreview = await safeCreateHistoryPreview(processed.resultUrl);
       const historyItem = createHistoryItem({
         id: processed.id,
         fileName: sourceMeta.name,
@@ -278,7 +307,7 @@ function App() {
         usedAi: processed.usedAi,
         modelName: processed.modelName,
         sourcePreview,
-        resultPreview: processed.resultUrl,
+        resultPreview,
         sourceMeta,
         resultMeta: processed.resultMeta,
         isDemo: processed.isDemo,
@@ -329,10 +358,10 @@ function App() {
 
   const handleHistoryOpen = (item: HistoryItem) => {
     setSourceMeta(item.sourceMeta);
-    setSourceUrl(item.sourcePreview);
+    setSourceUrl(item.sourcePreview || null);
     setResult({
       id: item.id,
-      resultUrl: item.resultPreview,
+      resultUrl: item.resultPreview || item.downloadUrl,
       downloadUrl: item.downloadUrl || item.resultPreview,
       mode: item.mode,
       usedAi: item.usedAi,

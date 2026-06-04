@@ -57,11 +57,17 @@ export function HistorySection({
         <div className='historyList'>
           {items.map((item) => (
             <article key={item.id} className='historyCard'>
-              <img
-                className='historyImage'
-                src={item.resultPreview || item.sourcePreview}
-                alt={item.fileName}
-              />
+              {item.resultPreview || item.sourcePreview || item.downloadUrl ? (
+                <img
+                  className='historyImage'
+                  src={item.resultPreview || item.sourcePreview || item.downloadUrl}
+                  alt={item.fileName}
+                />
+              ) : (
+                <div className='historyImage historyImagePlaceholder'>
+                  Нет превью
+                </div>
+              )}
               <div className='historyBody'>
                 <div className='historyTitleRow'>
                   <h3>{item.fileName}</h3>

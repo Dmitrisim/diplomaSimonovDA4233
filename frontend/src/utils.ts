@@ -92,6 +92,42 @@ export async function fileToDataUrl(file: File): Promise<string> {
   return blobToDataUrl(file);
 }
 
+export async function createImageThumbnailDataUrl(
+  source: Blob | string,
+  maxWidth = 360,
+  maxHeight = 240,
+): Promise<string> {
+  let objectUrl: string | null = null;
+  const src =
+    typeof source === 'string'
+      ? source
+      : (objectUrl = URL.createObjectURL(source));
+
+  try {
+    const image = await loadImage(src);
+    const ratio = Math.min(
+      1,
+      maxWidth / image.naturalWidth,
+      maxHeight / image.naturalHeight,
+    );
+    const width = Math.max(1, Math.round(image.naturalWidth * ratio));
+    const height = Math.max(1, Math.round(image.naturalHeight * ratio));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas недоступен');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(image, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', 0.72);
+  } finally {
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+}
+
 export async function urlToBlob(url: string): Promise<Blob> {
   const response = await fetch(url);
   if (!response.ok) {
