@@ -198,11 +198,15 @@ export function PreviewPanel(props: PreviewPanelProps) {
           <ImageCard
             title='Исходное изображение'
             url={sourceUrl}
+            width={result?.sourceMeta.width}
+            height={result?.sourceMeta.height}
             variant='split'
           />
           <ImageCard
             title={result?.isDemo ? 'Результат (демо)' : 'Результат обработки'}
             url={result?.resultUrl ?? null}
+            width={result?.resultMeta.width}
+            height={result?.resultMeta.height}
             variant='split'
           />
         </div>
@@ -214,16 +218,23 @@ export function PreviewPanel(props: PreviewPanelProps) {
 function ImageCard({
   title,
   url,
+  width,
+  height,
   variant = 'default',
 }: {
   title: string;
   url: string | null;
+  width?: number;
+  height?: number;
   variant?: 'default' | 'split';
 }) {
+  const aspectRatio =
+    variant === 'split' && width && height ? `${width} / ${height}` : undefined;
+
   return (
     <div className={`imageCard ${variant === 'split' ? 'isSplitPreview' : ''}`}>
       <div className='cardTitle'>{title}</div>
-      <div className='imageCardBody'>
+      <div className='imageCardBody' style={{ aspectRatio }}>
         {url ? (
           <img src={url} alt={title} />
         ) : (
