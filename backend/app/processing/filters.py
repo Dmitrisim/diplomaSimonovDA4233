@@ -44,10 +44,10 @@ def enhance_image(image_bgr: np.ndarray) -> np.ndarray:
 
 
 def restore_image(image_bgr: np.ndarray) -> np.ndarray:
-    denoised = cv2.fastNlMeansDenoisingColored(image_bgr, None, 9, 9, 7, 21)
-    softened = cv2.bilateralFilter(denoised, d=7, sigmaColor=30, sigmaSpace=30)
-    contrasted = _apply_clahe(softened, clip_limit=1.6)
-    return _apply_unsharp_mask(contrasted, amount=0.22, sigma=1.3)
+    denoised = cv2.fastNlMeansDenoisingColored(image_bgr, None, 5, 5, 7, 21)
+    contrasted = _apply_clahe(denoised, clip_limit=1.25)
+    sharpened = _apply_unsharp_mask(contrasted, amount=0.12, sigma=1.2)
+    return cv2.addWeighted(image_bgr, 0.45, sharpened, 0.55, 0)
 
 
 def upscale_image(image_bgr: np.ndarray, scale: int) -> np.ndarray:
