@@ -66,9 +66,13 @@ class AIProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         del prefer_ai
         del upscale_scale
+        del max_width
+        del max_height
 
         mode_norm = (mode or "").strip().lower()
         if mode_norm != "upscale":

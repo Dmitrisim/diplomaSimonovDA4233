@@ -117,6 +117,8 @@ class CompositeAIProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         mode_norm = (mode or "").strip().lower()
         for processor in self.processors:
@@ -126,6 +128,8 @@ class CompositeAIProcessor(ImageProcessor):
                     mode=mode,
                     prefer_ai=prefer_ai,
                     upscale_scale=upscale_scale,
+                    max_width=max_width,
+                    max_height=max_height,
                 )
         raise ValueError("unsupported_mode")
 

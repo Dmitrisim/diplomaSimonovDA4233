@@ -17,6 +17,12 @@ from ..storage import ensure_dirs, new_job_paths, safe_suffix
 router = APIRouter()
 
 RESULT_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
+RESULT_FORMATS = {
+    "png": (".png", "PNG"),
+    "jpeg": (".jpg", "JPEG"),
+    "jpg": (".jpg", "JPEG"),
+    "webp": (".webp", "WebP"),
+}
 
 
 def _settings() -> config.Settings:
@@ -34,6 +40,45 @@ def _normalize_image_format(value: str | None) -> str:
     if normalized == "webp":
         return "WebP"
     return normalized.upper()
+
+
+def _result_format(value: str | None) -> tuple[str, str]:
+    normalized = (value or "png").strip().lower()
+    return RESULT_FORMATS.get(normalized, RESULT_FORMATS["png"])
+
+
+def _clamp_int(value: int, minimum: int, maximum: int) -> int:
+    return max(minimum, min(maximum, int(value)))
+
+
+def _truthy_form(value: str | None) -> bool:
+    return (value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _save_result_image(
+    image: Image.Image,
+    path: Path,
+    *,
+    image_format: str,
+    quality: int,
+    optimize_file_size: bool,
+) -> None:
+    output = image.convert("RGB") if image_format in {"JPEG", "WebP"} else image
+    save_kwargs: dict[str, object] = {}
+    if image_format == "JPEG":
+        save_kwargs.update(
+            quality=quality,
+            optimize=optimize_file_size,
+            progressive=optimize_file_size,
+        )
+    elif image_format == "WebP":
+        save_kwargs.update(
+            quality=quality,
+            method=6 if optimize_file_size else 4,
+        )
+    elif image_format == "PNG":
+        save_kwargs.update(optimize=optimize_file_size)
+    output.save(path, format=image_format, **save_kwargs)
 
 
 def _metadata_path(job_id: str) -> Path:
@@ -201,6 +246,12 @@ async def process_endpoint(
     file: UploadFile = File(...),
     prefer_ai: str = Form("true"),
     mode: str = Form("enhance"),
+    result_format: str = Form("png"),
+    quality: int = Form(90),
+    upscale_scale: int = Form(2),
+    max_width: int = Form(1920),
+    max_height: int = Form(1080),
+    optimize_file_size: str = Form("true"),
 ) -> dict:
     settings = _settings()
     ensure_dirs(settings.uploads_dir, settings.results_dir, settings.models_dir)
@@ -215,11 +266,18 @@ async def process_endpoint(
     if len(content) > settings.max_upload_bytes:
         raise HTTPException(status_code=413, detail="Файл слишком большой")
 
+    result_suffix, pil_result_format = _result_format(result_format)
+    output_quality = _clamp_int(quality, 1, 100)
+    output_upscale_scale = _clamp_int(upscale_scale, 1, 4)
+    output_max_width = _clamp_int(max_width, 1, 8000)
+    output_max_height = _clamp_int(max_height, 1, 8000)
+    optimize_output = _truthy_form(optimize_file_size)
+
     job = new_job_paths(
         settings.uploads_dir,
         settings.results_dir,
         upload_suffix=suffix,
-        result_suffix=".png",
+        result_suffix=result_suffix,
     )
     job.upload_path.write_bytes(content)
 
@@ -245,12 +303,21 @@ async def process_endpoint(
             models_dir=settings.models_dir,
             prefer_ai=prefer_ai_bool,
             mode=mode,
+            upscale_scale=output_upscale_scale,
+            max_width=output_max_width,
+            max_height=output_max_height,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Неподдерживаемый режим обработки") from exc
 
     dt_ms = int((time.perf_counter() - t0) * 1000)
-    result.image.save(job.result_path, format="PNG", optimize=True)
+    _save_result_image(
+        result.image,
+        job.result_path,
+        image_format=pil_result_format,
+        quality=output_quality,
+        optimize_file_size=optimize_output,
+    )
 
     in_width, in_height = image.size
     out_width, out_height = result.image.size
@@ -263,7 +330,7 @@ async def process_endpoint(
         source_width=in_width,
         source_height=in_height,
         result_path=job.result_path,
-        result_format="png",
+        result_format=pil_result_format,
         result_width=out_width,
         result_height=out_height,
         mode=result.mode,

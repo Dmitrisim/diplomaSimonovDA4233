@@ -137,6 +137,27 @@ def upscale_image(image_bgr: np.ndarray, scale: int) -> np.ndarray:
     return _apply_unsharp_mask(resized, amount=0.18, sigma=0.9)
 
 
+def web_export_image(image_bgr: np.ndarray, max_width: int = 1920, max_height: int = 1080) -> np.ndarray:
+    height, width = image_bgr.shape[:2]
+    target_width = max(1, int(max_width or width))
+    target_height = max(1, int(max_height or height))
+    scale = min(target_width / width, target_height / height, 1.0)
+
+    if scale < 1.0:
+        output = cv2.resize(
+            image_bgr,
+            (max(1, int(width * scale)), max(1, int(height * scale))),
+            interpolation=cv2.INTER_AREA,
+        )
+    else:
+        output = image_bgr.copy()
+
+    output = cv2.fastNlMeansDenoisingColored(output, None, 3, 3, 7, 21)
+    output = _apply_clahe(output, clip_limit=1.35)
+    output = _boost_saturation_and_brightness(output, saturation=1.03, brightness=1.01)
+    return _apply_unsharp_mask(output, amount=0.14, sigma=1.0)
+
+
 def colorize_image(image_bgr: np.ndarray) -> np.ndarray:
     image = bgr_to_pil(image_bgr)
     grayscale = ImageOps.grayscale(image)

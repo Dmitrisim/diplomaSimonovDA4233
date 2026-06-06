@@ -35,9 +35,13 @@ class _MockAiProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         del prefer_ai
         del upscale_scale
+        del max_width
+        del max_height
         if mode != "upscale":
             raise ValueError("unsupported_mode")
         output = image.resize((image.width * 2, image.height * 2))
@@ -62,9 +66,13 @@ class _MockColorizationAiProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         del prefer_ai
         del upscale_scale
+        del max_width
+        del max_height
         if mode != "colorize":
             raise ValueError("unsupported_mode")
         output = image.convert("L").convert("RGB")
@@ -79,7 +87,7 @@ class _MockColorizationAiProcessor(ImageProcessor):
 class _MockFallbackProcessor(ImageProcessor):
     name = "fallback-opencv-pillow"
     framework = "opencv-pillow-fallback"
-    supported_modes = ("enhance", "restore", "denoise", "upscale", "colorize")
+    supported_modes = ("enhance", "restore", "denoise", "upscale", "colorize", "web")
 
     def process(
         self,
@@ -88,9 +96,13 @@ class _MockFallbackProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         del prefer_ai
         del upscale_scale
+        del max_width
+        del max_height
         return InferenceResult(
             image=image,
             used_ai=False,
@@ -158,11 +170,11 @@ def test_model_status_returns_ok(client: TestClient, path: str) -> None:
     assert payload["model_path"].endswith("EDSR_x2.pb")
     assert payload["model_file_exists"] is False
     assert payload["availability_reason"] == "AI model path not configured"
-    assert payload["supported_modes"] == ["enhance", "restore", "denoise", "upscale", "colorize"]
+    assert payload["supported_modes"] == ["enhance", "restore", "denoise", "upscale", "colorize", "web"]
     assert payload["ai_supported_modes"] == []
     assert payload["ai_processors"] == []
     assert payload["fallback_available"] is True
-    assert payload["modes"] == ["enhance", "restore", "denoise", "upscale", "colorize"]
+    assert payload["modes"] == ["enhance", "restore", "denoise", "upscale", "colorize", "web"]
     assert payload["framework"] == "opencv-pillow-fallback"
 
 
@@ -311,6 +323,35 @@ def test_process_denoise_mode(client: TestClient) -> None:
     assert payload["output"]["format"] == "PNG"
 
 
+def test_process_web_mode_exports_jpeg_with_target_size(client: TestClient) -> None:
+    process_response = client.post(
+        "/api/process",
+        files={"file": ("web.jpg", _make_image_bytes(fmt="JPEG", size=(320, 240)), "image/jpeg")},
+        data={
+            "prefer_ai": "false",
+            "mode": "web",
+            "result_format": "jpeg",
+            "quality": "72",
+            "max_width": "80",
+            "max_height": "60",
+            "optimize_file_size": "true",
+        },
+    )
+
+    assert process_response.status_code == 200
+    payload = process_response.json()
+    assert payload["processing"]["mode"] == "web"
+    assert payload["processing"]["used_ai"] is False
+    assert payload["output"]["format"] == "JPEG"
+    assert payload["output"]["filename"].endswith(".jpg")
+    assert payload["output"]["width"] <= 80
+    assert payload["output"]["height"] <= 60
+
+    download_response = client.get(payload["urls"]["download"])
+    assert download_response.status_code == 200
+    assert download_response.headers["content-type"] == "image/jpeg"
+
+
 def test_process_upscale_changes_dimensions(client: TestClient) -> None:
     process_response = client.post(
         "/api/process",
@@ -343,7 +384,7 @@ def test_process_upscale_uses_ai_when_runtime_is_available(
         model_path="C:/fake/EDSR_x2.pb",
         model_file_exists=True,
         availability_reason=None,
-        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize"),
+        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize", "web"),
         fallback_available=True,
     )
     monkeypatch.setattr(pipeline_module, "load_processor_runtime", lambda _: runtime)
@@ -392,7 +433,7 @@ def test_process_upscale_uses_fallback_when_image_exceeds_ai_limit(
         model_path="C:/fake/EDSR_x2.pb",
         model_file_exists=True,
         availability_reason=None,
-        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize"),
+        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize", "web"),
         fallback_available=True,
     )
     monkeypatch.setattr(config_module, "get_settings", lambda: limited_settings)
@@ -441,7 +482,7 @@ def test_process_colorize_uses_ai_when_runtime_is_available(
         model_path="C:/fake/colorization_release_v2.caffemodel",
         model_file_exists=True,
         availability_reason=None,
-        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize"),
+        supported_modes=("enhance", "restore", "denoise", "upscale", "colorize", "web"),
         ai_supported_modes=("colorize",),
         ai_processors=("ai-colorization-opencv",),
         fallback_available=True,

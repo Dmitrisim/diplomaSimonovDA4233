@@ -50,6 +50,8 @@ class ProcessorRuntime:
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         processor = self.resolve_processor(mode, prefer_ai)
         try:
@@ -58,6 +60,8 @@ class ProcessorRuntime:
                 mode=mode,
                 prefer_ai=prefer_ai,
                 upscale_scale=upscale_scale,
+                max_width=max_width,
+                max_height=max_height,
             )
         except Exception:
             if processor is self.ai_processor and self.fallback_processor.supports_mode(mode):
@@ -66,6 +70,8 @@ class ProcessorRuntime:
                     mode=mode,
                     prefer_ai=False,
                     upscale_scale=upscale_scale,
+                    max_width=max_width,
+                    max_height=max_height,
                 )
             raise
 
@@ -88,5 +94,7 @@ class ImageProcessor(ABC):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         raise NotImplementedError

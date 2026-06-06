@@ -20,3 +20,9 @@ backend/models/*.onnx
 backend/models/*.pth
 backend/models/*.pt
 !backend/models/README.md
+
+# Diploma/report drafts and local reference materials.
+*.docx
+~$*.docx
+отчеты референс/
+tools/generate_diploma_report.py

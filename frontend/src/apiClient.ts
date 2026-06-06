@@ -76,7 +76,8 @@ function isBackendProcessingMode(value: unknown): value is BackendProcessingMode
     value === 'restore' ||
     value === 'denoise' ||
     value === 'upscale' ||
-    value === 'colorize'
+    value === 'colorize' ||
+    value === 'web'
   );
 }
 
@@ -120,6 +121,10 @@ function buildBackendStatusText(
     return preferAi
       ? 'Результат готов. AI-колоризация недоступна, выполнено fallback-тонирование OpenCV/Pillow.'
       : 'Результат готов. AI отключена в параметрах, выполнено fallback-тонирование OpenCV/Pillow.';
+  }
+
+  if (backendMode === 'web') {
+    return 'Результат готов. Изображение подготовлено для публикации: применена серверная коррекция, ограничение размера и сохранение в выбранном формате.';
   }
 
   return 'Результат готов. Режим выполнен backend-обработкой OpenCV/Pillow.';
@@ -212,6 +217,18 @@ export async function processImageRequest(
     formData.append('file', request.file);
     formData.append('prefer_ai', request.params.preferAi ? 'true' : 'false');
     formData.append('mode', modeConfig.backendMode!);
+    formData.append('result_format', request.params.resultFormat);
+    formData.append('quality', String(request.params.quality));
+    formData.append('max_width', String(request.params.maxWidth));
+    formData.append('max_height', String(request.params.maxHeight));
+    formData.append(
+      'optimize_file_size',
+      request.params.optimizeFileSize ? 'true' : 'false',
+    );
+    formData.append(
+      'upscale_scale',
+      request.params.upscaleFactor === 'x4' ? '4' : '2',
+    );
 
     const response = await fetch('/api/process', {
       method: 'POST',

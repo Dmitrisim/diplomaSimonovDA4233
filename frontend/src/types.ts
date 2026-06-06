@@ -17,7 +17,8 @@ export type BackendProcessingMode =
   | 'restore'
   | 'denoise'
   | 'upscale'
-  | 'colorize';
+  | 'colorize'
+  | 'web';
 
 export type ProcessStage =
   | 'idle'

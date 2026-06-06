@@ -166,6 +166,18 @@ function App() {
     setParams((prev) => ({ ...prev, [key]: value }));
   };
 
+  const selectMode = (nextMode: ProcessingMode) => {
+    setMode(nextMode);
+    if (nextMode === 'web-export') {
+      setParams((prev) => ({
+        ...prev,
+        resultFormat: prev.resultFormat === 'png' ? 'webp' : prev.resultFormat,
+        quality: Math.min(prev.quality, 82),
+        optimizeFileSize: true,
+      }));
+    }
+  };
+
   const setWorkflowToIdle = () => {
     setResult(null);
     setCompareValue(50);
@@ -258,7 +270,7 @@ function App() {
   };
 
   const openModeInWorkspace = (nextMode: ProcessingMode) => {
-    setMode(nextMode);
+    selectMode(nextMode);
     setActiveSection('processing');
     setOpenControlSection(hasSource ? 'settings' : 'source');
     setContextTab('info');
@@ -896,7 +908,7 @@ function App() {
                       <div
                         className={`controlSectionBody ${openControlSection === 'mode' ? 'isOpen' : ''}`}
                       >
-                        <ModeSelector mode={mode} onChange={setMode} />
+                        <ModeSelector mode={mode} onChange={selectMode} />
                       </div>
                     </section>
 

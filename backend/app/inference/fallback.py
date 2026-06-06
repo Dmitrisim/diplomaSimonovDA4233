@@ -10,6 +10,7 @@ from ..processing.filters import (
     pil_to_bgr,
     restore_image,
     upscale_image,
+    web_export_image,
 )
 from .base import ImageProcessor, InferenceResult
 
@@ -17,7 +18,7 @@ from .base import ImageProcessor, InferenceResult
 class FallbackImageProcessor(ImageProcessor):
     name = "fallback-opencv-pillow"
     framework = "opencv-pillow-fallback"
-    supported_modes = ("enhance", "restore", "denoise", "upscale", "colorize")
+    supported_modes = ("enhance", "restore", "denoise", "upscale", "colorize", "web")
 
     def process(
         self,
@@ -26,6 +27,8 @@ class FallbackImageProcessor(ImageProcessor):
         mode: str = "enhance",
         prefer_ai: bool = True,
         upscale_scale: int = 2,
+        max_width: int | None = None,
+        max_height: int | None = None,
     ) -> InferenceResult:
         del prefer_ai
 
@@ -43,6 +46,12 @@ class FallbackImageProcessor(ImageProcessor):
             output_bgr = denoise_image(image_bgr)
         elif mode_norm == "upscale":
             output_bgr = upscale_image(image_bgr, scale=max(1, int(upscale_scale or 2)))
+        elif mode_norm == "web":
+            output_bgr = web_export_image(
+                image_bgr,
+                max_width=max_width or 1920,
+                max_height=max_height or 1080,
+            )
         else:
             output_bgr = colorize_image(image_bgr)
 

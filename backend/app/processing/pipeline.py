@@ -16,6 +16,8 @@ def process_image(
     mode: str = "enhance",
     prefer_ai: bool = True,
     upscale_scale: int = 2,
+    max_width: int | None = None,
+    max_height: int | None = None,
 ) -> ProcessResult:
     runtime = load_processor_runtime(models_dir)
     return runtime.process(
@@ -23,6 +25,8 @@ def process_image(
         mode=mode,
         prefer_ai=prefer_ai,
         upscale_scale=upscale_scale,
+        max_width=max_width,
+        max_height=max_height,
     )
 
 
