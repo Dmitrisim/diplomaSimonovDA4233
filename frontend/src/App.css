@@ -812,7 +812,7 @@
 
 .mockupSettingsGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(132px, 1.35fr) minmax(78px, 0.7fr) minmax(58px, 0.55fr);
   gap: 12px;
   flex: 1;
 }
@@ -820,6 +820,7 @@
 .mockupSetting {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .mockupSetting span {
@@ -829,7 +830,9 @@
 
 .mockupSetting strong {
   font-size: 14px;
+  line-height: 1.2;
   color: var(--text-h);
+  white-space: nowrap;
 }
 
 .mockupDownloadButton {
@@ -1406,6 +1409,113 @@
     radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1.4px)
       center/8px 8px repeat,
     rgba(68, 90, 128, 0.22);
+}
+
+.heroPhotoPreview,
+.examplePreviewArt {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.heroPhotoBefore {
+  background-image: url('./assets/examples/hero-before.png');
+  filter: none;
+}
+
+.heroPhotoAfter {
+  background-image: url('./assets/examples/hero-after.png');
+}
+
+.preview-restore.before {
+  background-image: url('./assets/examples/restore-before.png');
+  filter: none;
+}
+
+.preview-restore.after {
+  background-image: url('./assets/examples/restore-after.png');
+  filter: none;
+}
+
+.preview-colorize.before {
+  background-image: url('./assets/examples/colorize-before.png');
+  filter: none;
+}
+
+.preview-colorize.after {
+  background-image: url('./assets/examples/colorize-after.png');
+  filter: none;
+}
+
+.preview-portrait.before {
+  background-image: url('./assets/examples/portrait-before.png');
+  filter: none;
+}
+
+.preview-portrait.after {
+  background-image: url('./assets/examples/portrait-after.png');
+  filter: none;
+}
+
+.preview-noise.before {
+  background-image: url('./assets/examples/noise-before.png');
+  filter: none;
+}
+
+.preview-noise.after {
+  background-image: url('./assets/examples/noise-after.png');
+  filter: none;
+}
+
+.preview-scan.before {
+  background-image: url('./assets/examples/scan-before.png');
+  filter: none;
+}
+
+.preview-scan.after {
+  background-image: url('./assets/examples/scan-after.png');
+  filter: none;
+}
+
+.preview-web.before {
+  background-image: url('./assets/examples/web-before.png');
+  filter: none;
+}
+
+.preview-web.after {
+  background-image: url('./assets/examples/web-after.png');
+  filter: none;
+}
+
+.preview-enhance.before {
+  background-image: url('./assets/examples/enhance-before.png');
+  filter: none;
+}
+
+.preview-enhance.after {
+  background-image: url('./assets/examples/enhance-after.png');
+  filter: none;
+}
+
+.heroPhotoBefore::before,
+.heroPhotoBefore::after,
+.heroPhotoAfter::before,
+.heroPhotoAfter::after,
+.preview-restore::before,
+.preview-restore::after,
+.preview-noise::before,
+.preview-noise::after,
+.preview-portrait::before,
+.preview-portrait::after,
+.preview-scan::before,
+.preview-scan::after,
+.preview-colorize::before,
+.preview-colorize::after,
+.preview-web::before,
+.preview-web::after,
+.preview-enhance::before,
+.preview-enhance::after {
+  content: none;
 }
 
 .exampleCardBody {
