@@ -1427,6 +1427,46 @@
   background-image: url('./assets/examples/hero-after.png');
 }
 
+.preview-enhance.before {
+  background-image: url('./assets/examples/enhance-before.jpg');
+  filter: none;
+}
+
+.preview-enhance.after {
+  background-image: url('./assets/examples/enhance-after.png');
+  filter: none;
+}
+
+.preview-restore.before {
+  background-image: url('./assets/examples/restore-before.jpg');
+  filter: none;
+}
+
+.preview-restore.after {
+  background-image: url('./assets/examples/restore-after.png');
+  filter: none;
+}
+
+.preview-noise.before {
+  background-image: url('./assets/examples/denoise-before.jpg');
+  filter: none;
+}
+
+.preview-noise.after {
+  background-image: url('./assets/examples/denoise-after.png');
+  filter: none;
+}
+
+.preview-scan.before {
+  background-image: url('./assets/examples/upscale-before.jpg');
+  filter: none;
+}
+
+.preview-scan.after {
+  background-image: url('./assets/examples/upscale-after.png');
+  filter: none;
+}
+
 .preview-colorize.before {
   background-image: url('./assets/examples/colorize-before.png');
   filter: none;
@@ -1434,16 +1474,6 @@
 
 .preview-colorize.after {
   background-image: url('./assets/examples/colorize-after.png');
-  filter: none;
-}
-
-.preview-portrait.before {
-  background-image: url('./assets/examples/portrait-before.png');
-  filter: none;
-}
-
-.preview-portrait.after {
-  background-image: url('./assets/examples/portrait-after.png');
   filter: none;
 }
 

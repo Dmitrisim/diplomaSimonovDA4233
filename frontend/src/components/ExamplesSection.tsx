@@ -9,7 +9,7 @@ type ExampleCardData = {
   description: string;
   meta: string;
   tone: 'blue' | 'violet' | 'cyan' | 'orange';
-  filter: 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web';
+  filter: 'enhance' | 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web';
   visual: 'restore' | 'colorize' | 'noise' | 'portrait' | 'scan' | 'web' | 'enhance';
 };
 
@@ -23,6 +23,50 @@ type ExamplesSectionProps = {
 
 const EXAMPLE_CARDS: ExampleCardData[] = [
   {
+    id: 'auto-enhance',
+    mode: 'auto-enhance',
+    title: 'Быстрое улучшение снимка',
+    description:
+      'Подтягивает контраст, яркость и локальную выразительность обычного фото через серверные алгоритмы OpenCV/Pillow.',
+    meta: 'OpenCV/Pillow',
+    tone: 'blue',
+    filter: 'enhance',
+    visual: 'enhance',
+  },
+  {
+    id: 'super-resolution',
+    mode: 'super-resolution',
+    title: 'AI-увеличение разрешения',
+    description:
+      'Увеличивает небольшой фрагмент изображения в 2 раза через AI super-resolution на модели EDSR_x2.pb.',
+    meta: 'AI x2',
+    tone: 'violet',
+    filter: 'resolution',
+    visual: 'scan',
+  },
+  {
+    id: 'denoise-photo',
+    mode: 'denoise',
+    title: 'Снижение цифрового шума',
+    description:
+      'Уменьшает зернистость на зашумленном фото алгоритмическим denoise без генеративного восстановления деталей.',
+    meta: 'шум',
+    tone: 'orange',
+    filter: 'noise',
+    visual: 'noise',
+  },
+  {
+    id: 'restore-photo',
+    mode: 'restore-photo',
+    title: 'Мягкая обработка старого снимка',
+    description:
+      'Корректирует тон, контраст и мелкие дефекты архивного изображения средствами OpenCV/Pillow.',
+    meta: 'архив',
+    tone: 'blue',
+    filter: 'restore',
+    visual: 'restore',
+  },
+  {
     id: 'colorize-photo',
     mode: 'colorize-photo',
     title: 'AI-колоризация ч/б фото',
@@ -32,17 +76,6 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     tone: 'cyan',
     filter: 'colorize',
     visual: 'colorize',
-  },
-  {
-    id: 'sharpen',
-    mode: 'sharpen',
-    title: 'Повысить чёткость',
-    description:
-      'Возвращает контуры и детали на мягких портретах, сканах и предметных фото.',
-    meta: 'резкость',
-    tone: 'blue',
-    filter: 'sharpness',
-    visual: 'portrait',
   },
   {
     id: 'web-export',
@@ -65,7 +98,7 @@ export function ExamplesSection({
   onTryMode,
 }: ExamplesSectionProps) {
   const [filter, setFilter] = useState<
-    'all' | 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web'
+    'all' | 'enhance' | 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web'
   >('all');
 
   const filteredItems = useMemo(() => {
@@ -78,8 +111,11 @@ export function ExamplesSection({
   const filterItems = useMemo(
     () => [
       { id: 'all' as const, label: 'Все' },
+      { id: 'enhance' as const, label: 'Улучшение' },
+      { id: 'resolution' as const, label: 'Разрешение' },
+      { id: 'noise' as const, label: 'Шум' },
+      { id: 'restore' as const, label: 'Архив' },
       { id: 'colorize' as const, label: 'Колоризация' },
-      { id: 'sharpness' as const, label: 'Резкость' },
       { id: 'web' as const, label: 'Web' },
     ],
     [],
