@@ -93,8 +93,8 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     mode: 'web-export',
     title: 'Подготовить для сайта',
     description:
-      'Оптимизирует размер файла и качество изображения перед публикацией.',
-    meta: 'web',
+      'Оптимизирует изображение перед публикацией: уменьшает вес файла и сохраняет результат в формате WebP.',
+    meta: 'JPG -> WebP',
     tone: 'blue',
     filter: 'web',
     visual: 'web',

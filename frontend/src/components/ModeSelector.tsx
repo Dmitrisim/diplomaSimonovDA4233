@@ -19,9 +19,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
           </span>
         </div>
         <p className='sectionMuted'>
-          Выберите сценарий: AI используется для увеличения разрешения и
-          колоризации ч/б фото, остальные режимы выполняются серверными
-          алгоритмами обработки.
+          Выберите один сценарий обработки для текущего изображения.
         </p>
       </div>
 
@@ -36,12 +34,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
             <div className='modeCardTop'>
               <span className='modeIcon'>{item.iconLabel}</span>
               <div className='modeCardText'>
-                <div className='modeCardTitleRow'>
-                  <strong>{item.shortTitle}</strong>
-                  <span className={`modeRuntimeChip ${runtimeClass(item)}`}>
-                    {runtimeLabel(item)}
-                  </span>
-                </div>
+                <strong>{item.shortTitle}</strong>
                 <span>{item.description}</span>
               </div>
             </div>
@@ -68,20 +61,4 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
       </div>
     </section>
   );
-}
-
-function runtimeLabel(item: (typeof MODE_DEFINITIONS)[number]): string {
-  if (!item.backendMode) return 'demo';
-  if (item.backendMode === 'upscale' || item.backendMode === 'colorize') {
-    return 'AI';
-  }
-  return 'Алгоритм';
-}
-
-function runtimeClass(item: (typeof MODE_DEFINITIONS)[number]): string {
-  if (!item.backendMode) return 'isDemo';
-  if (item.backendMode === 'upscale' || item.backendMode === 'colorize') {
-    return 'isAi';
-  }
-  return 'isApi';
 }

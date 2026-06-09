@@ -1497,6 +1497,33 @@
   filter: none;
 }
 
+.preview-web.before::after,
+.preview-web.after::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  min-height: 24px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: var(--text-h);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.preview-web.before::after {
+  content: 'JPG 71 КБ';
+}
+
+.preview-web.after::after {
+  content: 'WebP 35 КБ';
+}
+
 .heroPhotoBefore::before,
 .heroPhotoBefore::after,
 .heroPhotoAfter::before,
@@ -1512,7 +1539,6 @@
 .preview-colorize::before,
 .preview-colorize::after,
 .preview-web::before,
-.preview-web::after,
 .preview-enhance::before,
 .preview-enhance::after {
   content: none;
