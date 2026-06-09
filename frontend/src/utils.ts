@@ -1,4 +1,4 @@
-import { MODE_BY_ID } from './constants';
+import { AI_UPSCALE_LIMIT_PIXELS, MODE_BY_ID } from './constants';
 import type {
   FileMeta,
   HistoryItem,
@@ -173,7 +173,8 @@ export async function analyzeImageFile(
     const noise = noiseSum / Math.max(1, pixels - 1);
     const colorfulness = (saturationSum / pixels) * 100;
     const lowResolution = meta.width < 700 || meta.height < 700;
-    const exceedsAiUpscaleLimit = meta.width * meta.height > 512 * 512;
+    const exceedsAiUpscaleLimit =
+      meta.width * meta.height > AI_UPSCALE_LIMIT_PIXELS;
     const likelyGrayscale = colorfulness < 8;
 
     let recommendedMode: ProcessingMode = 'auto-enhance';

@@ -36,7 +36,7 @@ def get_settings() -> Settings:
         models_dir=models_dir,
         frontend_dist_dir=frontend_dist_dir,
         max_upload_bytes=10 * 1024 * 1024,
-        max_ai_upscale_pixels=512 * 512,
+        max_ai_upscale_pixels=1024 * 1024,
         cors_origins=(
             "http://127.0.0.1:5173",
             "http://localhost:5173",
