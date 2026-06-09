@@ -2,6 +2,7 @@ import { MODE_BY_ID } from './constants';
 import type {
   FileMeta,
   HistoryItem,
+  ImageAnalysis,
   ProcessingMode,
   ProgressState,
   ResultFormat,
@@ -92,6 +93,126 @@ export async function fileToDataUrl(file: File): Promise<string> {
   return blobToDataUrl(file);
 }
 
+export async function createImageThumbnailDataUrl(
+  source: Blob | string,
+  maxSize = 360,
+): Promise<string> {
+  const objectUrl =
+    typeof source === 'string' ? source : URL.createObjectURL(source);
+  try {
+    const image = await loadImage(objectUrl);
+    const scale = Math.min(
+      maxSize / image.naturalWidth,
+      maxSize / image.naturalHeight,
+      1,
+    );
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas unavailable');
+    ctx.drawImage(image, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', 0.78);
+  } finally {
+    if (typeof source !== 'string') {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+}
+
+export async function analyzeImageFile(
+  file: File,
+  meta: FileMeta,
+): Promise<ImageAnalysis> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await loadImage(objectUrl);
+    const sampleSize = 96;
+    const canvas = document.createElement('canvas');
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas unavailable');
+    ctx.drawImage(image, 0, 0, sampleSize, sampleSize);
+    const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+
+    let brightnessSum = 0;
+    let saturationSum = 0;
+    let minLuma = 255;
+    let maxLuma = 0;
+    let edgeSum = 0;
+    let noiseSum = 0;
+    let previousLuma = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+      const maxChannel = Math.max(r, g, b);
+      const minChannel = Math.min(r, g, b);
+      brightnessSum += luma;
+      saturationSum +=
+        maxChannel === 0 ? 0 : (maxChannel - minChannel) / maxChannel;
+      minLuma = Math.min(minLuma, luma);
+      maxLuma = Math.max(maxLuma, luma);
+      if (i > 0) {
+        const diff = Math.abs(luma - previousLuma);
+        edgeSum += diff;
+        if (diff > 18) noiseSum += diff;
+      }
+      previousLuma = luma;
+    }
+
+    const pixels = data.length / 4;
+    const brightness = brightnessSum / pixels;
+    const contrast = maxLuma - minLuma;
+    const sharpness = edgeSum / Math.max(1, pixels - 1);
+    const noise = noiseSum / Math.max(1, pixels - 1);
+    const colorfulness = (saturationSum / pixels) * 100;
+    const lowResolution = meta.width < 700 || meta.height < 700;
+    const exceedsAiUpscaleLimit = meta.width * meta.height > 512 * 512;
+    const likelyGrayscale = colorfulness < 8;
+
+    let recommendedMode: ProcessingMode = 'auto-enhance';
+    const reasons: string[] = [];
+
+    if (likelyGrayscale && colorfulness < 5) {
+      recommendedMode = 'colorize-photo';
+      reasons.push('image looks grayscale');
+    } else if (lowResolution && !exceedsAiUpscaleLimit) {
+      recommendedMode = 'super-resolution';
+      reasons.push('low resolution fits AI x2');
+    } else if (noise > 12) {
+      recommendedMode = 'denoise';
+      reasons.push('visible digital noise');
+    } else if (sharpness < 9) {
+      recommendedMode = 'sharpen';
+      reasons.push('image looks soft');
+    } else if (brightness < 85 || contrast < 90) {
+      recommendedMode = 'auto-enhance';
+      reasons.push('tone and contrast can be improved');
+    }
+
+    return {
+      brightness,
+      contrast,
+      sharpness,
+      noise,
+      colorfulness,
+      lowResolution,
+      exceedsAiUpscaleLimit,
+      likelyGrayscale,
+      recommendedMode,
+      reasons,
+    };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export async function urlToBlob(url: string): Promise<Blob> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -157,6 +278,7 @@ export function createHistoryItem(input: {
   timingMs: number;
   usedAi: boolean;
   modelName: string | null;
+  sourceUrl?: string;
   sourcePreview: string;
   resultPreview: string;
   sourceMeta: FileMeta;

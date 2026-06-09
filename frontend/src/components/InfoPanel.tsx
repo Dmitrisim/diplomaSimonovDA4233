@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { MODE_BY_ID } from '../constants';
 import type {
   FileMeta,
+  ImageAnalysis,
   ProcessResult,
   ProcessingParameters,
   ProcessingMode,
@@ -17,6 +18,7 @@ type InfoPanelProps = {
   params: ProcessingParameters;
   stage: ProcessStage;
   serviceStatus: ServiceStatus;
+  analysis?: ImageAnalysis | null;
 };
 
 export function InfoPanel({
@@ -26,6 +28,7 @@ export function InfoPanel({
   params,
   stage,
   serviceStatus,
+  analysis,
 }: InfoPanelProps) {
   if (!sourceMeta) {
     return (
@@ -71,6 +74,23 @@ export function InfoPanel({
           />
           <InfoRow label='Статус' value={statusLabel(stage, result)} />
         </InfoGroup>
+
+        {analysis ? (
+          <InfoGroup title='Автоанализ'>
+            <InfoRow
+              label='Рекомендация'
+              value={MODE_BY_ID[analysis.recommendedMode].shortTitle}
+            />
+            <InfoRow
+              label='Шум'
+              value={`${Math.round(analysis.noise)}`}
+            />
+            <InfoRow
+              label='Резкость'
+              value={`${Math.round(analysis.sharpness)}`}
+            />
+          </InfoGroup>
+        ) : null}
 
         {result ? (
           <InfoGroup title='Результат'>
