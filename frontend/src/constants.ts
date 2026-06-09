@@ -2,8 +2,8 @@ import type { ModeDefinition, ProcessingParameters, ProcessingMode } from './typ
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 export const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-export const AI_UPSCALE_LIMIT_PIXELS = 1024 * 1024;
-export const AI_UPSCALE_LIMIT_LABEL = '1024 × 1024';
+export const AI_UPSCALE_LIMIT_PIXELS = 512 * 512;
+export const AI_UPSCALE_LIMIT_LABEL = '512 × 512';
 
 export const DEFAULT_PARAMETERS: ProcessingParameters = {
   intensity: 65,
