@@ -23,17 +23,6 @@ type ExamplesSectionProps = {
 
 const EXAMPLE_CARDS: ExampleCardData[] = [
   {
-    id: 'restore-photo',
-    mode: 'restore-photo',
-    title: 'Восстановление старого снимка',
-    description:
-      'Поднимает тон и контраст на выцветших сканах без увеличения разрешения.',
-    meta: 'старый скан',
-    tone: 'orange',
-    filter: 'restore',
-    visual: 'restore',
-  },
-  {
     id: 'colorize-photo',
     mode: 'colorize-photo',
     title: 'AI-колоризация ч/б фото',
@@ -56,28 +45,6 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     visual: 'portrait',
   },
   {
-    id: 'denoise',
-    mode: 'denoise',
-    title: 'Убрать шум',
-    description:
-      'Снижает зернистость и цифровой шум на вечерних и архивных снимках.',
-    meta: 'шум',
-    tone: 'cyan',
-    filter: 'noise',
-    visual: 'noise',
-  },
-  {
-    id: 'super-resolution',
-    mode: 'super-resolution',
-    title: 'Увеличить разрешение',
-    description:
-      'Делает маленькие и пиксельные изображения крупнее через AI super-resolution.',
-    meta: 'разрешение',
-    tone: 'violet',
-    filter: 'resolution',
-    visual: 'scan',
-  },
-  {
     id: 'web-export',
     mode: 'web-export',
     title: 'Подготовить для сайта',
@@ -87,17 +54,6 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     tone: 'blue',
     filter: 'web',
     visual: 'web',
-  },
-  {
-    id: 'auto-enhance',
-    mode: 'auto-enhance',
-    title: 'Быстро улучшить снимок',
-    description:
-      'Быстрый сценарий для общей коррекции света, цвета и выразительности фото.',
-    meta: 'ai result',
-    tone: 'violet',
-    filter: 'sharpness',
-    visual: 'enhance',
   },
 ];
 
@@ -122,11 +78,8 @@ export function ExamplesSection({
   const filterItems = useMemo(
     () => [
       { id: 'all' as const, label: 'Все' },
-      { id: 'restore' as const, label: 'Старые снимки' },
       { id: 'colorize' as const, label: 'Колоризация' },
-      { id: 'noise' as const, label: 'Шум' },
       { id: 'sharpness' as const, label: 'Резкость' },
-      { id: 'resolution' as const, label: 'Разрешение' },
       { id: 'web' as const, label: 'Web' },
     ],
     [],

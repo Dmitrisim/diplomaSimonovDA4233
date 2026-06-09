@@ -64,15 +64,15 @@ export function Hero({ onStart, onExplore }: HeroProps) {
           </div>
         </div>
         <div className='heroCompareCaption'>
-          <span>Старая фотография</span>
-          <span>Восстановленная версия</span>
+          <span>Чёрно-белое фото</span>
+          <span>AI-колоризация</span>
         </div>
 
         <div className='mockupSettings'>
           <div className='mockupSettingsGrid'>
             <div className='mockupSetting'>
               <span>Сценарий</span>
-              <strong>Восстановление</strong>
+              <strong>Колоризация</strong>
             </div>
             <div className='mockupSetting'>
               <span>Интенсивность</span>
