@@ -78,6 +78,17 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     visual: 'colorize',
   },
   {
+    id: 'sharpen',
+    mode: 'sharpen',
+    title: 'Повысить чёткость',
+    description:
+      'Возвращает контуры и детали на мягких портретах, сканах и предметных фото.',
+    meta: 'резкость',
+    tone: 'blue',
+    filter: 'sharpness',
+    visual: 'portrait',
+  },
+  {
     id: 'web-export',
     mode: 'web-export',
     title: 'Подготовить для сайта',
@@ -116,6 +127,7 @@ export function ExamplesSection({
       { id: 'noise' as const, label: 'Шум' },
       { id: 'restore' as const, label: 'Архив' },
       { id: 'colorize' as const, label: 'Колоризация' },
+      { id: 'sharpness' as const, label: 'Резкость' },
       { id: 'web' as const, label: 'Web' },
     ],
     [],

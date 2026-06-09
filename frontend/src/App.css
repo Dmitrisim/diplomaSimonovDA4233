@@ -1477,6 +1477,16 @@
   filter: none;
 }
 
+.preview-portrait.before {
+  background-image: url('./assets/examples/portrait-before.png');
+  filter: none;
+}
+
+.preview-portrait.after {
+  background-image: url('./assets/examples/portrait-after.png');
+  filter: none;
+}
+
 .preview-web.before {
   background-image: url('./assets/examples/web-before.png');
   filter: none;
