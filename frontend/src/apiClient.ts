@@ -288,10 +288,7 @@ export async function processImageRequest(
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw error;
     }
-    return simulateProcess(
-      request,
-      'Демо-режим: реальная AI-обработка не выполнялась',
-    );
+    throw error;
   }
 }
 
