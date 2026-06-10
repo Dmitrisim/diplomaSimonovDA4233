@@ -145,7 +145,7 @@ export function ParametersPanel({
             <div className='modeLimitNote'>
               <strong>Лимит AI-увеличения</strong>
               <span>
-                AI super-resolution запускается для исходных изображений до{' '}
+                AI super-resolution запускается для изображений до{' '}
                 {AI_UPSCALE_LIMIT_LABEL}. Более крупные файлы увеличиваются
                 через fallback OpenCV/Pillow.
               </span>

@@ -37,7 +37,7 @@ export const MODE_DEFINITIONS: ModeDefinition[] = [
     shortTitle: 'Разрешение',
     iconLabel: 'UP',
     description:
-      `Увеличивает маленькое или пиксельное изображение в 2 раза через AI super-resolution. AI применяется для исходников до ${AI_UPSCALE_LIMIT_LABEL}.`,
+      `Увеличивает маленькое или пиксельное изображение в 2 раза через AI super-resolution. AI применяется для изображений до ${AI_UPSCALE_LIMIT_LABEL}.`,
     bestFor: `Подходит для маленьких фото, обрезков, аватарок и изображений с низким разрешением до ${AI_UPSCALE_LIMIT_LABEL}.`,
     limitations: `Для изображений больше ${AI_UPSCALE_LIMIT_LABEL} используется fallback-увеличение OpenCV/Pillow, чтобы не перегружать сервер. Режим не восстанавливает полностью потерянные детали.`,
     backendMode: 'upscale',
