@@ -26,3 +26,4 @@ backend/models/*.pt
 ~$*.docx
 отчеты референс/
 tools/generate_diploma_report.py
+materials_for_vkr_artful.md
