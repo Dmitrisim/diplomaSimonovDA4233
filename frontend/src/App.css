@@ -1497,11 +1497,7 @@
   filter: none;
 }
 
-.preview-web.before::after,
-.preview-web.after::after,
-.preview-scan.before::after,
-.preview-scan.after::after {
-  content: '';
+.examplePreviewDetailBadge {
   position: absolute;
   right: 10px;
   bottom: 10px;
@@ -1521,22 +1517,6 @@
   white-space: nowrap;
 }
 
-.preview-web.before::after {
-  content: 'JPG 71 КБ';
-}
-
-.preview-web.after::after {
-  content: 'WebP 35 КБ';
-}
-
-.preview-scan.before::after {
-  content: '250 × 250';
-}
-
-.preview-scan.after::after {
-  content: '500 × 500';
-}
-
 .heroPhotoBefore::before,
 .heroPhotoBefore::after,
 .heroPhotoAfter::before,
@@ -1547,10 +1527,12 @@
 .preview-noise::after,
 .preview-portrait::before,
 .preview-portrait::after,
+.preview-scan::after,
 .preview-scan::before,
 .preview-colorize::before,
 .preview-colorize::after,
 .preview-web::before,
+.preview-web::after,
 .preview-enhance::before,
 .preview-enhance::after {
   content: none;

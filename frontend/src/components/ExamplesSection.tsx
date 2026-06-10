@@ -8,6 +8,8 @@ type ExampleCardData = {
   title: string;
   description: string;
   meta: string;
+  beforeBadge?: string;
+  afterBadge?: string;
   tone: 'blue' | 'violet' | 'cyan' | 'orange';
   filter: 'enhance' | 'restore' | 'colorize' | 'noise' | 'sharpness' | 'resolution' | 'web';
   visual: 'restore' | 'colorize' | 'noise' | 'portrait' | 'scan' | 'web' | 'enhance';
@@ -40,6 +42,8 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     description:
       'Увеличивает небольшой фрагмент изображения в 2 раза через AI super-resolution на модели EDSR_x2.pb.',
     meta: 'AI x2',
+    beforeBadge: '250 × 250',
+    afterBadge: '500 × 500',
     tone: 'violet',
     filter: 'resolution',
     visual: 'scan',
@@ -95,6 +99,8 @@ const EXAMPLE_CARDS: ExampleCardData[] = [
     description:
       'Оптимизирует изображение перед публикацией: уменьшает вес файла и сохраняет результат в формате WebP.',
     meta: 'JPG -> WebP',
+    beforeBadge: 'JPG 71 КБ',
+    afterBadge: 'WebP 35 КБ',
     tone: 'blue',
     filter: 'web',
     visual: 'web',
@@ -165,6 +171,11 @@ export function ExamplesSection({
                 <div
                   className={`examplePreviewArt preview-${item.visual} before`}
                 />
+                {item.beforeBadge ? (
+                  <span className='examplePreviewDetailBadge'>
+                    {item.beforeBadge}
+                  </span>
+                ) : null}
               </div>
               <div className='examplePreviewDivider' aria-hidden='true' />
               <div className='examplePreviewPane isAfter'>
@@ -172,6 +183,11 @@ export function ExamplesSection({
                 <div
                   className={`examplePreviewArt preview-${item.visual} after`}
                 />
+                {item.afterBadge ? (
+                  <span className='examplePreviewDetailBadge'>
+                    {item.afterBadge}
+                  </span>
+                ) : null}
               </div>
             </div>
 
