@@ -1,4 +1,5 @@
 import type { RuntimeMode } from '../types';
+import artfulLogoUrl from '../assets/artful-logo.svg';
 
 type AppSection =
   | 'home'
@@ -29,7 +30,7 @@ export function Header({ activeSection, onNavigate }: HeaderProps) {
   return (
     <header className='appHeader'>
       <div className='brandBlock'>
-        <img className='brandMark' src='/artful-logo.svg' alt='' aria-hidden='true' />
+        <img className='brandMark' src={artfulLogoUrl} alt='' aria-hidden='true' />
         <div className='brandTitle'>Artful</div>
       </div>
 

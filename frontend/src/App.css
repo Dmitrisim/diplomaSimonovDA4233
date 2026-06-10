@@ -2661,6 +2661,26 @@
   color: var(--muted);
 }
 
+.modeLimitNote {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(30, 64, 175, 0.14);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fbff 0%, #fffaf2 100%);
+}
+
+.modeLimitNote strong {
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.modeLimitNote span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .segmentedControl {
   display: inline-flex;
   gap: 4px;

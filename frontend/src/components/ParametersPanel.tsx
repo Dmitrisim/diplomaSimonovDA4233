@@ -1,3 +1,4 @@
+import { AI_UPSCALE_LIMIT_LABEL } from '../constants';
 import type { ProcessingMode, ProcessingParameters } from '../types';
 
 type ParametersPanelProps = {
@@ -139,6 +140,17 @@ export function ParametersPanel({
               ))}
             </div>
           </label>
+
+          {showUpscale ? (
+            <div className='modeLimitNote'>
+              <strong>Лимит AI-увеличения</strong>
+              <span>
+                AI super-resolution запускается для исходных изображений до{' '}
+                {AI_UPSCALE_LIMIT_LABEL}. Более крупные файлы увеличиваются
+                через fallback OpenCV/Pillow.
+              </span>
+            </div>
+          ) : null}
 
           <label className={`field ${showDenoise ? '' : 'isDisabled'}`}>
             <span className='fieldLabel'>Сила шумоподавления</span>
