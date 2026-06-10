@@ -77,45 +77,11 @@
 .brandMark {
   width: 32px;
   height: 32px;
-  position: relative;
-  overflow: hidden;
+  display: block;
   border-radius: 12px;
-  border: 1px solid rgba(232, 221, 204, 0.9);
-  background:
-    linear-gradient(
-      135deg,
-      transparent 47%,
-      rgba(255, 255, 255, 0.92) 48%,
-      rgba(255, 255, 255, 0.92) 52%,
-      transparent 53%
-    ),
-    linear-gradient(135deg, #172554 0%, #1e40af 48%, #fff4de 48%, #f5d9a4 100%);
   box-shadow:
     0 8px 18px rgba(23, 37, 84, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-.brandMark::before,
-.brandMark::after {
-  content: '';
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  border: 1.5px solid rgba(255, 255, 255, 0.76);
-}
-
-.brandMark::before {
-  top: 5px;
-  left: 5px;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.brandMark::after {
-  right: 5px;
-  bottom: 5px;
-  border-left: 0;
-  border-top: 0;
 }
 
 .brandTitle {

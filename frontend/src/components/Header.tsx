@@ -29,7 +29,7 @@ export function Header({ activeSection, onNavigate }: HeaderProps) {
   return (
     <header className='appHeader'>
       <div className='brandBlock'>
-        <div className='brandMark' aria-hidden='true' />
+        <img className='brandMark' src='/artful-logo.svg' alt='' aria-hidden='true' />
         <div className='brandTitle'>Artful</div>
       </div>
 
